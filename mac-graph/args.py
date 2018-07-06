@@ -34,7 +34,7 @@ def get_args(extend=lambda parser:None):
 	args["modes"] = ["eval", "train", "predict"]
 
 	for i in [*args["modes"], "all"]:
-		args[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfr")
+		args[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
 
 	args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
 

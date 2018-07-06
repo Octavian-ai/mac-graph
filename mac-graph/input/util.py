@@ -30,9 +30,15 @@ def read_gqa(args):
 	with tf.gfile.GFile(args["gqa_path"], 'r') as in_file:
 		d = yaml.safe_load_all(in_file)
 
+		ctr = 0
+
 		for i in d:
 			if i is not None:
 				yield i
+				ctr += 1
+
+				if args["limit"] is not None and ctr >= args["limit"]:
+					return
 
 
 class Partitioner(object):

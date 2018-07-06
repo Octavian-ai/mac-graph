@@ -1,7 +1,7 @@
 # MacGraph
 The MacGraph network. An Irish attempt at intelligence. Puns not included.
 
-Skeleton implementation.
+This codebase implements graph question answering, using CLEVR-graph as the dataset and MACnets as the reasoning architecture.
 
 ### TODO:
 - Add input_fn
@@ -18,6 +18,19 @@ $ pipenv install
 $ pipenv shell
 (mac-graph-sjOzWQ6Y) $
 ```
+
+### Building the data
+
+The data (a Graph-Question-Answer YAML from CLEVR-graph) must be pre-processed for training/evaluation. The YAML is transformed into TensorFlow records, and split into test-train-predict tranches.
+
+Build the data:
+
+```shell
+python -m mac-graph.input.build
+```
+
+#### Arguments
+ - *--limit N* will only read N records from the YAML and only output a total of N tf-records (split across three tranches)
 
 ### Testing
 

@@ -6,6 +6,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+
+
 def input_fn(args, mode, question=None):
 
 	d = tf.data.TFRecordDataset([args[f"{mode}_input_path"]])
@@ -64,5 +66,10 @@ def input_fn(args, mode, question=None):
 	return d
 
 
+
+def gen_input_fn(args, mode):
+	return lambda: input_fn(args, mode)
+
+	
 
 

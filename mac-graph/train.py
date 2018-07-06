@@ -3,6 +3,7 @@ import tensorflow as tf
 
 from .model import model_fn
 from .input import gen_input_fn
+from .args import get_args
 
 def train(args):
 
@@ -12,5 +13,12 @@ def train(args):
 	eval_spec  = tf.estimator.EvalSpec( input_fn=gen_input_fn(args, "eval"))
 
 	tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
+
+
+
+if __name__ == "__main__":
+	args = get_args()
+	train(args)
+
 
 

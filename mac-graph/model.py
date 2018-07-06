@@ -3,7 +3,7 @@ from .cell import MACCell
 from .encoder import encode_input
 from .util import assert_shape
 
-def model(features, labels, mode, params):
+def model_fn(features, labels, mode, params):
 
 	# --------------------------------------------------------------------------
 	# Setup input
