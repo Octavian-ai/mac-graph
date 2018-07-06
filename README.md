@@ -32,6 +32,14 @@ python -m mac-graph.input.build
 #### Arguments
  - *--limit N* will only read N records from the YAML and only output a total of N tf-records (split across three tranches)
 
+### Training
+
+Invoke some TF Estimator magic!
+
+```shell
+python -m mac-graph.train
+```
+
 ### Testing
 
 You can easily run the unit-tests for the model:
