@@ -3,6 +3,11 @@ The MacGraph network. An Irish attempt at intelligence. Puns not included.
 
 Skeleton implementation.
 
+### TODO:
+- Add input_fn
+- Add RNN encoder for question
+- Wrap cell up in dynamic_rnn
+
 
 ## Running the code
 ### Prerequisites
