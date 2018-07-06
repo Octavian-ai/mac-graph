@@ -12,7 +12,7 @@ def write_cell(args, in_memory_state, in_data_read, in_control):
 
 	new_memory = tf.layers.dense(all_memory_data, args["bus_width"])
 
-	forget_scalar = tf.layers.dense(in_control, [1])
+	forget_scalar = tf.layers.dense(in_control, 1)
 
 	out_memory_state = (new_memory * forget_scalar) + (in_memory_state * (1-forget_scalar))
 	assert_shape(out_memory_state, [args["bus_width"]])

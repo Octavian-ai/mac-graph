@@ -50,16 +50,17 @@ def model_fn(features, labels, mode, params):
 			decoder_helper,
 			d_cell_initial)
 
-		# 'outputs' is a tensor of shape [max_time, batch_size, cell.output_size]
+		# 'outputs' is a tensor of shape [batch_size, max_time, cell.output_size]
 		decoded_outputs, decoded_state, decoded_sequence_lengths = tf.contrib.seq2seq.dynamic_decode(
 			guided_decoder,
 			swap_memory=True,
 			maximum_iterations=args["max_decode_iterations"],
 			scope=decoder_scope)
 
-
-		final_output = decoded_outputs[:-1:]
-		assert_shape(final_output, [args["num_answer_classes"]])
+		
+		# Take the final reasoning step output
+		final_output = decoded_outputs.rnn_output[:,-1,:]
+		assert_shape(final_output, [args["answer_classes"]])
 
 		logits = final_output
 
