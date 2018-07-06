@@ -28,7 +28,7 @@ python -m mac-graph.cell.test_read_cell
 
 ### Acknowledgements
 
-Thanks to Drew Hudson and Christopher Manning for publishing their work, ["Compositional Attention Networks for Machine Reasoning"](https://arxiv.org/abs/1803.03067) upon which this is based.
+Thanks to Drew Hudson and Christopher Manning for publishing their work, [Compositional Attention Networks for Machine Reasoning](https://arxiv.org/abs/1803.03067) upon which this is based.
 
 ### A limerick
 
