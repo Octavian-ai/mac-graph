@@ -18,7 +18,7 @@ $ pipenv shell
 
 Test the read cell
 
-```python
+```shell
 python -m mac-graph.cell.test_read_cell
 ```
 

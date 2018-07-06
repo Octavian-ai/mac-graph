@@ -8,6 +8,8 @@ def read_from_graph(args, in_content, in_mask, in_knowledge, W_score=None):
 	"""Perform attention based read from table
 
 	@param W_score is for testing/debug purposes so you can easily inject the score fn you'd like. The code will default to a variable normally
+	
+	@returns read_data
 	"""
 
 	assert_shape(in_content, [args["kb_width"]])
@@ -33,13 +35,33 @@ def read_from_graph(args, in_content, in_mask, in_knowledge, W_score=None):
 		assert_shape(scores, [args["kb_len"]])
 		scores_sm = tf.nn.softmax(scores)
 
-		kb_linear_comb = tf.tensordot(scores_sm, in_knowledge, axes=[[1], [0]])
-		assert_shape(kb_linear_comb, [args["kb_width"]])
+		read_data = tf.tensordot(scores_sm, in_knowledge, axes=[[1], [0]])
+		assert_shape(read_data, [args["kb_width"]])
 
-		return kb_linear_comb
+		return read_data
 
 
 
-def read_cell(args, in_query, in_state, in_knowledge, out_state, out_answer):
+def read_cell(args, in_memory_state, in_control, in_knowledge, W_score=None):
+	"""
+	A read cell
 
-	return True
+	@returns read_data
+
+	"""
+
+	assert_shape(in_memory_state,   [args["bus_width"]])
+	assert_shape(in_control, [args["bus_width"]])
+
+	in_all = tf.concat([in_memory_state, in_control], -1)
+
+	read_content = tf.layer.dense(in_all, args["kb_width"])
+	read_mask    = tf.layer.dense(in_all, args["kb_width"])
+
+	read_data = read_from_graph(args, read_content, read_mask, in_knowledge, W_score)
+
+	return read_data
+
+
+
+
