@@ -8,7 +8,7 @@ def control_cell(args, in_control_state, in_question_state, in_question_tokens):
 	# time_minor format
 	# in_question_tokens.shape = [batch_size, seq_len, bus_width]
 
-	assert in_question_tokens.shape[-1] == args["bus_width"]
+	assert in_question_tokens.shape[-1] == args["bus_width"], f"Expected question tokens inner dimension to equal {args['bus_width']}, but got {in_question_tokens.shape[-1]} (overall shape: {in_question_tokens.shape})"
 	assert len(in_question_tokens.shape) == 3
 
 	# Skipping tf.dense(in_question_state, name="control_question_t"+iteration_step)

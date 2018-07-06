@@ -4,7 +4,7 @@ import tensorflow as tf
 
 def basic_cell(args, i, unit_mul):
 
-	c = tf.contrib.rnn.LSTMCell(args['bus_width']*unit_mul)
+	c = tf.contrib.rnn.LSTMCell(int(args['bus_width']*unit_mul))
 	c = tf.contrib.rnn.DropoutWrapper(c, args['dropout'])
 
 	if i > 1:
@@ -14,7 +14,7 @@ def basic_cell(args, i, unit_mul):
 
 def cell_stack(args, layer_mul=1, unit_mul=1):
 	cells = []
-	for i in range(args["num_input_layers"]*layer_mul):
+	for i in range(int(args["num_input_layers"]*layer_mul)):
 		cells.append(basic_cell(args, i, unit_mul))
 
 	cell = tf.contrib.rnn.MultiRNNCell(cells)
@@ -64,8 +64,9 @@ def encode_input(args, features):
 	# Encoder
 	# --------------------------------------------------------------------------
 	
-	fw_cell = cell_stack(args)
-	bw_cell = cell_stack(args)
+	# 1/2 multiplier so that when we concat the layers together we get bus_width
+	fw_cell = cell_stack(args, unit_mul=0.5)
+	bw_cell = cell_stack(args, unit_mul=0.5)
 	
 	(fw_output, bw_output), (fw_states, bw_states) = tf.nn.bidirectional_dynamic_rnn(
 		fw_cell,

@@ -33,11 +33,12 @@ def model_fn(features, labels, mode, params):
 		d_cell = MACCell(args, question_state, question_tokens, features["knowledge_base"])
 		d_cell_initial = d_cell.zero_state(dtype=tf.float32, batch_size=dynamic_batch_size)
 
-		label_seq = tf.tile(tf.expand_dims(labels, 0), [args["max_decode_iterations"],0])
-		label_seq_len = tf.tile([args["max_decode_iterations"]], tf.shape(labels))
-
+		# label_seq: [batch_size, seq_len]
+		label_seq = tf.tile(tf.expand_dims(labels, 1), [0, args["max_decode_iterations"]])
 		assert_shape(label_seq, [args["max_decode_iterations"]])
-		assert_shape(label_seq_len, labels.shape)
+
+		# label_seq_len: [batch_size]
+		label_seq_len = tf.tile([args["max_decode_iterations"]], tf.shape(labels))
 
 		decoder_helper = tf.contrib.seq2seq.TrainingHelper(
 			label_seq, 
