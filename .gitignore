@@ -1,3 +1,8 @@
+
+/input
+/data
+/output*/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -6,10 +11,7 @@ __pycache__/
 *~
 .DS_Store
 
-output*/
-output/
-output-pbt/
-output_test/
+
 
 # C extensions
 *.so

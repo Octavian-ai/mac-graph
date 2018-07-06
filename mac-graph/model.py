@@ -27,7 +27,7 @@ def model(features, labels, mode, params):
 
 	with tf.variable_scope("decoder",reuse=tf.AUTO_REUSE) as decoder_scope:
 
-		d_cell = MACCell(args, question_state, question_tokens, features["knowledge_table"])
+		d_cell = MACCell(args, question_state, question_tokens, features["knowledge_base"])
 		d_cell_initial = d_cell.zero_state()
 
 		decoder_helper = tf.contrib.seq2seq.TrainingHelper(

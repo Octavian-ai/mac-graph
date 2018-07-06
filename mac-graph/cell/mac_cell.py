@@ -5,12 +5,12 @@ from .read_cell import *
 from .write_cell import *
 from .control_cell import *
 
-def mac_cell(args, in_states, in_question_state, in_question_tokens, in_knowledge_table):
+def mac_cell(args, in_states, in_question_state, in_question_tokens, in_knowledge_base):
 
 	in_control_state, in_memory_state = in_states
 
 	out_control_state = control_cell(args, in_control_state, in_question_state, in_question_tokens)
-	data_read = read_cell(args, in_memory_state, out_control_state, in_knowledge_table)
+	data_read = read_cell(args, in_memory_state, out_control_state, in_knowledge_base)
 	out_memory_state = write_cell(args, in_memory_state, data_read, out_control_state)
 
 	return (out_control_state, out_memory_state)
@@ -30,11 +30,11 @@ def output_unit(args, in_question_state, in_memory_state):
 
 class MACCell(tf.nn.rnn_cell.RNNCell):
 
-	def __init__(self, args, question_state, question_tokens, knowledge_table):
+	def __init__(self, args, question_state, question_tokens, knowledge_base):
 		self.args = args
 		self.question_state = question_state
 		self.question_tokens = question_tokens
-		self.knowledge_table = knowledge_table
+		self.knowledge_base = knowledge_base
 
 		super().__init__(self)
 
@@ -57,7 +57,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				the arity and shapes of `state`.
 		"""
 
-		next_control, next_memory = mac_cell(self.args, state, self.question_state, self.question_tokens, self.knowledge_table)
+		next_control, next_memory = mac_cell(self.args, state, self.question_state, self.question_tokens, self.knowledge_base)
 		output = output_unit(self.args, self.question_state, next_memory)
 
 		return output, (next_control, next_memory)

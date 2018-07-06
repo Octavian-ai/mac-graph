@@ -34,7 +34,7 @@ Also the model construction functions contain many assertions to help validate c
 
 ### Acknowledgements
 
-Thanks to Drew Hudson and Christopher Manning for publishing their work, [Compositional Attention Networks for Machine Reasoning](https://arxiv.org/abs/1803.03067) upon which this is based.
+Thanks to Drew Hudson and Christopher Manning for publishing their work, [Compositional Attention Networks for Machine Reasoning](https://arxiv.org/abs/1803.03067) upon which this is based. Also, thank you [coffee](https://thebarn.de/) and [techno](https://soundcloud.com/ostgutton-official/berghain-07-function) for your company.
 
 ### A limerick
 
