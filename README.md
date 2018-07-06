@@ -26,8 +26,8 @@ python -m mac-graph.cell.test_read_cell
 
 Since you're here.
 
-> There once was an old man of Esser,
-> Whose knowledge grew lesser and lesser,
-> It at last grew so small
-> He knew nothing at all
+> There once was an old man of Esser,<br/>
+> Whose knowledge grew lesser and lesser,<br/>
+> It at last grew so small<br/>
+> He knew nothing at all<br/>
 > And now he's a college professor.
