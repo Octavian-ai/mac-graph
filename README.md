@@ -3,7 +3,9 @@ The MacGraph network. An Irish attempt at intelligence. Puns not included.
 
 Almost nothing is written yet.
 
-## Prerequisites
+
+## Running the code
+### Prerequisites
 
 We use the pipenv dependency/virtualenv framework:
 ```shell
@@ -12,7 +14,7 @@ $ pipenv shell
 (mac-graph-sjOzWQ6Y) $
 ```
 
-## Testing
+### Testing
 
 Test the read cell
 
@@ -21,6 +23,12 @@ python -m mac-graph.cell.test_read_cell
 ```
 
 
+
+## AOB
+
+### Acknowledgements
+
+Thanks to Drew Hudson and Christopher Manning for publishing their work, ["Compositional Attention Networks for Machine Reasoning"](https://arxiv.org/abs/1803.03067) upon which this is based.
 
 ### A limerick
 
