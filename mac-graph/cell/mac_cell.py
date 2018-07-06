@@ -20,8 +20,8 @@ def output_unit(args, in_question_state, in_memory_state):
 
 	in_states = tf.concat([in_question_state, in_memory_state], -1)
 
-	v = tf.layer.dense(in_states, args["bus_width"], activation=tf.nn.relu)
-	v = tf.layer.dense(v, args["answer_classes"])
+	v = tf.layers.dense(in_states, args["bus_width"], activation=tf.nn.relu)
+	v = tf.layers.dense(v, args["answer_classes"])
 	output = tf.nn.softmax(v)
 
 	return output

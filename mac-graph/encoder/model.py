@@ -77,9 +77,12 @@ def encode_input(args, features):
 		time_major=time_major,
 		swap_memory=True)
 
-	encoder_outputs = tf.concat( (fw_output, bw_output), axis=-1)
-	encoder_final_state = tf.concat( (fw_states, bw_states), axis=-1)
 	
+	encoder_outputs = tf.concat( (fw_output, bw_output), axis=-1)
+
+	# Top layer, output layer
+	encoder_final_state = tf.concat( (fw_states[1].c, bw_states[1].c), axis=-1)
+
 	return (encoder_outputs, encoder_final_state)
 
 

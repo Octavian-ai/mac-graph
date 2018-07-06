@@ -18,7 +18,7 @@ def input_fn(args, mode, question=None):
 		features = {
 			'src': 				tf.FixedLenSequenceFeature([],tf.int64, allow_missing=True),
 			'src_len': 			tf.FixedLenFeature([], tf.int64),
-			'kb': 				tf.FixedLenSequenceFeature([], tf.int64, allow_missing=True),
+			'kb': 				tf.FixedLenSequenceFeature([], tf.float32, allow_missing=True),
 			'kb_width': 		tf.FixedLenFeature([], tf.int64),
 			'label': 			tf.FixedLenFeature([], tf.int64)
 		})
@@ -33,7 +33,7 @@ def input_fn(args, mode, question=None):
 	d = d.map(lambda i: ({
 		"src": 				i["src"],
 		"src_len": 			i["src_len"],
-		"knowledge_base": 	tf.reshape(i["kb"], as_2D_shape(i["kb_width"])),
+		"knowledge_base": 	tf.reshape(i["kb"], [-1, args["kb_len"], args["kb_width"]]), # as_2D_shape(i["kb_width"])
 	}, i["label"]))
 
 
@@ -51,7 +51,7 @@ def input_fn(args, mode, question=None):
 			{
 				"src": tf.TensorShape([None]),
 				"src_len": tf.TensorShape([]), 
-				"knowledge_base": tf.TensorShape([])
+				"knowledge_base": tf.TensorShape([args["kb_len"], args["kb_width"]])
 			},
 			tf.TensorShape([]),	# label
 		),
@@ -63,7 +63,7 @@ def input_fn(args, mode, question=None):
 			{
 				"src": 				tf.cast(EOS_ID, tf.int64), 
 				"src_len": 			tf.cast(0, tf.int64), # unused
-				"knowledge_base": 	tf.cast(0, tf.int64), # unused
+				"knowledge_base": 	0.0, # unused
 			},
 			tf.cast(0, tf.int64) # label (unused)
 		)

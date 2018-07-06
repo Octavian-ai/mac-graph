@@ -25,7 +25,7 @@ def generate_record(args, vocab, doc):
 	feature = {
 		"src": 				tf.train.Feature(int64_list=tf.train.Int64List(value=q)),
 		"src_len": 			int64_feature(len(q)),
-		"kb": 				tf.train.Feature(int64_list=tf.train.Int64List(value=graph.flatten())),
+		"kb": 				tf.train.Feature(float_list=tf.train.FloatList(value=graph.flatten())),
 		"kb_width": 		int64_feature(args["kb_width"]),
 		"label": 			int64_feature(label),
 	}
