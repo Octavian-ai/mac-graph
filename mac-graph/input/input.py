@@ -1,16 +1,9 @@
 
-import yaml
-import os.path
+import numpy as np
 import tensorflow as tf
-from collections import Counter
-import string
+
 import logging
-
 logger = logging.getLogger(__name__)
-
-from .util import *
-from .build_data import *
-from .graph import *
 
 
 def input_fn(args, mode, question=None):
@@ -23,7 +16,8 @@ def input_fn(args, mode, question=None):
 		features={
 			'src': 				tf.FixedLenFeature([], tf.string),
 			'src_len': 			tf.FixedLenFeature([], tf.int64),
-			'knowledge_base': 	tf.FixedLenFeature([], tf.string),
+			'kb': 				tf.FixedLenFeature([], tf.string),
+			'kb_width': 		tf.FixedLenFeature([], tf.int64),
 			'label': 			tf.FixedLenFeature([], tf.int64)
 		})
 	)
@@ -31,7 +25,7 @@ def input_fn(args, mode, question=None):
 	d = d.map(lambda i: ({
 		"src": 				i["src"],
 		"src_len": 			i["src_len"],
-		"knowledge_base": 	i["knowledge_base"],
+		"knowledge_base": 	np.reshape(i["kb"], [-1, i["kb_width"]]),
 	}, i["label"]))
 
 

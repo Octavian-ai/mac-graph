@@ -1,6 +1,7 @@
 
-
+import yaml
 import tensorflow as tf
+import random
 
 
 # --------------------------------------------------------------------------
@@ -9,14 +10,14 @@ import tensorflow as tf
 
 # Why it's so awkward to write a record I do not know
 
-def _int64_feature(value):
-  return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+def int64_feature(value):
+	return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
 
-def _bytes_feature(value):
-  return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+def bytes_feature(value):
+	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
-def _conv_bytes_feature(value):
-  return tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.compat.as_bytes(value)]))
+def conv_bytes_feature(value):
+	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.compat.as_bytes(value)]))
 
 
 
@@ -30,7 +31,8 @@ def read_gqa(args):
 		d = yaml.safe_load_all(in_file)
 
 		for i in d:
-			yield i
+			if i is not None:
+				yield i
 
 
 class Partitioner(object):
@@ -40,26 +42,32 @@ class Partitioner(object):
 
 
 	def __enter__(self, *vargs):
-		self.files = {i: tf.python_io.TFRecordWriter(args[f"{i}_input_path"], "w") for i in self.args.modes}
+		self.files = {
+			i: tf.python_io.TFRecordWriter(self.args[f"{i}_input_path"]) 
+			for i in self.args['modes']
+		}
+
 		return self
 
 
 	def write(self, *vargs):
 		r = random.random()
 
-		if r < args["eval_holdback"]:
+		if r < self.args["eval_holdback"]:
 			mode = "eval"
-		elif r < args["eval_holdback"] + args["predict_holdback"]:
+		elif r < self.args["eval_holdback"] + self.args["predict_holdback"]:
 			mode = "predict"
 		else:
 			mode = "train"
 
-		self.files[r].write(*vargs)
+		self.files[mode].write(*vargs)
 
 
 	def __exit__(self, *vargs):
 		for i in self.files.values():
 			i.close()
+
+		self.files = None
 
 
 # --------------------------------------------------------------------------

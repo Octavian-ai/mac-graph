@@ -4,6 +4,16 @@ import numpy as np
 import string
 import re
 import tensorflow as tf
+import sys
+from tqdm import tqdm
+import os.path
+import zipfile
+import urllib.request
+import pathlib
+
+from .util import *
+from ..args import *
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -15,15 +25,54 @@ UNK = "<unk>"
 SOS = "<sos>"
 EOS = "<eos>"
 SPACE = "<space>"
-special_tokens = [UNK, SOS, EOS, SPACE]
+SPECIAL_TOKENS = [UNK, SOS, EOS, SPACE]
 
-UNK_ID = special_tokens.index(UNK)
-SOS_ID = special_tokens.index(SOS)
-EOS_ID = special_tokens.index(EOS)
+UNK_ID = SPECIAL_TOKENS.index(UNK)
+SOS_ID = SPECIAL_TOKENS.index(SOS)
+EOS_ID = SPECIAL_TOKENS.index(EOS)
 
 ENGLISH_PUNCTUATION = '!"#$%&()*+,-./:;=?@[\\]^_`{|}~'
 
 # --------------------------------------------------------------------------
+
+
+def build_vocab(args):
+
+	hits = Counter()
+
+	def add_line(line):
+		line = line.replace("\n", "")
+
+		for word in line.split(' '):
+			if word != "" and word != " ":
+				hits[word] += 1
+
+	for i in tqdm(read_gqa(args)):
+		add_line(i["question"]["english"])
+
+	tokens = list()
+	tokens.extend(SPECIAL_TOKENS)
+
+	for i in string.ascii_lowercase:
+		tokens.append("<"+i+">")
+		tokens.append("<"+i.upper()+">")
+
+	for i, c in hits.most_common(args["vocab_size"]):
+		if len(tokens) == args["vocab_size"]:
+			break
+
+		if i not in tokens:
+			tokens.append(i)
+
+	assert len(tokens) <= args["vocab_size"]
+
+	with tf.gfile.GFile(args["vocab_path"], 'w') as out_file:
+		for i in tokens:
+			out_file.write(i + "\n")
+
+	return tokens
+
+
 
 def load_vocab(args):
 	tokens = list()
@@ -53,15 +102,19 @@ def expand_unknown_vocab(line, vocab):
 
 	return line
 
+def lookup_vocab(token, vocab):
+	try:
+		return vocab.index(token)
+	except ValueError:
+		return UNK_ID
+
+
 def string_to_tokens(line, vocab):
 	s = line.split(' ')
 
 	r = []
 	for i in s:
-		try:
-			r.append(vocab.index(i))
-		except ValueError:
-			r.append(UNK_ID)
+		r.append(lookup_vocab(i, vocab))
 
 	return r
 
