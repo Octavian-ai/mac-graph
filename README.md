@@ -30,7 +30,7 @@ python -m mac-graph.input.build
 ```
 
 #### Arguments
- - *--limit N* will only read N records from the YAML and only output a total of N tf-records (split across three tranches)
+ - `--limit N` will only read N records from the YAML and only output a total of N tf-records (split across three tranches)
 
 ### Training
 

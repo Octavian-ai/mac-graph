@@ -4,10 +4,8 @@ import tensorflow as tf
 
 def basic_cell(args, i, unit_mul):
 
-	c = tf.contrib.rnn.LSTMCell(
-		args['bus_width']*unit_mul, 
-		dropout_keep_prob=args['dropout']
-		)
+	c = tf.contrib.rnn.LSTMCell(args['bus_width']*unit_mul)
+	c = tf.contrib.rnn.DropoutWrapper(c, args['dropout'])
 
 	if i > 1:
 		c = tf.contrib.rnn.ResidualWrapper(c)
@@ -73,7 +71,7 @@ def encode_input(args, features):
 		fw_cell,
 		bw_cell,
 		src,
-		dtype=dtype,
+		dtype=tf.float32,
 		sequence_length=padded_src_len,
 		time_major=time_major,
 		swap_memory=True)

@@ -5,7 +5,7 @@ import tensorflow as tf
 import logging
 logger = logging.getLogger(__name__)
 
-
+from .text_util import EOS_ID
 
 
 def input_fn(args, mode, question=None):
@@ -15,19 +15,25 @@ def input_fn(args, mode, question=None):
 	# Parse
 	d = d.map(lambda i: tf.parse_single_example(
 		i,
-		features={
-			'src': 				tf.FixedLenFeature([], tf.string),
+		features = {
+			'src': 				tf.FixedLenSequenceFeature([],tf.int64, allow_missing=True),
 			'src_len': 			tf.FixedLenFeature([], tf.int64),
-			'kb': 				tf.FixedLenFeature([], tf.string),
+			'kb': 				tf.FixedLenSequenceFeature([], tf.int64, allow_missing=True),
 			'kb_width': 		tf.FixedLenFeature([], tf.int64),
 			'label': 			tf.FixedLenFeature([], tf.int64)
 		})
 	)
 
+	def as_2D_shape(f):
+		return tf.concat([
+			[tf.constant(-1, dtype=tf.int64)],
+			[f]
+		], 0)
+
 	d = d.map(lambda i: ({
 		"src": 				i["src"],
 		"src_len": 			i["src_len"],
-		"knowledge_base": 	np.reshape(i["kb"], [-1, i["kb_width"]]),
+		"knowledge_base": 	tf.reshape(i["kb"], as_2D_shape(i["kb_width"])),
 	}, i["label"]))
 
 
@@ -55,11 +61,11 @@ def input_fn(args, mode, question=None):
 		# later on we will be masking out calculations past the true sequence.
 		padding_values=(
 			{
-				"src": EOS_ID, 
-				"src_len": 0,		 # unused
-				"knowledge_base": 0, # unused
+				"src": 				tf.cast(EOS_ID, tf.int64), 
+				"src_len": 			tf.cast(0, tf.int64), # unused
+				"knowledge_base": 	tf.cast(0, tf.int64), # unused
 			},
-			0 # label (unused)
+			tf.cast(0, tf.int64) # label (unused)
 		)
 	)
 	
@@ -70,6 +76,6 @@ def input_fn(args, mode, question=None):
 def gen_input_fn(args, mode):
 	return lambda: input_fn(args, mode)
 
-	
+
 
 

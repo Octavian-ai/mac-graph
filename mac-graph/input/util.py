@@ -10,6 +10,9 @@ import random
 
 # Why it's so awkward to write a record I do not know
 
+def int32_feature(value):
+	return tf.train.Feature(int32_list=tf.train.Int32List(value=[value]))
+
 def int64_feature(value):
 	return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
 
