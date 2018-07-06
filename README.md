@@ -1,7 +1,7 @@
 # MacGraph
 The MacGraph network. An Irish attempt at intelligence. Puns not included.
 
-Almost nothing is written yet.
+Skeleton implementation.
 
 
 ## Running the code
@@ -16,12 +16,13 @@ $ pipenv shell
 
 ### Testing
 
-Test the read cell
+You can easily run the unit-tests for the model:
 
 ```shell
-python -m mac-graph.cell.test_read_cell
+python -m mac-graph.test
 ```
 
+Also the model construction functions contain many assertions to help validate correctness.
 
 
 ## AOB
