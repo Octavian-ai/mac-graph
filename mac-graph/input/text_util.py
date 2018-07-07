@@ -47,7 +47,7 @@ def build_vocab(args):
 			if word != "" and word != " ":
 				hits[word] += 1
 
-	for i in tqdm(read_gqa(args)):
+	for i in read_gqa(args):
 		add_line(i["question"]["english"])
 
 	tokens = list()

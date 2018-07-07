@@ -2,7 +2,7 @@
 import yaml
 import tensorflow as tf
 import random
-
+from tqdm import tqdm
 
 # --------------------------------------------------------------------------
 # TFRecord functions
@@ -35,7 +35,7 @@ def read_gqa(args):
 
 		ctr = 0
 
-		for i in d:
+		for i in tqdm(d):
 			if i is not None:
 				yield i
 				ctr += 1

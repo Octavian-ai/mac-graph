@@ -18,7 +18,15 @@ def generate_record(args, vocab, doc):
 	q = string_to_tokens(q, vocab)
 
 	a = doc["answer"]
+	if a == True:
+		a = "y"
+	if a == False:
+		a = "n"
+
 	label = lookup_vocab(a, vocab)
+
+	if label == UNK_ID:
+		raise ValueError("We're only including questions that have in-vocab answers")
 
 	graph = graph_to_table(args, doc["graph"])
 
@@ -47,12 +55,24 @@ if __name__ == "__main__":
 
 	args = get_args(extras)
 
+	print("Build vocab")
 	build_vocab(args)
 	vocab = load_vocab(args)
+	print()
 
+	written = 0
+
+	print("Generate TFRecords")
 	with Partitioner(args) as p:
 		for i in read_gqa(args):
-			p.write(generate_record(args, vocab, i))
+			try:
+				p.write(generate_record(args, vocab, i))
+				written += 1
+			except ValueError:
+				pass
+
+	print(f"Wrote {written} TFRecords")
+
 
 
 
