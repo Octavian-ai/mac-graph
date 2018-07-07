@@ -3,11 +3,6 @@ The MacGraph network. An Irish attempt at intelligence. Puns not included.
 
 This codebase implements graph question answering, using CLEVR-graph as the dataset and MACnets as the reasoning architecture.
 
-### TODO:
-- Add input_fn
-- Add RNN encoder for question
-- Wrap cell up in dynamic_rnn
-
 
 ## Running the code
 ### Prerequisites

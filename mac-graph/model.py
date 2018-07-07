@@ -64,7 +64,6 @@ def model_fn(features, labels, mode, params):
 
 		logits = final_output
 
-
 	# --------------------------------------------------------------------------
 	# Calc loss
 	# --------------------------------------------------------------------------	
@@ -74,6 +73,7 @@ def model_fn(features, labels, mode, params):
 			labels=labels, logits=logits)
 
 		loss = tf.reduce_sum(crossent) / tf.to_float(dynamic_batch_size)
+		# loss = tf.reduce_sum(tf.cast(question_state, tf.float32) * tf.get_variable("W", dtype=tf.float32, shape=[1]))
 
 	# --------------------------------------------------------------------------
 	# Optimize
@@ -82,7 +82,7 @@ def model_fn(features, labels, mode, params):
 	if mode == tf.estimator.ModeKeys.TRAIN:
 		global_step = tf.train.get_global_step()
 		optimizer = tf.train.AdamOptimizer(args["learning_rate"])
-		train_op = optimizer.minimize(loss)
+		train_op = optimizer.minimize(loss, global_step=global_step)
 
 
 

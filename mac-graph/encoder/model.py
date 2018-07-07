@@ -5,10 +5,10 @@ import tensorflow as tf
 def basic_cell(args, i, unit_mul):
 
 	c = tf.contrib.rnn.LSTMCell(int(args['bus_width']*unit_mul))
-	c = tf.contrib.rnn.DropoutWrapper(c, args['dropout'])
+	# c = tf.contrib.rnn.DropoutWrapper(c, args['dropout'])
 
-	if i > 1:
-		c = tf.contrib.rnn.ResidualWrapper(c)
+	# if i > 1:
+	# 	c = tf.contrib.rnn.ResidualWrapper(c)
 
 	return c
 
@@ -47,11 +47,9 @@ def encode_input(args, features):
 	assert "src_len" in features
 
 	dynamic_batch_size = tf.shape(features["src"])[0]
-	time_major = False
 
 	# Trim down to the residual batch size (e.g. when at end of input data)
 	padded_src_len = features["src_len"][0 : dynamic_batch_size]
-
 
 	# --------------------------------------------------------------------------
 	# Embed vocab
@@ -73,8 +71,7 @@ def encode_input(args, features):
 		bw_cell,
 		src,
 		dtype=tf.float32,
-		sequence_length=padded_src_len,
-		time_major=time_major,
+		# sequence_length=padded_src_len, # was causing seg fault 11
 		swap_memory=True)
 
 	

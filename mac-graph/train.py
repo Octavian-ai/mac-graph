@@ -17,6 +17,7 @@ def train(args):
 
 
 if __name__ == "__main__":
+	tf.logging.set_verbosity(tf.logging.DEBUG)
 	args = get_args()
 	train(args)
 
