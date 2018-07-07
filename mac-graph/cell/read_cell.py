@@ -1,7 +1,7 @@
 
 import tensorflow as tf
 
-from ..util import assert_shape
+from ..util import *
 
 
 def read_from_graph(args, in_content, in_mask, in_knowledge, W_score=None):
@@ -23,14 +23,18 @@ def read_from_graph(args, in_content, in_mask, in_knowledge, W_score=None):
 		if W_score is None:
 			W_score = tf.get_variable("W_score", [args["kb_width"], args["kb_width"]], tf.float32)
 		
-		query = in_content * in_mask
-		assert_shape(query, [args["kb_width"]])
-		
-		halfbaked = tf.matmul(query, W_score)
-		assert_shape(halfbaked, [args["kb_width"]])
+		masked_query = in_content * in_mask
+		assert_shape(masked_query, [args["kb_width"]])
 
-		masked_kb = in_knowledge * in_mask
+		masked_kb = in_knowledge * tf.expand_dims(in_mask, 1)
 		assert_shape(masked_kb, [args["kb_len"], args["kb_width"]])
+
+		# --------------------------------------------------------------------------
+		# Perform scoring (masked_query x W x masked_kb)
+		# --------------------------------------------------------------------------
+		
+		halfbaked = tf.matmul(masked_query, W_score)
+		assert_shape(halfbaked, [args["kb_width"]])
 		
 		# todo: verify this is right
 		scores = tf.matmul(masked_kb, tf.expand_dims(halfbaked, -1), name="scores")

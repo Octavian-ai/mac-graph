@@ -17,6 +17,10 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 	"""
 	with tf.name_scope("control_cell"):
 
+		# --------------------------------------------------------------------------
+		# Compute query to compare across question_tokens
+		# --------------------------------------------------------------------------
+
 		in_control_state = dynamic_assert_shape(in_control_state, 
 			[ features["d_batch_size"], args["bus_width"] ]
 		)
@@ -33,6 +37,10 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 		question_token_dot = dynamic_assert_shape(question_token_dot, 
 			[ features["d_batch_size"], features["d_seq_len"], args["bus_width"] ]
 		)
+
+		# --------------------------------------------------------------------------
+		# Attention across question_tokens
+		# --------------------------------------------------------------------------
 	
 		question_token_scores = tf.layers.dense(question_token_dot, 1, name="question_token_scores")
 		question_token_scores = tf.squeeze(question_token_scores, axis=-1)
@@ -41,8 +49,10 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 			[ features["d_batch_size"], features["d_seq_len"] ]
 		)
 
-		control_out = tf.tensordot(question_token_scores, in_question_tokens, axes=[[1], [1]])
-		control_out = tf.squeeze(control_out, axis=[0])
+
+		# Weighted sum
+		control_out = tf.expand_dims(question_token_scores, -1) * in_question_tokens
+		control_out = tf.reduce_sum(control_out, axis=1) # Sum along seq_len dimension
 		control_out = dynamic_assert_shape(control_out, 
 			[ features["d_batch_size"], args["bus_width"]]
 		)
