@@ -5,6 +5,7 @@ import numpy as np
 from .cell import execute_reasoning
 from .encoder import encode_input
 from .util import assert_shape
+from .hooks import *
 
 def model_fn(features, labels, mode, params):
 
@@ -49,6 +50,24 @@ def model_fn(features, labels, mode, params):
 		global_step = tf.train.get_global_step()
 		optimizer = tf.train.AdamOptimizer(args["learning_rate"])
 		train_op = optimizer.minimize(loss, global_step=global_step)
+
+
+	# --------------------------------------------------------------------------
+	# Eval metrics
+	# --------------------------------------------------------------------------
+	
+	if mode ==  tf.estimator.ModeKeys.EVAL:
+
+		predictions = tf.argmax(logits, axis=-1)
+
+		eval_metric_ops = {
+			"accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions),
+			"loss_": tf.metrics.mean(loss), # For FloydHub
+		}
+
+		eval_hooks = [FloydHubMetricHook(eval_metric_ops)]
+
+
 
 
 
