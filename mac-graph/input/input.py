@@ -68,6 +68,13 @@ def input_fn(args, mode, question=None):
 			tf.cast(0, tf.int64) # label (unused)
 		)
 	)
+
+	# Add dynamic dimensions for convenience (e.g. shape assertions)
+	d = d.map(lambda features, labels: ({
+		**features, 
+		"d_batch_size": tf.shape(features["src"])[0], 
+		"d_seq_len": tf.shape(features["src"])[1],
+	}, labels))
 	
 	return d
 

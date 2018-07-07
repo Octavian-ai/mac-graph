@@ -1,6 +1,6 @@
 
-from .read_cell import *
-
+# Tests
 from .test_read_cell import *
 
-from .mac_cell import MACCell
+# Modules
+from .decode import execute_reasoning

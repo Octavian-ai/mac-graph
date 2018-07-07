@@ -1,2 +1,2 @@
 
-from .model import encode_input
+from .encode import encode_input
