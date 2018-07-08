@@ -126,7 +126,21 @@ def pretokenize_general(text):
 	return text
 
 
+def pretokenize_json(value):
 
+	def to_str(value):
+		if value == True:
+			return 'y'
+		elif value == False:
+			return 'f'
+		elif isinstance(value, str):
+			return value
+		elif isinstance(value, list):
+			return ' '.join(value)
+		else:
+			return str(value)
+
+	return pretokenize_general(to_str(value))
 
 
 def pretokenize_english(text):
@@ -135,13 +149,6 @@ def pretokenize_english(text):
 
 	for p in ENGLISH_PUNCTUATION:
 		text = text.replace(p, f" {p} ")
-
-	# From Keras Tokenizer
-	# filters = '!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n'
-	# split = ' '
-
-	# translate_map = str.maketrans(filters, split * len(filters))
-	# text = text.translate(translate_map)
 
 	return text
 

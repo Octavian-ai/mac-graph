@@ -18,7 +18,7 @@ def input_fn(args, mode, question=None):
 		features = {
 			'src': 				tf.FixedLenSequenceFeature([],tf.int64, allow_missing=True),
 			'src_len': 			tf.FixedLenFeature([], tf.int64),
-			'kb': 				tf.FixedLenSequenceFeature([], tf.float32, allow_missing=True),
+			'kb': 				tf.FixedLenSequenceFeature([], tf.int64, allow_missing=True),
 			'kb_width': 		tf.FixedLenFeature([], tf.int64),
 			'label': 			tf.FixedLenFeature([], tf.int64)
 		})
@@ -63,7 +63,7 @@ def input_fn(args, mode, question=None):
 			{
 				"src": 				tf.cast(EOS_ID, tf.int64), 
 				"src_len": 			tf.cast(0, tf.int64), # unused
-				"knowledge_base": 	0.0, # unused
+				"knowledge_base": 	tf.cast(0, tf.int64), # unused
 			},
 			tf.cast(0, tf.int64) # label (unused)
 		)

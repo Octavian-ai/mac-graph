@@ -24,9 +24,11 @@ class ReadTest(tf.test.TestCase):
 			"batch_size": 1,
 			"kb_width": 3,
 			"kb_len": 2,
+			"vocab_size": 3,
 		}
 
 		W_score = np.identity(3)
+		vocab_embedding = tf.eye(args["vocab_size"])
 
 
 		with self.test_session():
@@ -42,7 +44,7 @@ class ReadTest(tf.test.TestCase):
 				W_score_p:		W_score,
 			}
 
-			out_data = read_from_graph(args, in_content_p, in_mask_p, in_knowledge_p, W_score_p)
+			out_data = read_from_graph(args, in_content_p, in_mask_p, in_knowledge_p, vocab_embedding, W_score=W_score_p)
 
 			self.assertAllClose(out_data.eval(feed_dict), [out_expected])
 

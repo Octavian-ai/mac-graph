@@ -4,10 +4,11 @@ import tensorflow as tf
 from .mac_cell import *
 from ..util import assert_shape
 
-def execute_reasoning(args, features, labels, question_tokens, question_state):
+def execute_reasoning(args, features, labels, question_tokens, question_state, vocab_embedding):
 	with tf.variable_scope("decoder",reuse=tf.AUTO_REUSE) as decoder_scope:
 
-		d_cell = MACCell(args, features, question_state, question_tokens, features["knowledge_base"])
+		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
+		
 		d_cell_initial = d_cell.zero_state(dtype=tf.float32, batch_size=features["d_batch_size"])
 
 		# label_seq: [batch_size, seq_len]

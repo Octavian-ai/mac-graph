@@ -20,12 +20,12 @@ def output_unit(args, in_question_state, in_memory_state):
 
 class MACCell(tf.nn.rnn_cell.RNNCell):
 
-	def __init__(self, args, features, question_state, question_tokens, knowledge_base):
+	def __init__(self, args, features, question_state, question_tokens, vocab_embedding):
 		self.args = args
 		self.features = features
 		self.question_state = question_state
 		self.question_tokens = question_tokens
-		self.knowledge_base = knowledge_base
+		self.vocab_embedding = vocab_embedding
 
 		super().__init__(self)
 
@@ -50,10 +50,17 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 		in_control_state, in_memory_state = state
 
-		out_control_state = control_cell(self.args, self.features, in_control_state, self.question_state, self.question_tokens)
-		data_read = read_cell(self.args, in_memory_state, out_control_state, self.knowledge_base)
-		out_memory_state = write_cell(self.args, in_memory_state, data_read, out_control_state)
-		output = output_unit(self.args, self.question_state, out_memory_state)
+		out_control_state = control_cell(self.args, self.features, 
+			in_control_state, self.question_state, self.question_tokens)
+		
+		data_read = read_cell(self.args, self.features, 
+			in_memory_state, out_control_state, self.vocab_embedding)
+		
+		out_memory_state = write_cell(self.args, 
+			in_memory_state, data_read, out_control_state)
+		
+		output = output_unit(self.args, 
+			self.question_state, out_memory_state)
 
 		return output, (out_control_state, out_memory_state)
 

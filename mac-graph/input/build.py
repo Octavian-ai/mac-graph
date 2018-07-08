@@ -17,23 +17,18 @@ def generate_record(args, vocab, doc):
 	q = expand_unknown_vocab(q, vocab)
 	q = string_to_tokens(q, vocab)
 
-	a = doc["answer"]
-	if a == True:
-		a = "y"
-	if a == False:
-		a = "n"
-
+	a = pretokenize_json(doc["answer"])
 	label = lookup_vocab(a, vocab)
 
 	if label == UNK_ID:
 		raise ValueError("We're only including questions that have in-vocab answers")
 
-	graph = graph_to_table(args, doc["graph"])
+	graph = graph_to_table(args, vocab, doc["graph"])
 
 	feature = {
 		"src": 				tf.train.Feature(int64_list=tf.train.Int64List(value=q)),
 		"src_len": 			int64_feature(len(q)),
-		"kb": 				tf.train.Feature(float_list=tf.train.FloatList(value=graph.flatten())),
+		"kb": 				tf.train.Feature(int64_list=tf.train.Int64List(value=graph.flatten())),
 		"kb_width": 		int64_feature(args["kb_width"]),
 		"label": 			int64_feature(label),
 	}

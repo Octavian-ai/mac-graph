@@ -1,13 +1,22 @@
 
 import numpy as np
 
-def graph_to_table(args, graph):
+from .text_util import *
+
+def graph_to_table(args, vocab, graph):
 
 	def node_to_vec(node):
-		return np.array([0,1,0])
+		node_props = ["name", "architecture", "cleanliness", "has_rail", "disabled_access", "size", "music"]
+
+		return np.array([
+			lookup_vocab(pretokenize_json(node[key]), vocab) for key in node_props
+		])
 
 	def edge_to_vec(edge):
-		return np.array([1,0,0])
+		edge_props = ["line_name", "line_color"]
+		return np.array([
+			lookup_vocab(pretokenize_json(edge[key]), vocab) for key in edge_props
+		])
 
 
 	table = []

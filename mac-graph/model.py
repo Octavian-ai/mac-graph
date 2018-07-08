@@ -4,7 +4,7 @@ import numpy as np
 
 from .cell import execute_reasoning
 from .encoder import encode_input
-from .util import assert_shape
+from .util import *
 from .hooks import *
 
 def model_fn(features, labels, mode, params):
@@ -24,13 +24,24 @@ def model_fn(features, labels, mode, params):
 	eval_hooks = None
 
 	# --------------------------------------------------------------------------
+	# Shared variables
+	# --------------------------------------------------------------------------
+	
+	vocab_embedding = tf.get_variable(
+		"vocab_embedding", 
+		[args["vocab_size"], args["embed_width"]], 
+		tf.float32)
+
+	# --------------------------------------------------------------------------
 	# Model for realz
 	# --------------------------------------------------------------------------
 	
-	question_tokens, question_state = encode_input(args, features)
+	question_tokens, question_state = encode_input(args, features, vocab_embedding)
+
 	logits = execute_reasoning(args, features, labels,
 		question_tokens=question_tokens, 
-		question_state=question_state)
+		question_state=question_state,
+		vocab_embedding=vocab_embedding)
 	
 	# --------------------------------------------------------------------------
 	# Calc loss
@@ -49,7 +60,7 @@ def model_fn(features, labels, mode, params):
 	if mode == tf.estimator.ModeKeys.TRAIN:
 		global_step = tf.train.get_global_step()
 		optimizer = tf.train.AdamOptimizer(args["learning_rate"])
-		train_op = optimizer.minimize(loss, global_step=global_step)
+		train_op = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
 
 
 	# --------------------------------------------------------------------------

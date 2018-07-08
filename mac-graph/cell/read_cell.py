@@ -3,8 +3,10 @@ import tensorflow as tf
 
 from ..util import *
 
+from ..attention import *
 
-def read_from_graph(args, in_content, in_mask, in_knowledge, W_score=None):
+
+def read_from_graph(args, features, vocab_embedding, query, mask):
 	"""Perform attention based read from table
 
 	@param W_score is for testing/debug purposes so you can easily inject the score fn you'd like. The code will default to a variable normally
@@ -12,47 +14,41 @@ def read_from_graph(args, in_content, in_mask, in_knowledge, W_score=None):
 	@returns read_data
 	"""
 
-	assert_shape(in_content, [args["kb_width"]])
-	assert_shape(in_mask, [args["kb_width"]])
-	assert_shape(in_knowledge, [args["kb_len"], args["kb_width"]])
-
-	assert in_mask.dtype == tf.float32, "Mask should be floats between 0 and 1"
-
-	with tf.variable_scope("read_from_graph", reuse=tf.AUTO_REUSE):
-
-		if W_score is None:
-			W_score = tf.get_variable("W_score", [args["kb_width"], args["kb_width"]], tf.float32)
-		
-		masked_query = in_content * in_mask
-		assert_shape(masked_query, [args["kb_width"]])
-
-		masked_kb = in_knowledge * tf.expand_dims(in_mask, 1)
-		assert_shape(masked_kb, [args["kb_len"], args["kb_width"]])
+	with tf.variable_scope("read_from_graph"):
 
 		# --------------------------------------------------------------------------
-		# Perform scoring (masked_query x W x masked_kb)
+		# Constants and validations
+		# --------------------------------------------------------------------------
+
+		kb_full_width = args["kb_width"] * args["embed_width"]
+		d_kb_len = tf.shape(features["knowledge_base"])[1]
+
+		assert_shape(query, [kb_full_width])
+		assert_shape(mask,  [kb_full_width])
+		assert features["knowledge_base"].shape[-1] == args["kb_width"]
+		assert mask.dtype == tf.float32, "Mask should be floats between 0 and 1"
+
+
+		# --------------------------------------------------------------------------
+		# Embed graph tokens
 		# --------------------------------------------------------------------------
 		
-		halfbaked = tf.matmul(masked_query, W_score)
-		assert_shape(halfbaked, [args["kb_width"]])
-		
-		# todo: verify this is right
-		scores = tf.matmul(masked_kb, tf.expand_dims(halfbaked, -1), name="scores")
-		scores = tf.squeeze(scores, axis=-1)
-		assert_shape(scores, [args["kb_len"]])
-		scores = tf.nn.softmax(scores)
+		emb_kb = tf.nn.embedding_lookup(vocab_embedding, features["knowledge_base"])
+		emb_kb = dynamic_assert_shape(emb_kb, 
+			[features["d_batch_size"], d_kb_len, args["kb_width"], args["embed_width"]])
 
-		weighted_kb = in_knowledge * tf.expand_dims(scores, -1)
-		assert_shape(weighted_kb, [args["kb_len"], args["kb_width"]])
-		
-		read_data = tf.reduce_sum(weighted_kb, axis=1)
-		assert_shape(read_data, [args["kb_width"]])
+		emb_kb = tf.reshape(emb_kb, [-1, d_kb_len, kb_full_width])
 
-		return read_data
+		# --------------------------------------------------------------------------
+		# Do lookup via attention
+		# --------------------------------------------------------------------------
+
+		output = attention(query, emb_kb, mask)
+		return output
 
 
 
-def read_cell(args, in_memory_state, in_control, in_knowledge, W_score=None):
+def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 	"""
 	A read cell
 
@@ -60,16 +56,23 @@ def read_cell(args, in_memory_state, in_control, in_knowledge, W_score=None):
 
 	"""
 
-	assert_shape(in_memory_state,   [args["bus_width"]])
-	assert_shape(in_control, [args["bus_width"]])
+	assert_shape(in_memory_state, [args["bus_width"]])
+	assert_shape(in_control,      [args["bus_width"]])
 
 	in_all = tf.concat([in_memory_state, in_control], -1)
 
-	read_content = tf.layers.dense(in_all, args["kb_width"])
-	read_mask    = tf.layers.dense(in_all, args["kb_width"])
+	query = tf.layers.dense(in_all, args["embed_width"] * args["kb_width"])
+	mask  = tf.layers.dense(in_all, args["embed_width"] * args["kb_width"])
 
-	read_data = read_from_graph(args, read_content, read_mask, in_knowledge, W_score)
-	assert_shape(read_data, [args["bus_width"]])
+	read_data = read_from_graph(args, features, vocab_embedding, query, mask)
+
+	# --------------------------------------------------------------------------
+	# Shrink results
+	# --------------------------------------------------------------------------
+
+	read_data = tf.layers.dense(read_data, args["bus_width"], name="data_read_shrink")
+	read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["bus_width"]])
+
 
 	return read_data
 

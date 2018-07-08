@@ -23,7 +23,7 @@ def cell_stack(args, layer_mul=1, unit_mul=1):
 	return cell
 
 
-def encode_input(args, features):
+def encode_input(args, features, vocab_embedding):
 	"""
 	Expects data in time-minor format (e.g. batch-major)
 
@@ -58,11 +58,6 @@ def encode_input(args, features):
 		# --------------------------------------------------------------------------
 		# Embed vocab
 		# --------------------------------------------------------------------------
-
-		vocab_embedding = tf.get_variable(
-			"vocab_embedding", 
-			[args["vocab_size"], args["bus_width"]], 
-			tf.float32)
 
 		src  = tf.nn.embedding_lookup(vocab_embedding, features["src"])
 		
