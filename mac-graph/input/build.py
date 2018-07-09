@@ -4,7 +4,10 @@ import tensorflow as tf
 from .graph_util import *
 from .text_util import *
 from .util import *
+from ..args import *
 
+import logging
+logger = logging.getLogger(__name__)
 
 
 # --------------------------------------------------------------------------
@@ -13,17 +16,17 @@ from .util import *
 
 def generate_record(args, vocab, doc):
 
-	q = pretokenize_english(doc["question"]["english"])
-	q = expand_unknown_vocab(q, vocab)
-	q = string_to_tokens(q, vocab)
+	q = vocab.english_to_ids(doc["question"]["english"])
 
-	a = pretokenize_json(doc["answer"])
-	label = lookup_vocab(a, vocab)
+	# May raise exception if unsupported type
+	label = vocab.lookup(pretokenize_json(doc["answer"]))
 
 	if label == UNK_ID:
 		raise ValueError("We're only including questions that have in-vocab answers")
 
 	graph = graph_to_table(args, vocab, doc["graph"])
+
+	logger.debug(f"Record: {vocab.ids_to_string([label])}, {vocab.ids_to_string(q)}, {[vocab.ids_to_string(g) for g in graph]}")
 
 	feature = {
 		"src": 				tf.train.Feature(int64_list=tf.train.Int64List(value=q)),
@@ -50,14 +53,16 @@ if __name__ == "__main__":
 
 	args = get_args(extras)
 
-	print("Build vocab")
-	build_vocab(args)
-	vocab = load_vocab(args)
-	print()
+	logging.basicConfig()
+	logger.setLevel(args["log_level"])
+
+	logger.info("Build vocab")
+	vocab = Vocab.build(args, lambda i:gqa_to_tokens(args, i))
+	logger.debug(f"vocab: {vocab.table}")
 
 	written = 0
 
-	print("Generate TFRecords")
+	logger.info("Generate TFRecords")
 	with Partitioner(args) as p:
 		for i in read_gqa(args):
 			try:
@@ -66,7 +71,7 @@ if __name__ == "__main__":
 			except ValueError:
 				pass
 
-	print(f"Wrote {written} TFRecords")
+	logger.info(f"Wrote {written} TFRecords")
 
 
 

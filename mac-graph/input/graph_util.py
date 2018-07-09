@@ -3,19 +3,43 @@ import numpy as np
 
 from .text_util import *
 
+NODE_PROPS = ["name", "cleanliness"]
+EDGE_PROPS = ["line_name"]
+
+
+def gqa_to_tokens(args, gqa):
+
+	tokens = list()
+
+	for edge in gqa["graph"]["edges"]:
+		for key in EDGE_PROPS:
+			tokens.append(pretokenize_json(edge[key]))
+
+	for node in gqa["graph"]["nodes"]:
+		for key in NODE_PROPS:
+			tokens.append(pretokenize_json(node[key]))
+
+	tokens += pretokenize_english(gqa["question"]["english"]).split(' ')
+
+	try:
+		tokens.append(pretokenize_json(gqa["answer"]))
+	except ValueError:
+		pass
+
+	return tokens
+
+
 def graph_to_table(args, vocab, graph):
 
 	def node_to_vec(node):
-		node_props = ["name", "architecture", "cleanliness", "has_rail", "disabled_access", "size", "music"]
-
 		return np.array([
-			lookup_vocab(pretokenize_json(node[key]), vocab) for key in node_props
+			vocab.lookup(node[key]) for key in NODE_PROPS
 		])
 
 	def edge_to_vec(edge):
-		edge_props = ["line_name", "line_color"]
+		
 		return np.array([
-			lookup_vocab(pretokenize_json(edge[key]), vocab) for key in edge_props
+			vocab.lookup(edge[key]) for key in EDGE_PROPS
 		])
 
 
