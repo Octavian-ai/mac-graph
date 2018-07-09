@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
 	def extras(parser):
 		parser.add_argument('--skip-extract', action='store_true')
-		parser.add_argument('--gqa_path', type=str, default="./input/gqa.yaml")
+		parser.add_argument('--gqa_path', type=str, default="./input_raw/gqa.yaml")
 
 	args = get_args(extras)
 

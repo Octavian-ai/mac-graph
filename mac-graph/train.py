@@ -9,8 +9,8 @@ def train(args):
 
 	estimator = tf.estimator.Estimator(model_fn, model_dir=args["model_dir"], params=args)
 
-	train_spec = tf.estimator.TrainSpec(input_fn=gen_input_fn(args, "train"))
-	eval_spec  = tf.estimator.EvalSpec( input_fn=gen_input_fn(args, "eval"))
+	train_spec = tf.estimator.TrainSpec(input_fn=gen_input_fn(args, "train"), max_steps=args["max_steps"])
+	eval_spec  = tf.estimator.EvalSpec(input_fn=gen_input_fn(args, "eval"))
 
 	tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
 

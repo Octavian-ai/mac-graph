@@ -14,11 +14,25 @@ $ pipenv shell
 (mac-graph-sjOzWQ6Y) $
 ```
 
+### Prediction
+
+Why not try out the model by having it answer your questions?
+
+**Not yet built.**
+
+
+
 ### Building the data
 
-The data (a Graph-Question-Answer YAML from CLEVR-graph) must be pre-processed for training/evaluation. The YAML is transformed into TensorFlow records, and split into test-train-predict tranches.
+To train the model, you need training data.
 
-Build the data:
+If you want to skip this step, you can download the pre-built data from [our public dataset](https://www.floydhub.com/davidmack/datasets/mac-graph).
+
+The underlying data (a Graph-Question-Answer YAML from CLEVR-graph) must be pre-processed for training and evaluation. The YAML is transformed into TensorFlow records, and split into test-train-predict tranches.
+
+First [download](https://storage.googleapis.com/octavian-static/download/english2cypher/gqa.zip) (or generate!) a `gqa.yaml`.
+
+Then build the data:
 
 ```shell
 python -m mac-graph.input.build
@@ -29,15 +43,23 @@ python -m mac-graph.input.build
 
 ### Training
 
-Invoke some TF Estimator magic!
+Let's build a model. (Note, this requires training data from the previous section)
 
 ```shell
 python -m mac-graph.train
 ```
 
+Running too slow? Fan spinning too much? Use FloydHub: 
+```shell
+pip install floyd-cli
+floyd login
+floyd init mac-graph-clone
+./floyd-train.sh`
+```
+
 ### Testing
 
-You can easily run the unit-tests for the model:
+You can easily run the unit tests for the model:
 
 ```shell
 python -m mac-graph.test

@@ -8,7 +8,7 @@ def get_args(extend=lambda parser:None):
 	extend(parser)
 
 	parser.add_argument('--output-dir', type=str, default="./output")
-	parser.add_argument('--input-dir',  type=str, default="./input")
+	parser.add_argument('--input-dir',  type=str, default="./input_processed")
 
 	parser.add_argument('--model-dir',      type=str, default="./output/model")
 	parser.add_argument('--warm-start-dir', type=str, default=None)
@@ -26,6 +26,7 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--limit', 				   type=int, default=None, help="How many rows of input data to train on")
 	parser.add_argument('--answer-classes',	       type=int, default=256,  help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
 	parser.add_argument('--max-decode-iterations', type=int, default=12)
+	parser.add_argument('--max-steps',             type=int, default=400)
 
 
 	parser.add_argument('--max-gradient-norm',     type=float, default=1.0)

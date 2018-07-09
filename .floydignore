@@ -1,0 +1,20 @@
+
+# Directories and files to ignore when uploading code to floyd
+
+./input_processed
+./output
+./input_raw
+
+__pycache__
+
+.git
+.eggs
+eggs
+lib
+lib64
+parts
+sdist
+var
+*.pyc
+*.swp
+.DS_Store
