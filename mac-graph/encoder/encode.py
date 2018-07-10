@@ -6,7 +6,7 @@ from ..util import *
 
 def basic_cell(args, i, unit_mul):
 
-	c = tf.contrib.rnn.LSTMCell(int(args['bus_width']*unit_mul))
+	c = tf.contrib.rnn.LSTMCell(int(args['embed_width']*unit_mul))
 	c = tf.contrib.rnn.DropoutWrapper(c, args['dropout'])
 
 	if i > 1:
@@ -51,7 +51,6 @@ def encode_input(args, features, vocab_embedding):
 		batch_size = features["d_batch_size"]
 		seq_len    = features["d_seq_len"]
 
-
 		# Trim down to the residual batch size (e.g. when at end of input data)
 		padded_src_len = features["src_len"][0 : batch_size]
 
@@ -60,10 +59,7 @@ def encode_input(args, features, vocab_embedding):
 		# --------------------------------------------------------------------------
 
 		src  = tf.nn.embedding_lookup(vocab_embedding, features["src"])
-		
-		# src.shape = [batch_size, seq_len, bus_width]
-		assert src.shape[2] == args["bus_width"]
-		assert_rank(src, 3)
+		src = dynamic_assert_shape(src, [batch_size, seq_len, args["embed_width"]])
 
 		# --------------------------------------------------------------------------
 		# Encoder
@@ -83,16 +79,14 @@ def encode_input(args, features, vocab_embedding):
 
 		
 		question_tokens = tf.concat( (fw_output, bw_output), axis=-1)
-
 		question_tokens = dynamic_assert_shape(question_tokens, 
-			[ features["d_batch_size"], features["d_seq_len"], args["bus_width"] ]
+			[ features["d_batch_size"], features["d_seq_len"], args["embed_width"] ]
 		)
 
 		# Top layer, output layer
 		question_state = tf.concat( (fw_states[1].c, bw_states[1].c), axis=-1)
-		
 		question_state = dynamic_assert_shape(question_state,
-			[ features["d_batch_size"], args["bus_width"] ]
+			[ features["d_batch_size"], args["embed_width"] ]
 		)
 
 		return (question_tokens, question_state)

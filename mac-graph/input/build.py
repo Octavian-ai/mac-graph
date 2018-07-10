@@ -53,7 +53,7 @@ def generate_record(args, vocab, doc):
 if __name__ == "__main__":
 
 	def extras(parser):
-		parser.add_argument('--skip-extract', action='store_true')
+		parser.add_argument('--skip-vocab', action='store_true')
 		parser.add_argument('--gqa_path', type=str, default="./input_raw/gqa.yaml")
 
 	args = get_args(extras)
@@ -61,9 +61,12 @@ if __name__ == "__main__":
 	logging.basicConfig()
 	logger.setLevel(args["log_level"])
 
-	logger.info("Build vocab")
-	vocab = Vocab.build(args, lambda i:gqa_to_tokens(args, i))
-	logger.debug(f"vocab: {vocab.table}")
+	if not args["skip_vocab"]:
+		logger.info("Build vocab")
+		vocab = Vocab.build(args, lambda i:gqa_to_tokens(args, i))
+		logger.debug(f"vocab: {vocab.table}")
+	else:
+		vocab = Vocab.load(args)
 
 	written = 0
 
