@@ -24,9 +24,12 @@ def generate_record(args, vocab, doc):
 	if label == UNK_ID:
 		raise ValueError("We're only including questions that have in-vocab answers")
 
+	if label >= args["answer_classes"]:
+		raise ValueError("Label greater than answer classes")
+
 	graph = graph_to_table(args, vocab, doc["graph"])
 
-	logger.debug(f"Record: {vocab.ids_to_string([label])}, {vocab.ids_to_string(q)}, {[vocab.ids_to_string(g) for g in graph]}")
+	logger.debug(f"Record: {label}={vocab.ids_to_string([label])}, {q}={vocab.ids_to_string(q)}, {[vocab.ids_to_string(g) for g in graph]}")
 
 	feature = {
 		"src": 				tf.train.Feature(int64_list=tf.train.Int64List(value=q)),
@@ -68,7 +71,8 @@ if __name__ == "__main__":
 			try:
 				p.write(generate_record(args, vocab, i))
 				written += 1
-			except ValueError:
+			except ValueError as ex:
+				logger.debug(ex)
 				pass
 
 	logger.info(f"Wrote {written} TFRecords")

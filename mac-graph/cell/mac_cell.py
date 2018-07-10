@@ -6,15 +6,16 @@ from .write_cell import *
 from .control_cell import *
 
 
-def output_unit(args, in_question_state, in_memory_state):
+def output_unit(args, features, in_question_state, in_memory_state):
 
-	in_states = tf.concat([in_question_state, in_memory_state], -1)
+	v = tf.concat([in_question_state, in_memory_state], -1)
 
-	v = tf.layers.dense(in_states, args["bus_width"], activation=tf.nn.relu)
+	# v = tf.layers.dense(v, args["bus_width"], activation=tf.nn.relu)
 	v = tf.layers.dense(v, args["answer_classes"])
-	output = tf.nn.softmax(v)
 
-	return output
+	# Don't do softmax here because the loss fn will apply it
+
+	return v
 
 
 
@@ -59,7 +60,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		out_memory_state = write_cell(self.args, 
 			in_memory_state, data_read, out_control_state)
 		
-		output = output_unit(self.args, 
+		output = output_unit(self.args, self.features,
 			self.question_state, out_memory_state)
 
 		return output, (out_control_state, out_memory_state)

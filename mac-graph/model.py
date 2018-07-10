@@ -14,8 +14,7 @@ def model_fn(features, labels, mode, params):
 	# --------------------------------------------------------------------------
 	
 	args = params
-	dynamic_batch_size = tf.shape(features["src"])[0]
-
+	
 	# EstimatorSpec slots
 	loss = None
 	train_op = None
@@ -42,17 +41,15 @@ def model_fn(features, labels, mode, params):
 		question_tokens=question_tokens, 
 		question_state=question_state,
 		vocab_embedding=vocab_embedding)
-	
+
 	# --------------------------------------------------------------------------
 	# Calc loss
 	# --------------------------------------------------------------------------	
 
 	if mode in [tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL]:		
 		crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
-
-		loss = tf.reduce_sum(crossent) / tf.to_float(dynamic_batch_size)
-		# loss = tf.reduce_sum(tf.cast(question_state, tf.float32) * tf.get_variable("W", dtype=tf.float32, shape=[1]))
-
+		loss = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
+		
 	# --------------------------------------------------------------------------
 	# Optimize
 	# --------------------------------------------------------------------------
@@ -69,11 +66,10 @@ def model_fn(features, labels, mode, params):
 	
 	if mode ==  tf.estimator.ModeKeys.EVAL:
 
-		predictions = tf.argmax(logits, axis=-1)
+		predictions = tf.argmax(tf.nn.softmax(logits), axis=-1)
 
 		eval_metric_ops = {
 			"accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions),
-			"loss_": tf.metrics.mean(loss), # For FloydHub
 		}
 
 		eval_hooks = [FloydHubMetricHook(eval_metric_ops)]
