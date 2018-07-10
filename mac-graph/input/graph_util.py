@@ -37,15 +37,23 @@ def graph_to_table(args, vocab, graph):
 		])
 
 	def edge_to_vec(edge):
-		
 		return np.array([
 			vocab.lookup(edge[key]) for key in EDGE_PROPS
 		])
 
+	def pack(row):
+		if len(row) > args["kb_width"]:
+			return row[0:args["kb_width"]]
+		elif len(row) < args["kb_width"]:
+			return np.pad(row, (0,args["kb_width"] - len(row)), 'constant', constant_values=0)
+		else:
+			return row
 
-	table = []
+	edges = []
 
 	node_lookup = {i["id"]: i for i in graph["nodes"]}
+
+	nodes = [pack(node_to_vec(i)) for i in graph["nodes"]]
 
 	for edge in graph["edges"]:
 		s1 = node_to_vec(node_lookup[edge["station1"]])
@@ -53,10 +61,11 @@ def graph_to_table(args, vocab, graph):
 		e = edge_to_vec(edge)
 
 		row = np.concatenate((s1, e, s2), -1)
-		row = np.pad(row, (0,args["kb_width"] - len(row)), 'constant', constant_values=0)
+		row = pack(row)
+		
 		assert len(row) == args["kb_width"], "Extraction functions didn't create the right length of knowledge table data"
 
-		table.append(row)
+		edges.append(row)
 
-	return np.array(table)
+	return np.array(nodes), np.array(edges)
 

@@ -23,7 +23,7 @@ EOS = "<eos>"
 SPACE = "<space>"
 
 CHARS = ["<"+i+">" for i in string.ascii_lowercase] + ["<"+i+">" for i in string.ascii_uppercase]
-SPECIAL_TOKENS = [UNK, SOS, EOS, SPACE] + CHARS
+SPECIAL_TOKENS = [UNK, SOS, EOS, SPACE] #+ CHARS
 
 UNK_ID = SPECIAL_TOKENS.index(UNK)
 SOS_ID = SPECIAL_TOKENS.index(SOS)

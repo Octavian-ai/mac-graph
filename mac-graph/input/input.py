@@ -6,6 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from .text_util import EOS_ID
+from .graph_util import *
 
 
 def input_fn(args, mode, question=None):
@@ -18,8 +19,10 @@ def input_fn(args, mode, question=None):
 		features = {
 			'src': 				tf.FixedLenSequenceFeature([],tf.int64, allow_missing=True),
 			'src_len': 			tf.FixedLenFeature([], tf.int64),
-			'kb': 				tf.FixedLenSequenceFeature([], tf.int64, allow_missing=True),
-			'kb_width': 		tf.FixedLenFeature([], tf.int64),
+			'kb_edges': 		tf.FixedLenSequenceFeature([], tf.int64, allow_missing=True),
+			'kb_edges_len': 	tf.FixedLenFeature([], tf.int64),
+			'kb_nodes': 		tf.FixedLenSequenceFeature([], tf.int64, allow_missing=True),
+			'kb_nodes_len': 	tf.FixedLenFeature([], tf.int64),
 			'label': 			tf.FixedLenFeature([], tf.int64)
 		})
 	)
@@ -33,7 +36,7 @@ def input_fn(args, mode, question=None):
 	d = d.map(lambda i: ({
 		"src": 				i["src"],
 		"src_len": 			i["src_len"],
-		"knowledge_base": 	tf.reshape(i["kb"], [-1, args["kb_width"]]), # as_2D_shape(i["kb_width"])
+		"knowledge_base": 	tf.reshape(i["kb_nodes"], [-1, args["kb_width"]]), # as_2D_shape(i["kb_width"]),
 	}, i["label"]))
 
 

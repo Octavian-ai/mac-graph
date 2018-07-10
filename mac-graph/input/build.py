@@ -27,15 +27,17 @@ def generate_record(args, vocab, doc):
 	if label >= args["answer_classes"]:
 		raise ValueError("Label greater than answer classes")
 
-	graph = graph_to_table(args, vocab, doc["graph"])
+	nodes, edges = graph_to_table(args, vocab, doc["graph"])
 
-	logger.debug(f"Record: {label}={vocab.ids_to_string([label])}, {q}={vocab.ids_to_string(q)}, {[vocab.ids_to_string(g) for g in graph]}")
+	logger.debug(f"Record: {label}={vocab.ids_to_string([label])}, {q}={vocab.ids_to_string(q)}, {[vocab.ids_to_string(g) for g in nodes]}")
 
 	feature = {
 		"src": 				tf.train.Feature(int64_list=tf.train.Int64List(value=q)),
 		"src_len": 			int64_feature(len(q)),
-		"kb": 				tf.train.Feature(int64_list=tf.train.Int64List(value=graph.flatten())),
-		"kb_width": 		int64_feature(args["kb_width"]),
+		"kb_edges": 		tf.train.Feature(int64_list=tf.train.Int64List(value=edges.flatten())),
+		"kb_edges_len": 	int64_feature(edges.shape[0]),
+		"kb_nodes": 		tf.train.Feature(int64_list=tf.train.Int64List(value=nodes.flatten())),
+		"kb_nodes_len": 	int64_feature(nodes.shape[0]),		
 		"label": 			int64_feature(label),
 	}
 

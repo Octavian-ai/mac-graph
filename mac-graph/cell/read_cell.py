@@ -6,7 +6,7 @@ from ..util import *
 from ..attention import *
 
 
-def read_from_graph(args, features, vocab_embedding, query, mask):
+def read_from_graph(args, features, vocab_embedding, query, mask, name="read_from_graph"):
 	"""Perform attention based read from table
 
 	@param W_score is for testing/debug purposes so you can easily inject the score fn you'd like. The code will default to a variable normally
@@ -14,7 +14,7 @@ def read_from_graph(args, features, vocab_embedding, query, mask):
 	@returns read_data
 	"""
 
-	with tf.variable_scope("read_from_graph"):
+	with tf.name_scope(name):
 
 		# --------------------------------------------------------------------------
 		# Constants and validations
@@ -43,7 +43,7 @@ def read_from_graph(args, features, vocab_embedding, query, mask):
 		# Do lookup via attention
 		# --------------------------------------------------------------------------
 
-		output = attention(query, emb_kb, mask)
+		output = attention(args, query, emb_kb, mask, use_dense=False)
 		return output
 
 
