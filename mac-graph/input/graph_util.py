@@ -3,7 +3,7 @@ import numpy as np
 
 from .text_util import *
 
-NODE_PROPS = ["name", "cleanliness"]
+NODE_PROPS = ["name", "cleanliness", "music", "architecture", "size", "has_rail", "disabled_access"]
 EDGE_PROPS = ["line_name"]
 
 
