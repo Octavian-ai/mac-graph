@@ -60,20 +60,17 @@ def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 
 	"""
 
+	# --------------------------------------------------------------------------
+	# Generate query
+	# --------------------------------------------------------------------------
+
 	assert_shape(in_memory_state, [args["bus_width"]])
 	assert_shape(in_control,      [args["bus_width"]])
 
 	in_all = tf.concat([in_memory_state, in_control], -1)
-	w = args["embed_width"] * args["kb_width"]
+	query = tf.layers.dense(in_all, args["embed_width"] * args["kb_width"], activation=tf.nn.tanh)
 
-	query = tf.layers.dense(in_all, w, activation=tf.nn.tanh)
-	# query = tf.layers.dense(query,  w, activation=tf.nn.tanh)
-
-	# mask  = tf.layers.dense(in_all, w, activation=tf.nn.tanh)
-	# mask  = tf.layers.dense(mask,   w, activation=tf.nn.tanh)
-	mask = None
-
-	read_data = read_from_graph(args, features, vocab_embedding, query, mask)
+	read_data = read_from_graph(args, features, vocab_embedding, query)
 
 	# --------------------------------------------------------------------------
 	# Shrink results

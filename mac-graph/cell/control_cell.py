@@ -18,7 +18,6 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 	"""
 	with tf.name_scope("control_cell"):
 
-
 		in_control_state = dynamic_assert_shape(in_control_state, 
 			[ features["d_batch_size"], args["bus_width"] ]
 		)
@@ -33,5 +32,6 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 		)
 
 		control_out = attention(args, question_token_query, in_question_tokens)
+		
 		return control_out
 
