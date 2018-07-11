@@ -69,8 +69,9 @@ def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 	query = tf.layers.dense(in_all, w, activation=tf.nn.tanh)
 	# query = tf.layers.dense(query,  w, activation=tf.nn.tanh)
 
-	mask  = tf.layers.dense(in_all, w, activation=tf.nn.tanh)
+	# mask  = tf.layers.dense(in_all, w, activation=tf.nn.tanh)
 	# mask  = tf.layers.dense(mask,   w, activation=tf.nn.tanh)
+	mask = None
 
 	read_data = read_from_graph(args, features, vocab_embedding, query, mask)
 
@@ -78,7 +79,7 @@ def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 	# Shrink results
 	# --------------------------------------------------------------------------
 
-	read_data = tf.layers.dense(read_data, args["bus_width"], name="data_read_shrink")
+	read_data = tf.layers.dense(read_data, args["bus_width"], name="data_read_shrink", activation=tf.nn.tanh)
 	read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["bus_width"]])
 
 

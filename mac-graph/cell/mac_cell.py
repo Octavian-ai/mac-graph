@@ -53,11 +53,14 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		in_control_state, in_memory_state = state
 
 		out_memory_state = in_memory_state
-		out_control_state = in_control_state
+
+		# out_control_state = in_control_state
+		out_control_state = tf.layers.dense(self.question_state, self.args["bus_width"], activation=tf.nn.tanh)
+		
 
 		# out_control_state = control_cell(self.args, self.features, 
 		# 	in_control_state, self.question_state, self.question_tokens)
-		
+
 		# data_read = read_cell(self.args, self.features, 
 		# 	in_memory_state, out_control_state, self.vocab_embedding)
 		
@@ -67,17 +70,32 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		# output = output_unit(self.args, self.features,
 		# 	self.question_state, out_memory_state)
 
-		w = self.args["kb_width"] * self.args["embed_width"]
+		args = self.args
+		features = self.features
+		question_state = self.question_state
+		vocab_embedding = self.vocab_embedding
 
-		query = deeep(self.question_state, w)
-		mask = deeep(self.question_state, w)
+		kb_full_width = args["kb_width"] * args["embed_width"]
+		
+		# query = tf.layers.dense(query, kb_full_width, activation=tf.nn.tanh)
 
-		tf.summary.image("query", tf.reshape(query, [-1, self.args["kb_width"], self.args["embed_width"], 1]))
-		tf.summary.image("mask",  tf.reshape(mask,  [-1, self.args["kb_width"], self.args["embed_width"], 1]))
+		# mask  = tf.layers.dense(question_state, kb_full_width, activation=tf.nn.tanh)
+		# mask  = tf.layers.dense(mask, kb_full_width, activation=tf.nn.tanh)
+		mask = None
 
-		output = read_from_graph(self.args, self.features, self.vocab_embedding, query, mask)
-		output = deeep(output, w, 1)
-		output = deeep(output, self.args["answer_classes"], 1)
+		# tf.summary.image("query", tf.reshape(query, [-1, args["kb_width"], args["embed_width"] ,1]) )
+		# tf.summary.image("mask",  tf.reshape(mask,  [-1, args["kb_width"], args["embed_width"] ,1]) )
+
+		read = read_cell(self.args, self.features, 
+			in_memory_state, out_control_state, self.vocab_embedding)
+
+		# read = read_from_graph(args, features, vocab_embedding, query, mask)
+		# tf.summary.image("read",  tf.reshape(read,  [-1, args["kb_width"], args["embed_width"] ,1]) )
+
+		# read = tf.layers.dense(read, kb_full_width, activation=tf.nn.tanh)
+		logits = tf.layers.dense(read, args["answer_classes"])
+		output = logits
+		
 
 		return output, (out_control_state, out_memory_state)
 

@@ -43,25 +43,10 @@ def model_fn(features, labels, mode, params):
 	
 	question_tokens, question_state = encode_input(args, features, vocab_embedding)
 
-	kb_full_width = args["kb_width"] * args["embed_width"]
-	query = tf.layers.dense(question_state, kb_full_width, activation=tf.nn.tanh)
-	query = tf.layers.dense(query, kb_full_width, activation=tf.nn.tanh)
-
-	mask  = tf.layers.dense(question_state, kb_full_width, activation=tf.nn.tanh)
-	mask  = tf.layers.dense(mask, kb_full_width, activation=tf.nn.tanh)
-
-	tf.summary.image("query", tf.reshape(query, [-1, args["kb_width"], args["embed_width"] ,1]) )
-	tf.summary.image("mask",  tf.reshape(mask,  [-1, args["kb_width"], args["embed_width"] ,1]) )
-
-	read = read_from_graph(args, features, vocab_embedding, query, mask)
-	tf.summary.image("read",  tf.reshape(read,  [-1, args["kb_width"], args["embed_width"] ,1]) )
-	read = tf.layers.dense(read, kb_full_width, activation=tf.nn.tanh)
-	logits = tf.layers.dense(read, args["answer_classes"])
-
-	# logits = execute_reasoning(args, features, labels,
-	# 	question_tokens=question_tokens, 
-	# 	question_state=question_state,
-	# 	vocab_embedding=vocab_embedding)
+	logits = execute_reasoning(args, features, labels,
+		question_tokens=question_tokens, 
+		question_state=question_state,
+		vocab_embedding=vocab_embedding)
 
 	# --------------------------------------------------------------------------
 	# Calc loss
