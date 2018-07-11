@@ -3,7 +3,7 @@ import tensorflow as tf
 
 from ..util import *
 
-def write_cell(args, in_memory_state, in_data_read, in_control):
+def memory_cell(args, in_memory_state, in_data_read, in_control):
 
 	assert_shape(in_memory_state, [args["bus_width"]])
 	assert_shape(in_data_read,    [args["bus_width"]])

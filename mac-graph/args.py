@@ -26,8 +26,8 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--num-input-layers',	   type=int, default=2,    help="How many input layers are in the english encoding LSTM stack")
 	parser.add_argument('--limit', 				   type=int, default=None, help="How many rows of input data to train on")
 	parser.add_argument('--answer-classes',	       type=int, default=32,  help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
-	parser.add_argument('--max-decode-iterations', type=int, default=1)
-	parser.add_argument('--max-steps',             type=int, default=50000)
+	parser.add_argument('--max-decode-iterations', type=int, default=4)
+	parser.add_argument('--max-steps',             type=int, default=70000)
 
 
 	parser.add_argument('--max-gradient-norm',     type=float, default=4.0)

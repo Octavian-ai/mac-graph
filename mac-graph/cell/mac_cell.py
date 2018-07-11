@@ -2,21 +2,10 @@
 import tensorflow as tf
 
 from .read_cell import *
-from .write_cell import *
+from .memory_cell import *
 from .control_cell import *
+from .output_cell import *
 from ..util import *
-
-def output_unit(args, features, in_question_state, in_memory_state):
-
-	v = tf.concat([in_question_state, in_memory_state], -1)
-
-	# v = tf.layers.dense(v, args["bus_width"], activation=tf.nn.relu)
-	v = tf.layers.dense(v, args["answer_classes"], activation=tf.nn.tanh)
-	v = tf.layers.dense(v, args["answer_classes"])
-
-	# Don't do softmax here because the loss fn will apply it
-
-	return v
 
 
 
@@ -58,10 +47,10 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		read = read_cell(self.args, self.features, 
 			in_memory_state, out_control_state, self.vocab_embedding)
 		
-		out_memory_state = write_cell(self.args, 
+		out_memory_state = memory_cell(self.args, 
 			in_memory_state, read, out_control_state)
 		
-		output = output_unit(self.args, self.features,
+		output = output_cell(self.args, self.features,
 			self.question_state, out_memory_state)	
 
 		return output, (out_control_state, out_memory_state)
