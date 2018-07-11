@@ -33,16 +33,5 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 		)
 
 		control_out = attention(args, question_token_query, in_question_tokens)
-
-		# Hack to let the question state through if wanted
-		control_out = tf.layers.dense(
-			tf.concat([
-				control_out, 
-				tf.layers.dense(in_question_state, args["bus_width"], activation=tf.nn.tanh)
-			], -1)
-		, args["bus_width"])
-
-
-
 		return control_out
 

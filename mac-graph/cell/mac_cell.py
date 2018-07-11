@@ -4,7 +4,7 @@ import tensorflow as tf
 from .read_cell import *
 from .write_cell import *
 from .control_cell import *
-
+from ..util import *
 
 def output_unit(args, features, in_question_state, in_memory_state):
 
@@ -52,17 +52,32 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 		in_control_state, in_memory_state = state
 
-		out_control_state = control_cell(self.args, self.features, 
-			in_control_state, self.question_state, self.question_tokens)
+		out_memory_state = in_memory_state
+		out_control_state = in_control_state
+
+		# out_control_state = control_cell(self.args, self.features, 
+		# 	in_control_state, self.question_state, self.question_tokens)
 		
-		data_read = read_cell(self.args, self.features, 
-			in_memory_state, out_control_state, self.vocab_embedding)
+		# data_read = read_cell(self.args, self.features, 
+		# 	in_memory_state, out_control_state, self.vocab_embedding)
 		
-		out_memory_state = write_cell(self.args, 
-			in_memory_state, data_read, out_control_state)
+		# out_memory_state = write_cell(self.args, 
+		# 	in_memory_state, data_read, out_control_state)
 		
-		output = output_unit(self.args, self.features,
-			self.question_state, out_memory_state)
+		# output = output_unit(self.args, self.features,
+		# 	self.question_state, out_memory_state)
+
+		w = self.args["kb_width"] * self.args["embed_width"]
+
+		query = deeep(self.question_state, w)
+		mask = deeep(self.question_state, w)
+
+		tf.summary.image("query", tf.reshape(query, [-1, self.args["kb_width"], self.args["embed_width"], 1]))
+		tf.summary.image("mask",  tf.reshape(mask,  [-1, self.args["kb_width"], self.args["embed_width"], 1]))
+
+		output = read_from_graph(self.args, self.features, self.vocab_embedding, query, mask)
+		output = deeep(output, w, 1)
+		output = deeep(output, self.args["answer_classes"], 1)
 
 		return output, (out_control_state, out_memory_state)
 

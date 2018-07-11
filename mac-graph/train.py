@@ -19,6 +19,10 @@ def train(args):
 if __name__ == "__main__":
 	tf.logging.set_verbosity(tf.logging.DEBUG)
 	args = get_args()
+
+	train_size = sum(1 for _ in tf.python_io.tf_record_iterator(args["train_input_path"]))
+	tf.logging.debug(f"Training on {train_size} records")
+
 	train(args)
 
 

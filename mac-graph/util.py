@@ -53,3 +53,9 @@ def minimize_clipped(optimizer, value, max_gradient_norm):
 	return optimizer.apply_gradients(zip(clipped_gradients, var), global_step=global_step)
 
 
+# Quick way to throw in some deep dense action
+def deeep(tensor, width, n=2):
+	for i in range(n):
+		tensor = tf.layers.dense(tensor, width, activation=tf.nn.tanh)
+	return tensor
+
