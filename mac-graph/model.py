@@ -67,17 +67,29 @@ def model_fn(features, labels, mode, params):
 
 
 	# --------------------------------------------------------------------------
+	# Predictions
+	# --------------------------------------------------------------------------
+	
+	if mode in [tf.estimator.ModeKeys.PREDICT, tf.estimator.ModeKeys.EVAL]:
+
+		predicted_labels = tf.argmax(tf.nn.softmax(logits), axis=-1)
+
+		predictions = {
+			"predicted_label": predicted_labels,
+			"actual_label": features["label"],
+			"src": features["src"],
+		}
+
+	# --------------------------------------------------------------------------
 	# Eval metrics
 	# --------------------------------------------------------------------------
 	
-	if mode ==  tf.estimator.ModeKeys.EVAL:
-
-		predictions = tf.argmax(tf.nn.softmax(logits), axis=-1)
+	if mode == tf.estimator.ModeKeys.EVAL:
 
 		eval_metric_ops = {
-			"accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions),
+			"accuracy": tf.metrics.accuracy(labels=labels, predictions=predicted_labels),
 			"accuracy_per_class": tf.metrics.mean_per_class_accuracy(
-				labels=labels, predictions=predictions, num_classes=args["answer_classes"]),
+				labels=labels, predictions=predicted_labels, num_classes=args["answer_classes"]),
 		}
 
 		eval_hooks = [FloydHubMetricHook(eval_metric_ops)]

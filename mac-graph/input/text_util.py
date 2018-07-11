@@ -1,6 +1,7 @@
 
 from collections import Counter
 import tensorflow as tf
+import numpy as np
 from typing import List, Set
 import re
 import string
@@ -92,8 +93,14 @@ class Vocab(object):
 		except ValueError:
 			return UNK_ID
 
+	def inverse_lookup(self, value):
+		try:
+			return self.table[value]
+		except IndexError:
+			return UNK
+
 	def ids_to_string(self, line):
-		return ' '.join([self.table[i] for i in line])
+		return ' '.join([self.inverse_lookup(i) for i in line])
 
 	def string_to_ids(self, line):
 		return [self.lookup(i) for i in line.split(' ')]
@@ -116,6 +123,11 @@ class Vocab(object):
 		line = self.expand_unknowns(line)
 		line = self.string_to_ids(line)
 		return line
+
+	def bytes_to_string(self, p):
+		decode_utf8 = np.vectorize(lambda v: v.decode("utf-8"))
+		p = decode_utf8(p)
+		return ids_to_string(p)
 
 
 

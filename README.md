@@ -19,10 +19,36 @@ $ pipenv shell
 
 ### Prediction
 
-Why not try out the model by having it answer your questions?
-**Not yet built.**
+You can watch the model predict values from the hold-back data:
+```shell
+$ python -m mac-graph.predict
 
+predicted_label: shabby
+actual_label: derilict
+src: How <space> clean <space> is <space> 3 ? <unk> <eos> <eos>
+-------
+predicted_label: small
+actual_label: medium-sized
+src: How <space> big <space> is <space> 4 ? <unk> <eos> <eos>
+-------
+predicted_label: medium-sized
+actual_label: tiny
+src: How <space> big <space> is <space> 7 ? <unk> <eos> <eos>
+-------
+predicted_label: True
+actual_label: True
+src: Does <space> 1 <space> have <space> rail <space> connections ? <unk>
+-------
+predicted_label: True
+actual_label: False
+src: Does <space> 0 <space> have <space> rail <space> connections ? <unk>
+-------
+predicted_label: victorian
+actual_label: victorian
+src: What <space> architectural <space> style <space> is <space> 1 ? <unk>
+```
 
+**TODO: Get it predicting from your typed input** 
 
 ### Building the data
 
