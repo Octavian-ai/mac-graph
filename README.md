@@ -51,10 +51,11 @@ Let's build a model. (Note, this requires training data from the previous sectio
 python -m mac-graph.train
 ```
 
-Running too slow? Fan spinning too much? Use [FloydHub](https://docs.floydhub.com/guides/basics/install/) with this magic shiney button:
+Running too slow? Fan spinning too much? Use [FloydHub](https://docs.floydhub.com/guides/basics/install/) with this magic button:
+
 [![Run on FloydHub](https://static.floydhub.com/button/button.svg)](https://floydhub.com/run)
 
-or just invoke with `floyd run`
+Or manually run on FloydHub with `floyd run`
 
 ### Testing
 
