@@ -11,7 +11,7 @@ def output_unit(args, features, in_question_state, in_memory_state):
 	v = tf.concat([in_question_state, in_memory_state], -1)
 
 	# v = tf.layers.dense(v, args["bus_width"], activation=tf.nn.relu)
-	v = tf.layers.dense(v, args["answer_classes"], activation=tf.nn.tanh)
+	# v = tf.layers.dense(v, args["answer_classes"], activation=tf.nn.tanh)
 	v = tf.layers.dense(v, args["answer_classes"], activation=tf.nn.tanh)
 
 	# Don't do softmax here because the loss fn will apply it
@@ -52,21 +52,19 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 		in_control_state, in_memory_state = state
 
-		out_memory_state = in_memory_state
-
 		out_control_state = control_cell(self.args, self.features, 
 			in_control_state, self.question_state, self.question_tokens)
 
-		data_read = read_cell(self.args, self.features, 
+		read = read_cell(self.args, self.features, 
 			in_memory_state, out_control_state, self.vocab_embedding)
 		
-		# out_memory_state = write_cell(self.args, 
-		# 	in_memory_state, data_read, out_control_state)
+		out_memory_state = write_cell(self.args, 
+			in_memory_state, read, out_control_state)
 		
 		# output = output_unit(self.args, self.features,
 		# 	self.question_state, out_memory_state)
 
-		output = tf.layers.dense(data_read, self.args["answer_classes"])
+		output = tf.layers.dense(out_memory_state, self.args["answer_classes"])
 		
 
 		return output, (out_control_state, out_memory_state)
