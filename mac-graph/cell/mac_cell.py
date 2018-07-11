@@ -12,7 +12,7 @@ def output_unit(args, features, in_question_state, in_memory_state):
 
 	# v = tf.layers.dense(v, args["bus_width"], activation=tf.nn.relu)
 	# v = tf.layers.dense(v, args["answer_classes"], activation=tf.nn.tanh)
-	v = tf.layers.dense(v, args["answer_classes"], activation=tf.nn.tanh)
+	v = tf.layers.dense(v, args["answer_classes"])
 
 	# Don't do softmax here because the loss fn will apply it
 
@@ -61,11 +61,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		out_memory_state = write_cell(self.args, 
 			in_memory_state, read, out_control_state)
 		
-		# output = output_unit(self.args, self.features,
-		# 	self.question_state, out_memory_state)
-
-		output = tf.layers.dense(out_memory_state, self.args["answer_classes"])
-		
+		output = output_unit(self.args, self.features,
+			self.question_state, out_memory_state)	
 
 		return output, (out_control_state, out_memory_state)
 
