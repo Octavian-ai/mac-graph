@@ -3,8 +3,11 @@ The MacGraph network. An Irish attempt at intelligence. Puns not included.
 
 This codebase implements graph question answering, using CLEVR-graph as the dataset and MACnets as the reasoning architecture.
 
+**This is a work in progress!!**
+
 
 ## Running the code
+
 ### Prerequisites
 
 We use the pipenv dependency/virtualenv framework:
@@ -17,7 +20,6 @@ $ pipenv shell
 ### Prediction
 
 Why not try out the model by having it answer your questions?
-
 **Not yet built.**
 
 
@@ -49,13 +51,10 @@ Let's build a model. (Note, this requires training data from the previous sectio
 python -m mac-graph.train
 ```
 
-Running too slow? Fan spinning too much? Use FloydHub: 
-```shell
-pip install floyd-cli
-floyd login
-floyd init mac-graph-clone
-./floyd-train.sh`
-```
+Running too slow? Fan spinning too much? Use [FloydHub](https://docs.floydhub.com/guides/basics/install/) with this magic shiney button:
+[![Run on FloydHub](https://static.floydhub.com/button/button.svg)](https://floydhub.com/run)
+
+or just invoke with `floyd run`
 
 ### Testing
 

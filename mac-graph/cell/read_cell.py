@@ -47,7 +47,7 @@ def read_from_graph(args, features, vocab_embedding, query, mask=None, name="rea
 		# Do lookup via attention
 		# --------------------------------------------------------------------------
 
-		output = attention(args, query, emb_kb, mask, use_dense=False)
+		output = attention(args, query, emb_kb, mask)
 		return output
 
 
@@ -64,9 +64,13 @@ def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 	assert_shape(in_control,      [args["bus_width"]])
 
 	in_all = tf.concat([in_memory_state, in_control], -1)
+	w = args["embed_width"] * args["kb_width"]
 
-	query = tf.layers.dense(in_all, args["embed_width"] * args["kb_width"])
-	mask  = tf.layers.dense(in_all, args["embed_width"] * args["kb_width"])
+	query = tf.layers.dense(in_all, w, activation=tf.nn.tanh)
+	# query = tf.layers.dense(query,  w, activation=tf.nn.tanh)
+
+	mask  = tf.layers.dense(in_all, w, activation=tf.nn.tanh)
+	# mask  = tf.layers.dense(mask,   w, activation=tf.nn.tanh)
 
 	read_data = read_from_graph(args, features, vocab_embedding, query, mask)
 

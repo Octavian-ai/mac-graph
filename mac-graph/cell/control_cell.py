@@ -2,6 +2,7 @@
 import tensorflow as tf
 
 from ..util import *
+from ..attention import *
 
 def control_cell(args, features, in_control_state, in_question_state, in_question_tokens):
 	"""
@@ -17,9 +18,6 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 	"""
 	with tf.name_scope("control_cell"):
 
-		# --------------------------------------------------------------------------
-		# Compute query to compare across question_tokens
-		# --------------------------------------------------------------------------
 
 		in_control_state = dynamic_assert_shape(in_control_state, 
 			[ features["d_batch_size"], args["bus_width"] ]
@@ -28,34 +26,23 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 		# Skipping tf.dense(in_question_state, name="control_question_t"+iteration_step)
 		all_input = tf.concat([in_control_state, in_question_state], -1, name="all_input")
 
-		question_token_cmp = tf.layers.dense(all_input, args["bus_width"])
-		question_token_cmp = dynamic_assert_shape(question_token_cmp, 
+		question_token_query = tf.layers.dense(all_input, args["bus_width"], activation=tf.nn.tanh)
+		question_token_query = tf.layers.dense(question_token_query, args["bus_width"], activation=tf.nn.tanh)
+		question_token_query = dynamic_assert_shape(question_token_query, 
 			[ features["d_batch_size"], args["bus_width"] ]
 		)
 
-		question_token_dot = tf.expand_dims(question_token_cmp, 1) * in_question_tokens
-		question_token_dot = dynamic_assert_shape(question_token_dot, 
-			[ features["d_batch_size"], features["d_seq_len"], args["bus_width"] ]
-		)
+		control_out = attention(args, question_token_query, in_question_tokens)
 
-		# --------------------------------------------------------------------------
-		# Attention across question_tokens
-		# --------------------------------------------------------------------------
-	
-		question_token_scores = tf.layers.dense(question_token_dot, 1, name="question_token_scores")
-		question_token_scores = tf.squeeze(question_token_scores, axis=-1)
-		question_token_scores = tf.nn.softmax(question_token_scores)
-		question_token_scores = dynamic_assert_shape(question_token_scores,
-			[ features["d_batch_size"], features["d_seq_len"] ]
-		)
+		# Hack to let the question state through if wanted
+		control_out = tf.layers.dense(
+			tf.concat([
+				control_out, 
+				tf.layers.dense(in_question_state, args["bus_width"], activation=tf.nn.tanh)
+			], -1)
+		, args["bus_width"])
 
 
-		# Weighted sum
-		control_out = tf.expand_dims(question_token_scores, -1) * in_question_tokens
-		control_out = tf.reduce_sum(control_out, axis=1) # Sum along seq_len dimension
-		control_out = dynamic_assert_shape(control_out, 
-			[ features["d_batch_size"], args["bus_width"]]
-		)
 
 		return control_out
 

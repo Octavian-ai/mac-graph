@@ -1,0 +1,7 @@
+machine: gpu
+input:
+  - source: davidmack/datasets/mac-graph
+    destination: /input
+env: tensorflow-1.8
+description: MacGraph iterative graph reasoning
+command: python -m mac-graph.train --max-steps 4000 --input-dir /input --output-dir /output --model-dir /output/model
