@@ -3,7 +3,7 @@ The MacGraph network. An Irish attempt at intelligence. Puns not included.
 
 This codebase implements graph question answering, using CLEVR-graph as the dataset and MACnets as the reasoning architecture.
 
-**This is a work in progress!!**
+<img src="https://media.giphy.com/media/S5JSwmQYHOGMo/giphy.gif"/>
 
 
 ## Running the code
