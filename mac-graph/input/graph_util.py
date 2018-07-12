@@ -33,12 +33,12 @@ def graph_to_table(args, vocab, graph):
 
 	def node_to_vec(node):
 		return np.array([
-			vocab.lookup(node[key]) for key in NODE_PROPS
+			vocab.lookup(pretokenize_json(node[key])) for key in NODE_PROPS
 		])
 
 	def edge_to_vec(edge):
 		return np.array([
-			vocab.lookup(edge[key]) for key in EDGE_PROPS
+			vocab.lookup(pretokenize_json(edge[key])) for key in EDGE_PROPS
 		])
 
 	def pack(row):

@@ -29,7 +29,6 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--max-decode-iterations', type=int, default=8)
 	parser.add_argument('--max-steps',             type=int, default=70000)
 
-
 	parser.add_argument('--max-gradient-norm',     type=float, default=4.0)
 	parser.add_argument('--learning-rate',         type=float, default=0.001)
 	parser.add_argument('--dropout',               type=float, default=0.2)
