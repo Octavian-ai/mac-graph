@@ -19,10 +19,11 @@ def int64_feature(value):
 def bytes_feature(value):
 	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
+def string_feature(value):
+	return conv_bytes_feature(value)
+
 def conv_bytes_feature(value):
 	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.compat.as_bytes(value)]))
-
-
 
 
 # --------------------------------------------------------------------------

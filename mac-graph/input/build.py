@@ -39,6 +39,7 @@ def generate_record(args, vocab, doc):
 		"kb_nodes": 		tf.train.Feature(int64_list=tf.train.Int64List(value=nodes.flatten())),
 		"kb_nodes_len": 	int64_feature(nodes.shape[0]),		
 		"label": 			int64_feature(label),
+		"type_string":		string_feature(doc["question"]["type_string"]),
 	}
 
 	example = tf.train.Example(features=tf.train.Features(feature=feature))
@@ -65,6 +66,7 @@ if __name__ == "__main__":
 		logger.info("Build vocab")
 		vocab = Vocab.build(args, lambda i:gqa_to_tokens(args, i))
 		logger.debug(f"vocab: {vocab.table}")
+		print()
 	else:
 		vocab = Vocab.load(args)
 

@@ -77,7 +77,8 @@ def model_fn(features, labels, mode, params):
 		predictions = {
 			"predicted_label": predicted_labels,
 			"actual_label": features["label"],
-			"src": features["src"],
+			"src":  features["src"],
+			"type_string": features["type_string"],
 		}
 
 	# --------------------------------------------------------------------------

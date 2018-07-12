@@ -23,7 +23,8 @@ def input_fn(args, mode, question=None):
 			'kb_edges_len': 	tf.FixedLenFeature([], tf.int64),
 			'kb_nodes': 		tf.FixedLenSequenceFeature([], tf.int64, allow_missing=True),
 			'kb_nodes_len': 	tf.FixedLenFeature([], tf.int64),
-			'label': 			tf.FixedLenFeature([], tf.int64)
+			'label': 			tf.FixedLenFeature([], tf.int64),
+			'type_string':		tf.FixedLenSequenceFeature([], tf.string, allow_missing=True),
 		})
 	)
 
@@ -38,6 +39,7 @@ def input_fn(args, mode, question=None):
 		"src_len": 			i["src_len"],
 		"label":			i["label"], # For prediction comparion
 		"knowledge_base": 	tf.reshape(i["kb_nodes"], [-1, args["kb_width"]]), # as_2D_shape(i["kb_width"]),
+		"type_string":		i["type_string"], # For prediction stats
 	}, i["label"]))
 
 
@@ -53,10 +55,11 @@ def input_fn(args, mode, question=None):
 		# the source and target row sizes; these are scalars.
 		padded_shapes=(
 			{
-				"src": tf.TensorShape([None]),
-				"src_len": tf.TensorShape([]), 
-				"label": tf.TensorShape([]), 
-				"knowledge_base": tf.TensorShape([None, args["kb_width"]])
+				"src": 				tf.TensorShape([None]),
+				"src_len": 			tf.TensorShape([]), 
+				"label": 			tf.TensorShape([]), 
+				"knowledge_base": 	tf.TensorShape([None, args["kb_width"]]),
+				"type_string": 		tf.TensorShape([None]),
 			},
 			tf.TensorShape([]),	# label
 		),
@@ -70,6 +73,7 @@ def input_fn(args, mode, question=None):
 				"src_len": 			tf.cast(0, tf.int64), # unused
 				"label": 			tf.cast(0, tf.int64), # unused
 				"knowledge_base": 	tf.cast(0, tf.int64), # unused
+				"type_string": 		tf.cast("", tf.string), # unused
 			},
 			tf.cast(0, tf.int64) # label (unused)
 		)

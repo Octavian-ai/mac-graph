@@ -67,6 +67,14 @@ def pretokenize_english(text):
 	return text
 
 
+def bytes_to_string(p):
+	if len(p) == 0:
+		return ""
+
+	decode_utf8 = np.vectorize(lambda v: v.decode("utf-8"))
+	p = decode_utf8(p)
+	s = ''.join(p)
+	return s
 
 
 # --------------------------------------------------------------------------
@@ -124,10 +132,24 @@ class Vocab(object):
 		line = self.string_to_ids(line)
 		return line
 
-	def bytes_to_string(self, p):
-		decode_utf8 = np.vectorize(lambda v: v.decode("utf-8"))
-		p = decode_utf8(p)
-		return ids_to_string(p)
+
+	def prediction_value_to_string(self, v):
+		"""Rough 'n' ready get me the hell outta here fn. 
+		Tries its best to deal with the mess of datatypes that end up coming out"""
+
+		if isinstance(v, np.int64):
+			s = self.inverse_lookup(v)
+		elif isinstance(v, np.ndarray):
+			if v.dtype == np.int64:
+				s = self.ids_to_string(v)
+			elif v.dtype == object:
+				s = bytes_to_string(v)
+			else:
+				raise ValueError()
+		else:
+			raise ValueError()
+
+		return s
 
 
 

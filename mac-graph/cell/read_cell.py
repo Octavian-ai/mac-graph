@@ -41,7 +41,7 @@ def read_from_graph(args, features, vocab_embedding, query, mask=None, name="rea
 
 		emb_kb = tf.reshape(emb_kb, [-1, d_kb_len, kb_full_width])
 
-		tf.summary.image("db", tf.expand_dims(emb_kb, -1))
+		# tf.summary.image("db", tf.expand_dims(emb_kb, -1))
 
 		# --------------------------------------------------------------------------
 		# Do lookup via attention
@@ -60,27 +60,30 @@ def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 
 	"""
 
-	# --------------------------------------------------------------------------
-	# Generate query
-	# --------------------------------------------------------------------------
 
-	assert_shape(in_memory_state, [args["bus_width"]])
-	assert_shape(in_control,      [args["bus_width"]])
+	with tf.name_scope("read_cell"):
 
-	in_all = tf.concat([in_memory_state, in_control], -1)
-	query = tf.layers.dense(in_all, args["embed_width"] * args["kb_width"], activation=tf.nn.tanh)
+		# --------------------------------------------------------------------------
+		# Generate query
+		# --------------------------------------------------------------------------
 
-	read_data = read_from_graph(args, features, vocab_embedding, query)
+		assert_shape(in_memory_state, [args["bus_width"]])
+		assert_shape(in_control,      [args["bus_width"]])
 
-	# --------------------------------------------------------------------------
-	# Shrink results
-	# --------------------------------------------------------------------------
+		in_all = tf.concat([in_memory_state, in_control], -1)
+		query = tf.layers.dense(in_all, args["embed_width"] * args["kb_width"], activation=tf.nn.tanh)
 
-	read_data = tf.layers.dense(read_data, args["bus_width"], name="data_read_shrink", activation=tf.nn.tanh)
-	read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["bus_width"]])
+		read_data = read_from_graph(args, features, vocab_embedding, query)
+
+		# --------------------------------------------------------------------------
+		# Shrink results
+		# --------------------------------------------------------------------------
+
+		read_data = tf.layers.dense(read_data, args["bus_width"], name="data_read_shrink", activation=tf.nn.tanh)
+		read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["bus_width"]])
 
 
-	return read_data
+		return read_data
 
 
 

@@ -39,21 +39,24 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				the arity and shapes of `state`.
 		"""
 
-		in_control_state, in_memory_state = state
 
-		out_control_state = control_cell(self.args, self.features, 
-			in_control_state, self.question_state, self.question_tokens)
+		with tf.variable_scope("mac_cell", reuse=tf.AUTO_REUSE):
 
-		read = read_cell(self.args, self.features, 
-			in_memory_state, out_control_state, self.vocab_embedding)
-		
-		out_memory_state = memory_cell(self.args, 
-			in_memory_state, read, out_control_state)
-		
-		output = output_cell(self.args, self.features,
-			self.question_state, out_memory_state)	
+			in_control_state, in_memory_state = state
 
-		return output, (out_control_state, out_memory_state)
+			out_control_state = control_cell(self.args, self.features, 
+				in_control_state, self.question_state, self.question_tokens)
+
+			read = read_cell(self.args, self.features, 
+				in_memory_state, out_control_state, self.vocab_embedding)
+			
+			out_memory_state = memory_cell(self.args, 
+				in_memory_state, read, out_control_state)
+			
+			output = output_cell(self.args, self.features,
+				self.question_state, out_memory_state)	
+
+			return output, (out_control_state, out_memory_state)
 
 
 
