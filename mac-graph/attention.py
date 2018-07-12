@@ -46,7 +46,7 @@ def attention(args, query, database, mask=None, use_dense=False):
 	scores = tf.matmul(db, tf.expand_dims(q, 2))
 	scores = tf.nn.softmax(scores, axis=1)
 	scores = dynamic_assert_shape(scores, (batch_size, seq_len, 1))
-	# tf.summary.image("attn_scores", tf.reshape(scores, [batch_size, 1, seq_len, 1]))
+	tf.summary.image("attention", tf.reshape(scores, [batch_size, 1, seq_len, 1]), max_outputs=1, family="Attention")
 
 	weighted_db = db * scores
 

@@ -72,8 +72,10 @@ def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 
 		in_all = tf.concat([in_memory_state, in_control], -1)
 		query = tf.layers.dense(in_all, args["embed_width"] * args["kb_width"], activation=tf.nn.tanh)
+		mask  = tf.layers.dense(in_all, args["embed_width"] * args["kb_width"], activation=tf.nn.tanh)
 
-		read_data = read_from_graph(args, features, vocab_embedding, query)
+
+		read_data = read_from_graph(args, features, vocab_embedding, query, mask)
 
 		# --------------------------------------------------------------------------
 		# Shrink results

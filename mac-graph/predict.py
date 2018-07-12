@@ -20,9 +20,7 @@ def predict(args):
 
 	for p in predictions:
 
-		print(p["type_string"])
 		type_string = vocab.prediction_value_to_string(p["type_string"])
-		print(type_string)
 
 		if p["predicted_label"] == p["actual_label"]:
 			stats["correct"] += 1

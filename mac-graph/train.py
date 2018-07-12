@@ -4,6 +4,7 @@ import tensorflow as tf
 from .model import model_fn
 from .input import gen_input_fn
 from .args import get_args
+from .predict import predict
 
 def train(args):
 
@@ -24,6 +25,7 @@ if __name__ == "__main__":
 	tf.logging.debug(f"Training on {train_size} records")
 
 	train(args)
+	predict(args)
 
 
 
