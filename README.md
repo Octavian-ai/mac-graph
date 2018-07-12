@@ -54,16 +54,20 @@ src: What <space> architectural <space> style <space> is <space> 1 ? <unk>
 
 To train the model, you need training data.
 
-If you want to skip this step, you can download the pre-built data from [our public dataset](https://www.floydhub.com/davidmack/datasets/mac-graph).
+If you want to skip this step, you can download the pre-built data from [our public dataset](https://www.floydhub.com/davidmack/datasets/mac-graph). This repo is a work in progress so the format is still in flux.
 
 The underlying data (a Graph-Question-Answer YAML from CLEVR-graph) must be pre-processed for training and evaluation. The YAML is transformed into TensorFlow records, and split into test-train-predict tranches.
 
-First [download](https://storage.googleapis.com/octavian-static/download/english2cypher/gqa.zip) (or generate!) a `gqa.yaml`.
+First [generate](https://github.com/Octavian-ai/clevr-graph) a `gqa.yaml` with the command:
+```shell
+clevr-graph$ python -m gqa.generate --count 50000 --quick --only-type StationProperty --int-names
+cp data/gqa-some-id.yaml ../mac-graph/input_raw/gqa.yaml
+```
 
-Then build the data:
+Then build (that is, pre-process into tfrecords) the data:
 
 ```shell
-python -m mac-graph.input.build
+mac-graph$ python -m mac-graph.input.build --gqa-path input_raw/gqa.yaml
 ```
 
 #### Arguments
@@ -98,7 +102,7 @@ Also the model construction functions contain many assertions to help validate c
 
 ### Acknowledgements
 
-Thanks to Drew Hudson and Christopher Manning for publishing their work, [Compositional Attention Networks for Machine Reasoning](https://arxiv.org/abs/1803.03067) upon which this is based. Also, thank you [coffee](https://thebarn.de/) and [techno](https://soundcloud.com/ostgutton-official/berghain-07-function) for your company.
+Thanks to Drew Hudson and Christopher Manning for publishing their work, [Compositional Attention Networks for Machine Reasoning](https://arxiv.org/abs/1803.03067) upon which this is based. 
 
 ### A limerick
 
