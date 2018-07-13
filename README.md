@@ -5,7 +5,6 @@ This codebase implements graph question answering, using [CLEVR-graph](https://g
 
 <img src="https://media.giphy.com/media/S5JSwmQYHOGMo/giphy.gif"/>
 
-
 ## Running the code
 
 ### Prerequisites
