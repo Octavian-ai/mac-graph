@@ -1,6 +1,6 @@
 
 # Directories and files to ignore when uploading code to floyd
-./input/
+./input_data/
 ./output/
 
 

@@ -9,7 +9,7 @@ def get_args(extend=lambda parser:None):
 
 	parser.add_argument('--log-level',  type=str, default='INFO')
 	parser.add_argument('--output-dir', type=str, default="./output")
-	parser.add_argument('--input-dir',  type=str, default="./input/processed")
+	parser.add_argument('--input-dir',  type=str, default="./input_data/processed")
 
 	parser.add_argument('--model-dir',      type=str, default="./output/model")
 	parser.add_argument('--warm-start-dir', type=str, default=None)
@@ -41,6 +41,8 @@ def get_args(extend=lambda parser:None):
 		args[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
 
 	args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
+	args["types_path"] = os.path.join(args["input_dir"], "types.yaml")
+
 
 
 	return args

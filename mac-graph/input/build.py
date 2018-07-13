@@ -1,6 +1,8 @@
 
 import tensorflow as tf
 import pathlib
+from collections import Counter
+import yaml
 
 from .graph_util import *
 from .text_util import *
@@ -56,7 +58,7 @@ if __name__ == "__main__":
 
 	def extras(parser):
 		parser.add_argument('--skip-vocab', action='store_true')
-		parser.add_argument('--gqa-path', type=str, default="./input/raw/gqa.yaml")
+		parser.add_argument('--gqa-path', type=str, default="./input_data/raw/gqa.yaml")
 
 	args = get_args(extras)
 
@@ -75,15 +77,22 @@ if __name__ == "__main__":
 
 	written = 0
 
+	types = Counter()
+
 	logger.info("Generate TFRecords")
 	with Partitioner(args) as p:
 		for i in read_gqa(args):
 			try:
 				p.write(generate_record(args, vocab, i))
+				types[i["question"]["type_string"]] += 1
 				written += 1
 			except ValueError as ex:
 				logger.debug(ex)
 				pass
+
+
+	with tf.gfile.GFile(args["types_path"], "w") as file:
+		yaml.dump(dict(types), file)
 
 	logger.info(f"Wrote {written} TFRecords")
 
