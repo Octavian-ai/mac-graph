@@ -6,7 +6,7 @@ from ..util import *
 from ..attention import *
 
 
-def read_from_graph(args, features, vocab_embedding, query, mask=None, name="read_from_graph"):
+def read_from_kb(args, features, vocab_embedding, in_all, noun="node"):
 	"""Perform attention based read from table
 
 	@param W_score is for testing/debug purposes so you can easily inject the score fn you'd like. The code will default to a variable normally
@@ -14,40 +14,42 @@ def read_from_graph(args, features, vocab_embedding, query, mask=None, name="rea
 	@returns read_data
 	"""
 
-	with tf.name_scope(name):
+	with tf.name_scope(f"read_{noun}_from_kb"):
 
 		# --------------------------------------------------------------------------
 		# Constants and validations
 		# --------------------------------------------------------------------------
 
-		kb_full_width = args["kb_node_width"] * args["embed_width"]
-		d_kb_len = tf.shape(features["kb_nodes"])[1]
+		kb = features[f"kb_{noun}s"]
+		kb_width = args[f"kb_{noun}_width"]
+		kb_full_width = kb_width * args["embed_width"]
 
-		assert_shape(query, [kb_full_width])
-		assert features["kb_nodes"].shape[-1] == args["kb_node_width"]
-
-		if mask is not None:
-			assert_shape(mask,  [kb_full_width])
-			assert mask.dtype == tf.float32, "Mask should be floats between 0 and 1"
-
+		d_kb_len = tf.shape(kb)[1]
+		assert kb.shape[-1] == kb_width
 
 		# --------------------------------------------------------------------------
 		# Embed graph tokens
 		# --------------------------------------------------------------------------
 		
-		emb_kb = tf.nn.embedding_lookup(vocab_embedding, features["kb_nodes"])
+		emb_kb = tf.nn.embedding_lookup(vocab_embedding, kb)
 		emb_kb = dynamic_assert_shape(emb_kb, 
-			[features["d_batch_size"], d_kb_len, args["kb_node_width"], args["embed_width"]])
+			[features["d_batch_size"], d_kb_len, kb_width, args["embed_width"]])
 
 		emb_kb = tf.reshape(emb_kb, [-1, d_kb_len, kb_full_width])
 
-		# tf.summary.image("db", tf.expand_dims(emb_kb, -1))
+		# --------------------------------------------------------------------------
+		# Generate mask and query
+		# --------------------------------------------------------------------------
+		
+		query = tf.layers.dense(in_all, kb_full_width, activation=tf.nn.tanh)
+		mask  = tf.layers.dense(in_all, kb_full_width, activation=tf.nn.tanh)
 
 		# --------------------------------------------------------------------------
 		# Do lookup via attention
 		# --------------------------------------------------------------------------
 
 		output = attention(emb_kb, query, mask)
+		output = dynamic_assert_shape(output, [features["d_batch_size"], kb_full_width])
 		return output
 
 
@@ -71,11 +73,8 @@ def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 		assert_shape(in_control,      [args["bus_width"]])
 
 		in_all = tf.concat([in_memory_state, in_control], -1)
-		query = tf.layers.dense(in_all, args["embed_width"] * args["kb_node_width"], activation=tf.nn.tanh)
-		mask  = tf.layers.dense(in_all, args["embed_width"] * args["kb_node_width"], activation=tf.nn.tanh)
-
-
-		read_data = read_from_graph(args, features, vocab_embedding, query, mask)
+		
+		read_data = read_from_kb(args, features, vocab_embedding, in_all)
 
 		# --------------------------------------------------------------------------
 		# Shrink results
