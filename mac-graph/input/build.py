@@ -30,7 +30,7 @@ def generate_record(args, vocab, doc):
 
 	nodes, edges = graph_to_table(args, vocab, doc["graph"])
 
-	logger.debug(f"Record: {label}={vocab.ids_to_string([label])}, {q}={vocab.ids_to_string(q)}, {[vocab.ids_to_string(g) for g in nodes]}")
+	logger.debug(f"Record: {vocab.ids_to_string([label])}, {vocab.ids_to_string(q)}, {[vocab.ids_to_string(g) for g in nodes]}, {[vocab.ids_to_string(g) for g in edges]}")
 
 	feature = {
 		"src": 				tf.train.Feature(int64_list=tf.train.Int64List(value=q)),
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
 	def extras(parser):
 		parser.add_argument('--skip-vocab', action='store_true')
-		parser.add_argument('--gqa-path', type=str, default="./input_raw/gqa.yaml")
+		parser.add_argument('--gqa-path', type=str, default="./input/raw/gqa.yaml")
 
 	args = get_args(extras)
 

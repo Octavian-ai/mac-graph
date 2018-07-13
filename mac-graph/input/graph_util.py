@@ -59,12 +59,12 @@ def graph_to_table(args, vocab, graph):
 	nodes = [pack(node_to_vec(i), args["kb_node_width"]) for i in graph["nodes"]]
 
 	for edge in graph["edges"]:
-		s1 = node_to_vec(node_lookup[edge["station1"]])
-		s2 = node_to_vec(node_lookup[edge["station2"]])
+		s1 = node_to_vec(node_lookup[edge["station1"]], ['name'])
+		s2 = node_to_vec(node_lookup[edge["station2"]], ['name'])
 		e = edge_to_vec(edge)
 
 		row = np.concatenate((s1, e, s2), -1)
-		row = pack(row, args["kb_node_width"])
+		row = pack(row, args["kb_edge_width"])
 		
 		edges.append(row)
 

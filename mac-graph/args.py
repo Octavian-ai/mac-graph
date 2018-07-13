@@ -9,7 +9,7 @@ def get_args(extend=lambda parser:None):
 
 	parser.add_argument('--log-level',  type=str, default='INFO')
 	parser.add_argument('--output-dir', type=str, default="./output")
-	parser.add_argument('--input-dir',  type=str, default="./input_processed")
+	parser.add_argument('--input-dir',  type=str, default="./input/processed")
 
 	parser.add_argument('--model-dir',      type=str, default="./output/model")
 	parser.add_argument('--warm-start-dir', type=str, default=None)
@@ -18,8 +18,8 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--predict-holdback', type=float, default=0.005)
 
 	parser.add_argument('--batch-size',            type=int, default=32,  help="Number of items in a full batch")
-	parser.add_argument('--kb-node-width',         type=int, default=7,   help="Width of entry into graph table aka the knowledge base")
-	parser.add_argument('--kb-edge-width',         type=int, default=7,   help="Width of entry into graph table aka the knowledge base")
+	parser.add_argument('--kb-node-width',         type=int, default=7,   help="Width of node entry into graph table aka the knowledge base")
+	parser.add_argument('--kb-edge-width',         type=int, default=3,   help="Width of edge entry into graph table aka the knowledge base")
 	parser.add_argument('--bus-width',	           type=int, default=64,  help="The width of instructions and cell memory")
 	parser.add_argument('--embed-width',	       type=int, default=64,  help="The width of token embeddings")
 	parser.add_argument('--vocab-size',	           type=int, default=64,  help="How many different words are in vocab")

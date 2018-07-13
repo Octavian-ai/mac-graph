@@ -48,21 +48,32 @@ def pretokenize_general(text):
 	text = text.replace(" ", f" {SPACE} ")
 	return text
 
+def detokenize_general(text):
+	text = text.replace(f" {SPACE} ", " ")
+	return text
+
 
 def pretokenize_json(value):
 	if isinstance(value, str) or isinstance(value, bool) or isinstance(value, int):
 		return str(value)
-
 	raise ValueError("Unsupported json value type")
 
 
-
 def pretokenize_english(text):
-
 	text = pretokenize_general(text)
 
 	for p in ENGLISH_PUNCTUATION:
 		text = text.replace(p, f" {p} ")
+
+	text = re.sub(r'\s*$', '', text)
+	return text
+
+
+def detokenize_english(text):
+	text = detokenize_general(text)
+
+	for p in ENGLISH_PUNCTUATION:
+		text = text.replace(f" {p} ", p)
 
 	return text
 
@@ -130,6 +141,11 @@ class Vocab(object):
 		line = pretokenize_english(line)
 		line = self.expand_unknowns(line)
 		line = self.string_to_ids(line)
+		return line
+
+	def ids_to_english(self, line):
+		line = self.ids_to_string(line)
+		line = detokenize_english(line)
 		return line
 
 

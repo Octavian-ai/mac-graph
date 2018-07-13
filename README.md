@@ -74,7 +74,9 @@ mac-graph$ python -m mac-graph.input.build --gqa-path input_raw/gqa.yaml
 
 ### Training
 
-Let's build a model. (Note, this requires training data from the previous section)
+Let's build a model. (Note, this requires training data from the previous section).
+
+General advice is to have at least 40,000 training records (e.g. build from 50,000 GQA triples)
 
 ```shell
 python -m mac-graph.train

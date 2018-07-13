@@ -1,9 +1,8 @@
 
 # Directories and files to ignore when uploading code to floyd
-./input_processed_station_prop
-./input_processed
-./output
-./input_raw
+./input/
+./output/
+
 
 __pycache__
 
