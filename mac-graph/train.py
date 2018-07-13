@@ -8,7 +8,10 @@ from .predict import predict
 
 def train(args):
 
-	estimator = tf.estimator.Estimator(model_fn, model_dir=args["model_dir"], params=args)
+	estimator = tf.estimator.Estimator(model_fn, 
+		model_dir=args["model_dir"],
+		warm_start_from=args["warm_start_dir"],
+		params=args)
 
 	train_spec = tf.estimator.TrainSpec(input_fn=gen_input_fn(args, "train"), max_steps=args["max_steps"])
 	eval_spec  = tf.estimator.EvalSpec(input_fn=gen_input_fn(args, "eval"))
