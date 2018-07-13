@@ -38,7 +38,7 @@ def input_fn(args, mode, question=None):
 		"src": 				i["src"],
 		"src_len": 			i["src_len"],
 		"label":			i["label"], # For prediction comparion
-		"knowledge_base": 	tf.reshape(i["kb_nodes"], [-1, args["kb_width"]]), # as_2D_shape(i["kb_width"]),
+		"kb_nodes": 		tf.reshape(i["kb_nodes"], [-1, args["kb_node_width"]]), # as_2D_shape(i["kb_node_width"]),
 		"type_string":		i["type_string"], # For prediction stats
 	}, i["label"]))
 
@@ -58,7 +58,7 @@ def input_fn(args, mode, question=None):
 				"src": 				tf.TensorShape([None]),
 				"src_len": 			tf.TensorShape([]), 
 				"label": 			tf.TensorShape([]), 
-				"knowledge_base": 	tf.TensorShape([None, args["kb_width"]]),
+				"kb_nodes": 		tf.TensorShape([None, args["kb_node_width"]]),
 				"type_string": 		tf.TensorShape([None]),
 			},
 			tf.TensorShape([]),	# label
@@ -72,7 +72,7 @@ def input_fn(args, mode, question=None):
 				"src": 				tf.cast(EOS_ID, tf.int64), 
 				"src_len": 			tf.cast(0, tf.int64), # unused
 				"label": 			tf.cast(0, tf.int64), # unused
-				"knowledge_base": 	tf.cast(0, tf.int64), # unused
+				"kb_nodes": 		tf.cast(0, tf.int64), # unused
 				"type_string": 		tf.cast("", tf.string), # unused
 			},
 			tf.cast(0, tf.int64) # label (unused)
@@ -83,7 +83,7 @@ def input_fn(args, mode, question=None):
 	d = d.map(lambda features, labels: ({
 		**features, 
 		"d_batch_size": tf.shape(features["src"])[0], 
-		"d_seq_len": tf.shape(features["src"])[1],
+		"d_seq_len":    tf.shape(features["src"])[1],
 	}, labels))
 	
 	return d

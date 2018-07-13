@@ -42,10 +42,10 @@ def graph_to_table(args, vocab, graph):
 		])
 
 	def pack(row):
-		if len(row) > args["kb_width"]:
-			return row[0:args["kb_width"]]
-		elif len(row) < args["kb_width"]:
-			return np.pad(row, (0,args["kb_width"] - len(row)), 'constant', constant_values=0)
+		if len(row) > args["kb_node_width"]:
+			return row[0:args["kb_node_width"]]
+		elif len(row) < args["kb_node_width"]:
+			return np.pad(row, (0,args["kb_node_width"] - len(row)), 'constant', constant_values=0)
 		else:
 			return row
 
@@ -63,7 +63,7 @@ def graph_to_table(args, vocab, graph):
 		row = np.concatenate((s1, e, s2), -1)
 		row = pack(row)
 		
-		assert len(row) == args["kb_width"], "Extraction functions didn't create the right length of knowledge table data"
+		assert len(row) == args["kb_node_width"], "Extraction functions didn't create the right length of knowledge table data"
 
 		edges.append(row)
 

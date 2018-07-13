@@ -20,11 +20,11 @@ def read_from_graph(args, features, vocab_embedding, query, mask=None, name="rea
 		# Constants and validations
 		# --------------------------------------------------------------------------
 
-		kb_full_width = args["kb_width"] * args["embed_width"]
-		d_kb_len = tf.shape(features["knowledge_base"])[1]
+		kb_full_width = args["kb_node_width"] * args["embed_width"]
+		d_kb_len = tf.shape(features["kb_nodes"])[1]
 
 		assert_shape(query, [kb_full_width])
-		assert features["knowledge_base"].shape[-1] == args["kb_width"]
+		assert features["kb_nodes"].shape[-1] == args["kb_node_width"]
 
 		if mask is not None:
 			assert_shape(mask,  [kb_full_width])
@@ -35,9 +35,9 @@ def read_from_graph(args, features, vocab_embedding, query, mask=None, name="rea
 		# Embed graph tokens
 		# --------------------------------------------------------------------------
 		
-		emb_kb = tf.nn.embedding_lookup(vocab_embedding, features["knowledge_base"])
+		emb_kb = tf.nn.embedding_lookup(vocab_embedding, features["kb_nodes"])
 		emb_kb = dynamic_assert_shape(emb_kb, 
-			[features["d_batch_size"], d_kb_len, args["kb_width"], args["embed_width"]])
+			[features["d_batch_size"], d_kb_len, args["kb_node_width"], args["embed_width"]])
 
 		emb_kb = tf.reshape(emb_kb, [-1, d_kb_len, kb_full_width])
 
@@ -71,8 +71,8 @@ def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 		assert_shape(in_control,      [args["bus_width"]])
 
 		in_all = tf.concat([in_memory_state, in_control], -1)
-		query = tf.layers.dense(in_all, args["embed_width"] * args["kb_width"], activation=tf.nn.tanh)
-		mask  = tf.layers.dense(in_all, args["embed_width"] * args["kb_width"], activation=tf.nn.tanh)
+		query = tf.layers.dense(in_all, args["embed_width"] * args["kb_node_width"], activation=tf.nn.tanh)
+		mask  = tf.layers.dense(in_all, args["embed_width"] * args["kb_node_width"], activation=tf.nn.tanh)
 
 
 		read_data = read_from_graph(args, features, vocab_embedding, query, mask)
