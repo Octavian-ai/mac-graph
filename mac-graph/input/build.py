@@ -1,5 +1,6 @@
 
 import tensorflow as tf
+import pathlib
 
 from .graph_util import *
 from .text_util import *
@@ -61,6 +62,8 @@ if __name__ == "__main__":
 
 	logging.basicConfig()
 	logger.setLevel(args["log_level"])
+
+	pathlib.Path(args["input_dir"]).mkdir(parents=True, exist_ok=True)
 
 	if not args["skip_vocab"]:
 		logger.info("Build vocab")

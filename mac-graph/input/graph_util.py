@@ -31,29 +31,32 @@ def gqa_to_tokens(args, gqa):
 
 def graph_to_table(args, vocab, graph):
 
-	def node_to_vec(node):
+	def node_to_vec(node, props=NODE_PROPS):
 		return np.array([
-			vocab.lookup(pretokenize_json(node[key])) for key in NODE_PROPS
+			vocab.lookup(pretokenize_json(node[key])) for key in props
 		])
 
-	def edge_to_vec(edge):
+	def edge_to_vec(edge, props=EDGE_PROPS):
 		return np.array([
-			vocab.lookup(pretokenize_json(edge[key])) for key in EDGE_PROPS
+			vocab.lookup(pretokenize_json(edge[key])) for key in props
 		])
 
-	def pack(row):
-		if len(row) > args["kb_node_width"]:
-			return row[0:args["kb_node_width"]]
-		elif len(row) < args["kb_node_width"]:
-			return np.pad(row, (0,args["kb_node_width"] - len(row)), 'constant', constant_values=0)
+	def pack(row, width):
+		if len(row) > width:
+			r = row[0:width]
+		elif len(row) < width:
+			r = np.pad(row, (0, width - len(row)), 'constant', constant_values=UNK_ID)
 		else:
-			return row
+			r = row
+
+		assert len(r) == width, "Extraction functions didn't create the right length of knowledge table data"
+		return r
 
 	edges = []
 
 	node_lookup = {i["id"]: i for i in graph["nodes"]}
 
-	nodes = [pack(node_to_vec(i)) for i in graph["nodes"]]
+	nodes = [pack(node_to_vec(i), args["kb_node_width"]) for i in graph["nodes"]]
 
 	for edge in graph["edges"]:
 		s1 = node_to_vec(node_lookup[edge["station1"]])
@@ -61,10 +64,8 @@ def graph_to_table(args, vocab, graph):
 		e = edge_to_vec(edge)
 
 		row = np.concatenate((s1, e, s2), -1)
-		row = pack(row)
+		row = pack(row, args["kb_node_width"])
 		
-		assert len(row) == args["kb_node_width"], "Extraction functions didn't create the right length of knowledge table data"
-
 		edges.append(row)
 
 	return np.array(nodes), np.array(edges)
