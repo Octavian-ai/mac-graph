@@ -66,7 +66,7 @@ def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 	with tf.name_scope("read_cell"):
 
 		# --------------------------------------------------------------------------
-		# Generate query
+		# Read data
 		# --------------------------------------------------------------------------
 
 		assert_shape(in_memory_state, [args["bus_width"]])
@@ -74,7 +74,9 @@ def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 
 		in_all = tf.concat([in_memory_state, in_control], -1)
 		
-		read_data = read_from_kb(args, features, vocab_embedding, in_all)
+		read_node = read_from_kb(args, features, vocab_embedding, in_all, "node")
+		read_edge = read_from_kb(args, features, vocab_embedding, in_all, "edge")
+		read_data = tf.concat([read_node, read_edge], -1)
 
 		# --------------------------------------------------------------------------
 		# Shrink results

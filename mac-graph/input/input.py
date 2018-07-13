@@ -11,35 +11,44 @@ from .graph_util import *
 
 def input_fn(args, mode, question=None):
 
-	d = tf.data.TFRecordDataset([args[f"{mode}_input_path"]])
+	# --------------------------------------------------------------------------
+	# Read TFRecords
+	# --------------------------------------------------------------------------
 
-	# Parse
+	d = tf.data.TFRecordDataset([args[f"{mode}_input_path"]])
 	d = d.map(lambda i: tf.parse_single_example(
 		i,
 		features = {
 			'src': 				tf.FixedLenSequenceFeature([],tf.int64, allow_missing=True),
 			'src_len': 			tf.FixedLenFeature([], tf.int64),
+			
 			'kb_edges': 		tf.FixedLenSequenceFeature([], tf.int64, allow_missing=True),
 			'kb_edges_len': 	tf.FixedLenFeature([], tf.int64),
 			'kb_nodes': 		tf.FixedLenSequenceFeature([], tf.int64, allow_missing=True),
 			'kb_nodes_len': 	tf.FixedLenFeature([], tf.int64),
+			
 			'label': 			tf.FixedLenFeature([], tf.int64),
 			'type_string':		tf.FixedLenSequenceFeature([], tf.string, allow_missing=True),
 		})
 	)
 
-	def as_2D_shape(f):
-		return tf.concat([
-			[tf.constant(-1, dtype=tf.int64)],
-			[f]
-		], 0)
+	# --------------------------------------------------------------------------
+	# Layout input data
+	# --------------------------------------------------------------------------
 
 	d = d.map(lambda i: ({
+		# Text input
 		"src": 				i["src"],
 		"src_len": 			i["src_len"],
-		"label":			i["label"], # For prediction comparion
-		"kb_nodes": 		tf.reshape(i["kb_nodes"], [-1, args["kb_node_width"]]), # as_2D_shape(i["kb_node_width"]),
-		"type_string":		i["type_string"], # For prediction stats
+
+		# Knowledge base
+		"kb_nodes": 		tf.reshape(i["kb_nodes"], [-1, args["kb_node_width"]]),
+		"kb_edges": 		tf.reshape(i["kb_edges"], [-1, args["kb_edge_width"]]),
+
+		# Prediction stats
+		"label":			i["label"], 
+		"type_string":		i["type_string"],
+		
 	}, i["label"]))
 
 
@@ -47,6 +56,8 @@ def input_fn(args, mode, question=None):
 		d = d.take(args["limit"])
 
 	d = d.shuffle(args["batch_size"]*10)
+
+	zero64 = tf.cast(0, tf.int64) 
 
 	d = d.padded_batch(
 		args["batch_size"],
@@ -57,8 +68,9 @@ def input_fn(args, mode, question=None):
 			{
 				"src": 				tf.TensorShape([None]),
 				"src_len": 			tf.TensorShape([]), 
-				"label": 			tf.TensorShape([]), 
 				"kb_nodes": 		tf.TensorShape([None, args["kb_node_width"]]),
+				"kb_edges": 		tf.TensorShape([None, args["kb_edge_width"]]),
+				"label": 			tf.TensorShape([]), 
 				"type_string": 		tf.TensorShape([None]),
 			},
 			tf.TensorShape([]),	# label
@@ -70,16 +82,17 @@ def input_fn(args, mode, question=None):
 		padding_values=(
 			{
 				"src": 				tf.cast(EOS_ID, tf.int64), 
-				"src_len": 			tf.cast(0, tf.int64), # unused
-				"label": 			tf.cast(0, tf.int64), # unused
-				"kb_nodes": 		tf.cast(0, tf.int64), # unused
-				"type_string": 		tf.cast("", tf.string), # unused
+				"src_len": 			zero64, # unused
+				"kb_nodes": 		zero64, 
+				"kb_edges": 		zero64, 
+				"label":			zero64,
+				"type_string": 		tf.cast("", tf.string),
 			},
-			tf.cast(0, tf.int64) # label (unused)
+			zero64 # label (unused)
 		)
 	)
 
-	# Add dynamic dimensions for convenience (e.g. shape assertions)
+	# Add dynamic dimensions for convenience (e.g. to do shape assertions)
 	d = d.map(lambda features, labels: ({
 		**features, 
 		"d_batch_size": tf.shape(features["src"])[0], 

@@ -19,7 +19,7 @@ def get_args(extend=lambda parser:None):
 
 	parser.add_argument('--batch-size',            type=int, default=32,  help="Number of items in a full batch")
 	parser.add_argument('--kb-node-width',         type=int, default=7,   help="Width of entry into graph table aka the knowledge base")
-	parser.add_argument('--kb-edge-width',         type=int, default=3,   help="Width of entry into graph table aka the knowledge base")
+	parser.add_argument('--kb-edge-width',         type=int, default=7,   help="Width of entry into graph table aka the knowledge base")
 	parser.add_argument('--bus-width',	           type=int, default=64,  help="The width of instructions and cell memory")
 	parser.add_argument('--embed-width',	       type=int, default=64,  help="The width of token embeddings")
 	parser.add_argument('--vocab-size',	           type=int, default=64,  help="How many different words are in vocab")
