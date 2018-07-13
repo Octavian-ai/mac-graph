@@ -91,11 +91,10 @@ def model_fn(features, labels, mode, params):
 		eval_metric_ops = {
 			"accuracy": tf.metrics.accuracy(labels=labels, predictions=predicted_labels),
 		}
-
+	
 		with tf.gfile.GFile(args["types_path"]) as file:
 			doc = yaml.load(file)
-			print(doc)
-			for type_string in doc:
+			for type_string in doc.keys():
 				eval_metric_ops["z_accuracy_"+type_string] = tf.metrics.accuracy(
 					labels=labels, 
 					predictions=predicted_labels, 
