@@ -1,7 +1,7 @@
 
 from .util import *
 
-def attention(args, query, database, mask=None, use_dense=False):
+def attention(database, query, mask=None, use_dense=False):
 	"""
 	Apply attention
 

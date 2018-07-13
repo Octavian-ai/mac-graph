@@ -47,7 +47,7 @@ def read_from_graph(args, features, vocab_embedding, query, mask=None, name="rea
 		# Do lookup via attention
 		# --------------------------------------------------------------------------
 
-		output = attention(args, query, emb_kb, mask)
+		output = attention(emb_kb, query, mask)
 		return output
 
 

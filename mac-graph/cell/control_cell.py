@@ -31,7 +31,7 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 			[ features["d_batch_size"], args["bus_width"] ]
 		)
 
-		control_out = attention(args, question_token_query, in_question_tokens)
+		control_out = attention(in_question_tokens, question_token_query)
 		
 		return control_out
 
