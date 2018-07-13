@@ -1,7 +1,7 @@
 # MacGraph
 The MacGraph network. An Irish attempt at intelligence. Puns not included.
 
-This codebase implements graph question answering, using CLEVR-graph as the dataset and MACnets as the reasoning architecture.
+This codebase implements graph question answering, using [CLEVR-graph](https://github.com/Octavian-ai/clevr-graph) as the dataset and [MACnets](https://arxiv.org/abs/1803.03067) as the reasoning architecture.
 
 <img src="https://media.giphy.com/media/S5JSwmQYHOGMo/giphy.gif"/>
 
