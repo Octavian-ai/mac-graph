@@ -26,10 +26,10 @@ def generate_record(args, vocab, doc):
 	label = vocab.lookup(pretokenize_json(doc["answer"]))
 
 	if label == UNK_ID:
-		raise ValueError("We're only including questions that have in-vocab answers")
+		raise ValueError(f"We're only including questions that have in-vocab answers ({doc['answer']})")
 
 	if label >= args["answer_classes"]:
-		raise ValueError("Label greater than answer classes")
+		raise ValueError(f"Label {label} greater than answer classes {args['answer_classes']}")
 
 	nodes, edges = graph_to_table(args, vocab, doc["graph"])
 
@@ -61,6 +61,7 @@ if __name__ == "__main__":
 
 	logging.basicConfig()
 	logger.setLevel(args["log_level"])
+	logging.getLogger("mac-graph.input.util").setLevel(args["log_level"])
 
 	pathlib.Path(args["input_dir"]).mkdir(parents=True, exist_ok=True)
 

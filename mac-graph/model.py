@@ -97,10 +97,11 @@ def model_fn(features, labels, mode, params):
 		with tf.gfile.GFile(args["types_path"]) as file:
 			doc = yaml.load(file)
 			for type_string in doc.keys():
-				eval_metric_ops["z_accuracy_"+type_string] = tf.metrics.accuracy(
-					labels=labels, 
-					predictions=predicted_labels, 
-					weights=tf.equal(features["type_string"], type_string))
+				if args["type_string_prefix"] is None or type_string.startswith(args["type_string_prefix"]):
+					eval_metric_ops["z_accuracy_"+type_string] = tf.metrics.accuracy(
+						labels=labels, 
+						predictions=predicted_labels, 
+						weights=tf.equal(features["type_string"], type_string))
 
 		eval_hooks = [FloydHubMetricHook(eval_metric_ops)]
 

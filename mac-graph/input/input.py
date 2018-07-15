@@ -56,8 +56,9 @@ def input_fn(args, mode, question=None):
 	if args["limit"] is not None:
 		d = d.take(args["limit"])
 
-	d = d.filter(lambda features, labels: 
-		tf_startswith(features["type_string"], args["type_string_prefix"]))
+	if args["type_string_prefix"] is not None:
+		d = d.filter(lambda features, labels: 
+			tf_startswith(features["type_string"], args["type_string_prefix"]))
 
 	d = d.shuffle(args["batch_size"]*10)
 
