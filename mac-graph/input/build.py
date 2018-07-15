@@ -3,11 +3,12 @@ import tensorflow as tf
 import pathlib
 from collections import Counter
 import yaml
+from tqdm import tqdm
 
 from .graph_util import *
 from .text_util import *
 from .util import *
-from ..args import *
+from .args import *
 
 import logging
 logger = logging.getLogger(__name__)
@@ -56,11 +57,7 @@ def generate_record(args, vocab, doc):
 
 if __name__ == "__main__":
 
-	def extras(parser):
-		parser.add_argument('--skip-vocab', action='store_true')
-		parser.add_argument('--gqa-path', type=str, default="./input_data/raw/gqa.yaml")
-
-	args = get_args(extras)
+	args = get_args()
 
 	logging.basicConfig()
 	logger.setLevel(args["log_level"])
@@ -81,7 +78,7 @@ if __name__ == "__main__":
 
 	logger.info("Generate TFRecords")
 	with Partitioner(args) as p:
-		for i in read_gqa(args):
+		for i in tqdm(read_gqa(args)):
 			try:
 				p.write(generate_record(args, vocab, i))
 				types[i["question"]["type_string"]] += 1

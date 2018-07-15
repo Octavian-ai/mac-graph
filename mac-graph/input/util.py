@@ -27,6 +27,13 @@ def conv_bytes_feature(value):
 
 
 # --------------------------------------------------------------------------
+# TF helpers
+# --------------------------------------------------------------------------
+
+def tf_startswith(tensor, prefix, axis=None):
+	return tf.reduce_all(tf.equal(tensor[:len(prefix)], prefix), axis=axis)
+
+# --------------------------------------------------------------------------
 # File readers and writers
 # --------------------------------------------------------------------------
 
@@ -36,13 +43,13 @@ def read_gqa(args):
 
 		ctr = 0
 
-		for i in tqdm(d):
+		for i in d:
 			if i is not None:
-				yield i
-				ctr += 1
-
-				if args["limit"] is not None and ctr >= args["limit"]:
-					return
+				if i["question"]["type_string"].startswith(args["type_string_prefix"]):
+					yield i
+					ctr += 1
+					if args["limit"] is not None and ctr >= args["limit"]:
+						return
 
 
 class Partitioner(object):

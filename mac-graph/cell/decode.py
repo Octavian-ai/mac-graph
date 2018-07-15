@@ -7,39 +7,54 @@ from ..util import *
 
 
 
-def dynamic_decode():
-	# label_seq: [batch_size, seq_len]
-	label_seq = tf.tile(tf.expand_dims(labels, 1), [0, args["max_decode_iterations"]])
-	assert_shape(label_seq, [args["max_decode_iterations"]])
+def dynamic_decode(args, features, labels, question_tokens, question_state, vocab_embedding):
+	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE) as decoder_scope:
 
-	# label_seq_len: [batch_size]
-	label_seq_len = tf.tile([args["max_decode_iterations"]], tf.shape(labels))
+		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
+		d_cell_initial = d_cell.zero_state(dtype=tf.float32, batch_size=features["d_batch_size"])
 
-	decoder_helper = tf.contrib.seq2seq.TrainingHelper(
-		label_seq, 
-		sequence_length=label_seq_len
-	)
+		# --------------------------------------------------------------------------
+		# Decoding handlers
+		# --------------------------------------------------------------------------
 
-	guided_decoder = tf.contrib.seq2seq.BasicDecoder(
-		d_cell,
-		decoder_helper,
-		d_cell_initial)
+		initialize_fn = lambda: (False, d_cell_initial)
+		sample_fn = lambda time, outputs, state: None
+		def next_inputs_fn(time, outputs, state, sample_ids):
+			# finished = tf.greater(tf.layers.dense(outputs, 1), 0.5)
+			finished = False
+			next_inputs = None
+			next_state = state
+			return (finished, next_inputs, next_state)
 
-	# 'outputs' is a tensor of shape [batch_size, max_time, cell.output_size]
-	decoded_outputs, decoded_state, decoded_sequence_lengths = tf.contrib.seq2seq.dynamic_decode(
-		guided_decoder,
-		swap_memory=True,
-		maximum_iterations=args["max_decode_iterations"],
-		scope=decoder_scope)
+		decoder_helper = tf.contrib.seq2seq.CustomHelper(
+			initialize_fn, sample_fn, next_inputs_fn
+		)
 
-	
-	# Take the final reasoning step output
-	final_output = decoded_outputs.rnn_output[:,-1,:]
-	assert_shape(final_output, [args["answer_classes"]])
+		decoder = tf.contrib.seq2seq.BasicDecoder(
+			d_cell,
+			decoder_helper,
+			d_cell_initial)
+
+		# --------------------------------------------------------------------------
+		# Do the decode!
+		# --------------------------------------------------------------------------
+		
+
+		# 'outputs' is a tensor of shape [batch_size, max_time, cell.output_size]
+		decoded_outputs, decoded_state, decoded_sequence_lengths = tf.contrib.seq2seq.dynamic_decode(
+			decoder,
+			swap_memory=True,
+			maximum_iterations=args["max_decode_iterations"],
+			scope=decoder_scope)
+
+		
+		# Take the final reasoning step output
+		final_output = decoded_outputs.rnn_output[:,-1,:]
+		assert_shape(final_output, [args["answer_classes"]])
+		return final_output
 
 
-
-def execute_reasoning(args, features, labels, question_tokens, question_state, vocab_embedding):
+def static_decode(args, features, labels, question_tokens, question_state, vocab_embedding):
 	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE) as decoder_scope:
 
 		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
@@ -55,5 +70,11 @@ def execute_reasoning(args, features, labels, question_tokens, question_state, v
 
 		return final_output
 
+
+def execute_reasoning(args, **kwargs):
+	if args["dynamic_decode"]:
+		return dynamic_decode(args, **kwargs)
+	else:
+		return static_decode(args, **kwargs)
 
 

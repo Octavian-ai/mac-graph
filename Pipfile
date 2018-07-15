@@ -15,6 +15,7 @@ tensorflow = "*"
 numpy = "*"
 pyyaml = "*"
 tqdm = "*"
+tableprint = "*"
 
 
 [requires]

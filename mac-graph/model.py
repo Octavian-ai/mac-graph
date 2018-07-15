@@ -44,7 +44,9 @@ def model_fn(features, labels, mode, params):
 	
 	question_tokens, question_state = encode_input(args, features, vocab_embedding)
 
-	logits = execute_reasoning(args, features, labels,
+	logits = execute_reasoning(args, 
+		features=features, 
+		labels=labels,
 		question_tokens=question_tokens, 
 		question_state=question_state,
 		vocab_embedding=vocab_embedding)

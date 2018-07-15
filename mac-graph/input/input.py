@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 from .text_util import EOS_ID
 from .graph_util import *
+from .util import tf_startswith
 
 
 def input_fn(args, mode, question=None):
@@ -54,6 +55,9 @@ def input_fn(args, mode, question=None):
 
 	if args["limit"] is not None:
 		d = d.take(args["limit"])
+
+	d = d.filter(lambda features, labels: 
+		tf_startswith(features["type_string"], args["type_string_prefix"]))
 
 	d = d.shuffle(args["batch_size"]*10)
 

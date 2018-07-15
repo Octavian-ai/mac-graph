@@ -5,6 +5,7 @@ import numpy as np
 from typing import List, Set
 import re
 import string
+from tqdm import tqdm
 
 import logging
 logger = logging.getLogger(__name__)
@@ -208,7 +209,7 @@ class Vocab(object):
 				if token not in ["", " ", "\n"]:
 					hits[token] += 1
 
-		for i in read_gqa(args):
+		for i in tqdm(read_gqa(args)):
 			add(gqa_to_tokens(i))
 
 		tokens = list()
