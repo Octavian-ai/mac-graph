@@ -14,8 +14,8 @@ This codebase implements graph question answering, using [CLEVR-graph](https://g
 		</tr>
 	</thead>
 	<tbody>
-		<tr><td>Basic MAC cell structure</td><td><strong>Complete</strong></td><td></td></tr>
-		<tr><td>Recall station (node) properties</td><td><strong>Complete</strong></td><td>99% accuracy on `--type-string-prefix StationProperty` questions</td></tr>
+		<tr><td>Basic MAC cell structure</td><td><strong>Complete</strong></td><td>Implemented as per paper, now diverging to achieve below objectives</td></tr>
+		<tr><td>Recall station (node) properties</td><td><strong>Complete</strong></td><td>99% accuracy on  StationProperty questions</td></tr>
 		<tr><td>Count length of shortest path between nodes</td><td><strong>In progress</strong></td><td>No capability better than random guessing</td></tr>
 		<tr><td>Find modal properties of lines</td><td>Not started</td><td>No observed capability</td></tr>
 		<tr><td>Count stations meeting criteria on lines</td><td>Not started</td><td>No observed capability</td></tr>
