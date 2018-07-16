@@ -3,5 +3,5 @@ input:
   - source: davidmack/datasets/mac-graph
     destination: /input
 env: tensorflow-1.8
-description: MacGraph iterative graph reasoning
+description: MacGraph iterative graph reasoning from Octavian.ai
 command: python -m mac-graph.train --input-dir /input --output-dir /output --model-dir /output/model

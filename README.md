@@ -1,7 +1,7 @@
 # MacGraph
 The MacGraph network. An Irish attempt at intelligence. Puns not included.
 
-This codebase implements graph question answering, using [CLEVR-graph](https://github.com/Octavian-ai/clevr-graph) as the dataset and [MACnets](https://arxiv.org/abs/1803.03067) as the reasoning architecture.
+This codebase implements graph question answering (GQA), using [CLEVR-graph](https://github.com/Octavian-ai/clevr-graph) as the dataset and [MACnets](https://arxiv.org/abs/1803.03067) as the reasoning architecture.
 
 
 ## Project status
@@ -75,22 +75,23 @@ To train the model, you need training data.
 
 If you want to skip this step, you can download the pre-built data from [our public dataset](https://www.floydhub.com/davidmack/datasets/mac-graph). This repo is a work in progress so the format is still in flux.
 
-The underlying data (a Graph-Question-Answer YAML from CLEVR-graph) must be pre-processed for training and evaluation. The YAML is transformed into TensorFlow records, and split into test-train-predict tranches.
+The underlying data (a Graph-Question-Answer YAML from CLEVR-graph) must be pre-processed for training and evaluation. The YAML is transformed into TensorFlow records, and split into train-evaluate-predict tranches.
 
 First [generate](https://github.com/Octavian-ai/clevr-graph) a `gqa.yaml` with the command:
 ```shell
-clevr-graph$ python -m gqa.generate --count 50000 --quick --only-type StationProperty --int-names
-cp data/gqa-some-id.yaml ../mac-graph/input_raw/gqa.yaml
+clevr-graph$ python -m gqa.generate --count 50000 --int-names
+cp data/gqa-some-id.yaml ../mac-graph/input_data/raw/gqa.yaml
 ```
-
-Then build (that is, pre-process into tfrecords) the data:
+Then build (that is, pre-process into a vocab table and tfrecords) the data:
 
 ```shell
-mac-graph$ python -m mac-graph.input.build --gqa-path input_raw/gqa.yaml
+mac-graph$ python -m mac-graph.input.build --gqa-path input_data/raw/gqa.yaml
 ```
 
-#### Arguments
+#### Arguments to build
  - `--limit N` will only read N records from the YAML and only output a total of N tf-records (split across three tranches)
+ - `--type-string-prefix StationProperty` will filter just questions with type string prefix "StationProperty"
+
 
 ### Training
 
@@ -121,9 +122,9 @@ Also the model construction functions contain many assertions to help validate c
 
 ## AOB
 
-### Acknowledgements
+### Acknowledgments
 
-Thanks to Drew Hudson and Christopher Manning for publishing their work, [Compositional Attention Networks for Machine Reasoning](https://arxiv.org/abs/1803.03067) upon which this is based. 
+Thanks to Drew Hudson and Christopher Manning for publishing their work, [Compositional Attention Networks for Machine Reasoning](https://arxiv.org/abs/1803.03067) upon which this is based. Thanks also to DeepMind for publishing their Differentiable Neural Computer results in Nature with a demonstration of that architecture solving graph problems, it is a reassurance that this endeavor is not ill-founded.
 
 ### A limerick
 
