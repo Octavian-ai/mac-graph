@@ -10,17 +10,17 @@ This codebase implements graph question answering, using [CLEVR-graph](https://g
 <table>
 	<thead>
 		<tr>
-			<th>Objective</th><th>Status</th>
+			<th>Objective</th><th>Status</th><th>Notes</th>
 		</tr>
 	</thead>
-	<<tbody>
-		<tr><td>Basic MAC cell structure</td><td><strong>Complete</strong></td></tr>
-		<tr><td>Recall station (node) properties</td><td><strong>Complete</strong>: 99% accuracy on `--type-string-prefix StationProperty` questions</td></tr>
-		<tr><td>Count length of shortest path between nodes</td><td><strong>In progress</strong>. No capability better than random guessing</td></tr>
-		<tr><td>Find modal properties of lines</td><td>Not started. No observed capability</td></tr>
-		<tr><td>Count stations meeting criteria on lines</td><td>Not started. No observed capability</td></tr>
-		<tr><td>Other line-based queries</td><td>Not started. No observed capability</td></tr>
-		<tr><td>List shortest routes</td><td>Not started. No capability</td></tr>
+	<tbody>
+		<tr><td>Basic MAC cell structure</td><td><strong>Complete</strong></td><td></td></tr>
+		<tr><td>Recall station (node) properties</td><td><strong>Complete</strong></td><td>99% accuracy on `--type-string-prefix StationProperty` questions</td></tr>
+		<tr><td>Count length of shortest path between nodes</td><td><strong>In progress</strong></td><td>No capability better than random guessing</td></tr>
+		<tr><td>Find modal properties of lines</td><td>Not started</td><td>No observed capability</td></tr>
+		<tr><td>Count stations meeting criteria on lines</td><td>Not started</td><td>No observed capability</td></tr>
+		<tr><td>Other line-based queries</td><td>Not started</td><td>No observed capability</td></tr>
+		<tr><td>List shortest routes</td><td>Not started</td><td>No capability</td></tr>
 	</tbody>
 </table>
 
