@@ -3,14 +3,13 @@ import tensorflow as tf
 import numpy as np
 from collections import Counter
 
-from .model import model_fn
-from .input import *
 from .args import get_args
-
+from .estimator import get_estimator
+from .input import *
 
 
 def predict(args):
-	estimator = tf.estimator.Estimator(model_fn, model_dir=args["model_dir"], params=args)
+	estimator = get_estimator(args)
 	predictions = estimator.predict(input_fn=gen_input_fn(args, "predict"))
 
 	vocab   = Vocab.load(args)

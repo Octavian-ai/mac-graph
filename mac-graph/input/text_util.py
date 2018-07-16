@@ -105,6 +105,9 @@ class Vocab(object):
 	def __iter__(self):
 		return iter(self.table)
 
+	def __len__(self):
+		return len(self.table)
+
 	# -------------------------------------------------------------------------- #
 
 	def lookup(self, value):

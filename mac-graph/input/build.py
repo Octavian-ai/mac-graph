@@ -73,26 +73,34 @@ if __name__ == "__main__":
 	else:
 		vocab = Vocab.load(args)
 
+	logger.info(f"Wrote {len(vocab)} vocab entries")
+
 	written = 0
 
-	types = Counter()
+	question_types = Counter()
+	answer_classes = Counter()
 
 	logger.info("Generate TFRecords")
 	with Partitioner(args) as p:
 		for i in tqdm(read_gqa(args)):
 			try:
 				p.write(generate_record(args, vocab, i))
-				types[i["question"]["type_string"]] += 1
+				question_types[i["question"]["type_string"]] += 1
+				answer_classes[i["answer"]] += 1
 				written += 1
 			except ValueError as ex:
 				logger.debug(ex)
 				pass
 
-
-	with tf.gfile.GFile(args["types_path"], "w") as file:
-		yaml.dump(dict(types), file)
-
 	logger.info(f"Wrote {written} TFRecords")
+
+	with tf.gfile.GFile(args["question_types_path"], "w") as file:
+		yaml.dump(dict(question_types), file)
+
+	with tf.gfile.GFile(args["answer_classes_path"], "w") as file:
+		yaml.dump(dict(answer_classes), file)
+
+	
 
 
 

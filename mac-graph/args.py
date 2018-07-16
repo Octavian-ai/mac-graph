@@ -59,7 +59,8 @@ def get_args(extend=lambda parser:None):
 		args[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
 
 	args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
-	args["types_path"] = os.path.join(args["input_dir"], "types.yaml")
+	args["question_types_path"] = os.path.join(args["input_dir"], "types.yaml")
+	args["answer_classes_path"] = os.path.join(args["input_dir"], "answer_classes.yaml")
 
 
 
