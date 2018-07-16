@@ -17,12 +17,18 @@ def dynamic_decode(args, features, labels, question_tokens, question_state, voca
 		# Decoding handlers
 		# --------------------------------------------------------------------------
 
-		initialize_fn = lambda: (False, d_cell_initial)
-		sample_fn = lambda time, outputs, state: None
+		finished_shape = tf.convert_to_tensor([features["d_batch_size"], 1])
+
+		initialize_fn = lambda: (
+			tf.fill(value=False, dims=finished_shape), # finished
+			tf.constant(0),  # inputs
+		)
+
+		sample_fn = lambda time, outputs, state: tf.constant(0) # sampled output
+
 		def next_inputs_fn(time, outputs, state, sample_ids):
-			# finished = tf.greater(tf.layers.dense(outputs, 1), 0.5)
-			finished = False
-			next_inputs = None
+			finished = tf.greater(tf.layers.dense(outputs, 1), 0.5)
+			next_inputs = tf.constant(0)
 			next_state = state
 			return (finished, next_inputs, next_state)
 
@@ -35,10 +41,10 @@ def dynamic_decode(args, features, labels, question_tokens, question_state, voca
 			decoder_helper,
 			d_cell_initial)
 
+
 		# --------------------------------------------------------------------------
 		# Do the decode!
 		# --------------------------------------------------------------------------
-		
 
 		# 'outputs' is a tensor of shape [batch_size, max_time, cell.output_size]
 		decoded_outputs, decoded_state, decoded_sequence_lengths = tf.contrib.seq2seq.dynamic_decode(
@@ -52,6 +58,9 @@ def dynamic_decode(args, features, labels, question_tokens, question_state, voca
 		final_output = decoded_outputs.rnn_output[:,-1,:]
 		assert_shape(final_output, [args["answer_classes"]])
 		return final_output
+
+
+
 
 
 def static_decode(args, features, labels, question_tokens, question_state, vocab_embedding):

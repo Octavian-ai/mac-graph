@@ -35,8 +35,8 @@ def encode_input(args, features, vocab_embedding):
 
 	Returns:
 		(
-			Tensor("outputs",     [batch_size, seq_len, bus_width * 2]), 
-			Tensor("final_state", [batch_size, bus_width * 2])
+			Tensor("outputs",     [batch_size, seq_len, control_width * 2]), 
+			Tensor("final_state", [batch_size, control_width * 2])
 		)
 	"""
 	with tf.name_scope("encoder"):
@@ -65,7 +65,7 @@ def encode_input(args, features, vocab_embedding):
 		# Encoder
 		# --------------------------------------------------------------------------
 		
-		# 1/2 multiplier so that when we concat the layers together we get bus_width
+		# 1/2 multiplier so that when we concat the layers together we get control_width
 		fw_cell = cell_stack(args, unit_mul=0.5)
 		bw_cell = cell_stack(args, unit_mul=0.5)
 		
