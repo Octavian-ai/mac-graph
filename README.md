@@ -3,7 +3,6 @@ The MacGraph network. An Irish attempt at intelligence. Puns not included.
 
 This codebase implements graph question answering, using [CLEVR-graph](https://github.com/Octavian-ai/clevr-graph) as the dataset and [MACnets](https://arxiv.org/abs/1803.03067) as the reasoning architecture.
 
-<img src="https://media.giphy.com/media/S5JSwmQYHOGMo/giphy.gif"/>
 
 ## Project status
 
@@ -23,6 +22,8 @@ This codebase implements graph question answering, using [CLEVR-graph](https://g
 		<tr><td>List shortest routes</td><td>Not started</td><td>No capability</td></tr>
 	</tbody>
 </table>
+
+<img src="https://media.giphy.com/media/S5JSwmQYHOGMo/giphy.gif"/>
 
 ## Running the code
 
