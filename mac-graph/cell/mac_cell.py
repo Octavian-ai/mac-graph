@@ -5,6 +5,7 @@ from .read_cell import *
 from .memory_cell import *
 from .control_cell import *
 from .output_cell import *
+from .write_cell import *
 from ..util import *
 
 
@@ -42,24 +43,30 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 		with tf.variable_scope("mac_cell", reuse=tf.AUTO_REUSE):
 
-			in_control_state, in_memory_state = state
+			in_control_state, in_memory_state, in_data_stack = state
 
 			if self.args["use_control_cell"]:
 				out_control_state = control_cell(self.args, self.features, 
 					in_control_state, self.question_state, self.question_tokens)
 			else:
-				out_control_state = None
+				out_control_state = in_control_state
 
-			read = read_cell(self.args, self.features, 
-				in_memory_state, out_control_state, self.vocab_embedding)
+			read = read_cell(self.args, self.features, self.vocab_embedding,
+				in_memory_state, out_control_state, in_data_stack)
 			
 			out_memory_state = memory_cell(self.args, self.features,
 				in_memory_state, read, out_control_state)
+
+			if self.args["use_data_stack"]:
+				out_data_stack = write_cell(self.args, self.features, 
+					out_memory_state, read, out_control_state, in_data_stack)
+			else:
+				out_data_stack = in_data_stack
 			
 			output = output_cell(self.args, self.features,
-				self.question_state, out_memory_state)	
+				self.question_state, out_memory_state, out_data_stack)	
 
-			return output, (out_control_state, out_memory_state)
+			return output, (out_control_state, out_memory_state, out_data_stack)
 
 
 
@@ -68,7 +75,11 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		"""
 		Returns a size tuple (control_state, memory_state)
 		"""
-		return (self.args["control_width"], self.args["memory_width"])
+		return (
+			self.args["control_width"], 
+			self.args["memory_width"], 
+			tf.TensorShape([self.args["data_stack_len"], self.args["data_stack_width"]]),
+		)
 
 	@property
 	def output_size(self):
