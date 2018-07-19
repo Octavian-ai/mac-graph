@@ -42,8 +42,8 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--learning-rate',         		type=float, default=0.001)
 	parser.add_argument('--dropout',               		type=float, default=0.2)
 
-	parser.add_argument('--answer-classes',	       		type=int, default=512,  help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
-	parser.add_argument('--vocab-size',	           		type=int, default=512,  help="How many different words are in vocab")
+	parser.add_argument('--answer-classes',	       		type=int, default=86,  help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
+	parser.add_argument('--vocab-size',	           		type=int, default=86,  help="How many different words are in vocab")
 	parser.add_argument('--embed-width',	       		type=int, default=64,   help="The width of token embeddings")
 
 	parser.add_argument('--kb-node-width',         		type=int, default=7,    help="Width of node entry into graph table aka the knowledge base")

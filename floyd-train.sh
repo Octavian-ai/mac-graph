@@ -10,8 +10,5 @@ floyd run \
     	--input-dir /input \
     	--output-dir /output \
     	--model-dir /output/model \
-    	--max-steps 30000 \
-    	--dynamic-decode \
-        --max-decode-iterations 64 \
         --disable-kb-node \
     "
