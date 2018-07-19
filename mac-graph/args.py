@@ -34,28 +34,34 @@ def get_args(extend=lambda parser:None):
 
 	parser.add_argument('--warm-start-dir',				type=str, default=None, help="Load model initial weights from previous checkpoints")
 	
-	parser.add_argument('--answer-classes',	       		type=int, default=512,  help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
-	parser.add_argument('--vocab-size',	           		type=int, default=512,  help="How many different words are in vocab")
-	parser.add_argument('--embed-width',	       		type=int, default=64,   help="The width of token embeddings")
-	
 	parser.add_argument('--batch-size',            		type=int, default=32,   help="Number of items in a full batch")
-	parser.add_argument('--kb-node-width',         		type=int, default=7,    help="Width of node entry into graph table aka the knowledge base")
-	parser.add_argument('--kb-edge-width',         		type=int, default=3,    help="Width of edge entry into graph table aka the knowledge base")
-	parser.add_argument('--control-width',	           	type=int, default=64,	help="The width of control state")
-	parser.add_argument('--memory-width',	           	type=int, default=64,	help="The width of memory state")
 	parser.add_argument('--num-input-layers',	   		type=int, default=3,    help="How many input layers are in the english encoding LSTM stack")
-	parser.add_argument('--max-decode-iterations', 		type=int, default=8)
 	parser.add_argument('--max-steps',             		type=int, default=100000)
 		
 	parser.add_argument('--max-gradient-norm',     		type=float, default=4.0)
 	parser.add_argument('--learning-rate',         		type=float, default=0.001)
 	parser.add_argument('--dropout',               		type=float, default=0.2)
 
-	parser.add_argument('--disable-kb-nodes', action='store_false', dest='use_kb_nodes')
-	parser.add_argument('--disable-kb-edges', action='store_false', dest='use_kb_edges')
+	# DM: I don't know why yet, but putting answer classes and vocab up to 512 from min helps accuracy converge?!
+	parser.add_argument('--answer-classes',	       		type=int, default=512,  help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
+	parser.add_argument('--vocab-size',	           		type=int, default=512,  help="How many different words are in vocab")
+	parser.add_argument('--embed-width',	       		type=int, default=64,   help="The width of token embeddings")
 
-	parser.add_argument('--dynamic-decode', action='store_true')
-	parser.add_argument('--disable-control-cell', action='store_false', dest="use_control_cell")
+	parser.add_argument('--kb-node-width',         		type=int, default=7,    help="Width of node entry into graph table aka the knowledge base")
+	parser.add_argument('--kb-edge-width',         		type=int, default=3,    help="Width of edge entry into graph table aka the knowledge base")
+	parser.add_argument('--data-stack-width',         	type=int, default=64,   help="Width of stack entry")
+	parser.add_argument('--data-stack-len',         	type=int, default=20,   help="Length of stack")
+	parser.add_argument('--control-width',	           	type=int, default=64,	help="The width of control state")
+	parser.add_argument('--memory-width',	           	type=int, default=64,	help="The width of memory state")
+
+	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
+	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
+	parser.add_argument('--disable-data-stack', 		action='store_false', dest='use_data_stack')
+	parser.add_argument('--disable-control-cell', 		action='store_false', dest="use_control_cell")
+
+	parser.add_argument('--dynamic-decode', 			action='store_true')
+	parser.add_argument('--max-decode-iterations', 		type=int, default=8)
+	
 
 	args = vars(parser.parse_args())
 

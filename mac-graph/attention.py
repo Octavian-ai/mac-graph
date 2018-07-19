@@ -26,7 +26,10 @@ def attention(database, query, mask=None, use_dense=False):
 	seq_len = tf.shape(db)[1]
 	word_size = tf.shape(db)[2]
 
-	q = dynamic_assert_shape(q, (batch_size, word_size) )
+	q = dynamic_assert_shape(q, [batch_size, word_size])
+
+	if mask is not None:
+		mask = dynamic_assert_shape(mask, [batch_size, word_size])
 
 	# --------------------------------------------------------------------------
 	# Run model
@@ -47,7 +50,13 @@ def attention(database, query, mask=None, use_dense=False):
 	scores = tf.nn.softmax(scores, axis=1)
 	scores = dynamic_assert_shape(scores, (batch_size, seq_len, 1))
 	
-	# tf.summary.image("attention", tf.reshape(scores, [batch_size, 1, seq_len, 1]), max_outputs=1, family="Attention")
+	barcode_height = tf.cast(tf.round(tf.div(tf.cast(seq_len, tf.float32), 3.0)), tf.int32)
+	barcode_image = tf.tile(tf.reshape(scores, [batch_size, 1, seq_len, 1]), [1, barcode_height, 1, 1])
+
+	tf.summary.image("attention", 
+		barcode_image,
+		max_outputs=1, 
+		family="Attention")
 
 	weighted_db = db * scores
 

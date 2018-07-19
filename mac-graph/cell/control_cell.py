@@ -18,9 +18,8 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 	"""
 	with tf.name_scope("control_cell"):
 
-		in_control_state = dynamic_assert_shape(in_control_state, 
-			[ features["d_batch_size"], args["control_width"] ]
-		)
+		control_shape = [ features["d_batch_size"], args["control_width"] ]
+		in_control_state = dynamic_assert_shape(in_control_state, control_shape)
 		
 		# Skipping tf.dense(in_question_state, name="control_question_t"+iteration_step)
 		all_input = tf.concat([in_control_state, in_question_state], -1, name="all_input")
@@ -31,7 +30,12 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 		)
 
 		control_out = attention(in_question_tokens, question_token_query)
-		# control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
+
+		if args["control_width"] != args["embed_width"]:
+			tf.logging.warn("Applying dense layer to control_out, this has caused failure in other runs")
+			control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
 		
+		control_out = dynamic_assert_shape(control_out, control_shape)
+
 		return control_out
 
