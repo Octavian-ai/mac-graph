@@ -22,6 +22,11 @@ This codebase implements graph question answering (GQA), using [CLEVR-graph](htt
 			<td><strong>Complete</strong></td>
 			<td>99% accuracy on  StationProperty questions. LR 0.001, batch 32, embed_width 64, control_width 64, memory_width 64, decode_iterations 8, num_input_layers 3, vocab_size 512, max_gradient_norm 4.0, dropout 2.0</td></tr>
 		<tr>
+			<td>Answer if stations adjacent</td>
+			<td><strong>In progress</strong></td>
+			<td>Unknown</td>
+		</tr>
+		<tr>
 			<td>Count length of shortest path between nodes</td>
 			<td><strong>In progress</strong></td>
 			<td>No capability better than random guessing</td>
