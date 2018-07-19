@@ -31,7 +31,7 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 		)
 
 		control_out = attention(in_question_tokens, question_token_query)
-		control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
+		# control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
 		
 		return control_out
 
