@@ -31,10 +31,10 @@ def write_cell(args, features, in_memory_state, in_data_read, in_control_state, 
 		in_all = tf.concat(in_all, axis=-1)
 
 		# Pop bool
-		pop_signal = tf.layers.dense(in_all, 1, activation=tf.nn.sigmoid)
+		pop_signal = tf.expand_dims(tf.layers.dense(in_all, 1, activation=tf.nn.sigmoid), -1)
 		
 		# Push bool
-		push_signal = tf.layers.dense(in_all, 1, activation=tf.nn.sigmoid)
+		push_signal = tf.expand_dims(tf.layers.dense(in_all, 1, activation=tf.nn.sigmoid), -1)
 		push_value = deeep(in_all, args["data_stack_width"])
 
 		

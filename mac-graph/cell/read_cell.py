@@ -56,6 +56,8 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 			[features["d_batch_size"], d_len, width, args["embed_width"]])
 
 		emb_kb = tf.reshape(emb_kb, [-1, d_len, full_width])
+		emb_kb = dynamic_assert_shape(emb_kb, 
+			[features["d_batch_size"], d_len, full_width])
 
 		# --------------------------------------------------------------------------
 		# Read
@@ -96,7 +98,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 			# Attentional read
 			reads.append(read_from_table(features, in_signal, in_data_stack, args["data_stack_width"]))
 			# Head read
-			reads.append(in_data_stack[0])
+			reads.append(in_data_stack[:,0,:])
 
 		read_data = tf.concat(reads, -1)
 

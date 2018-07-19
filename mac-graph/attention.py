@@ -26,7 +26,10 @@ def attention(database, query, mask=None, use_dense=False):
 	seq_len = tf.shape(db)[1]
 	word_size = tf.shape(db)[2]
 
-	q = dynamic_assert_shape(q, (batch_size, word_size) )
+	q = dynamic_assert_shape(q, [batch_size, word_size])
+
+	if mask is not None:
+		mask = dynamic_assert_shape(mask, [batch_size, word_size])
 
 	# --------------------------------------------------------------------------
 	# Run model
