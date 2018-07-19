@@ -51,6 +51,9 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--learning-rate',         		type=float, default=0.001)
 	parser.add_argument('--dropout',               		type=float, default=0.2)
 
+	parser.add_argument('--disable-kb-nodes', action='store_false', dest='use_kb_nodes')
+	parser.add_argument('--disable-kb-edges', action='store_false', dest='use_kb_edges')
+
 	parser.add_argument('--dynamic-decode', action='store_true')
 	parser.add_argument('--disable-control-cell', action='store_false', dest="use_control_cell")
 
