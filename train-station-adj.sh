@@ -7,5 +7,8 @@ python -m mac-graph.train \
 	--model-dir output/model/sa/$COMMIT \
 	--log-level DEBUG \
 	--disable-kb-node \
-	--memory-transform-layers 14 \
+	--disable-data-stack \
+	--disable-indicator-row \
+	--disable-read-comparison \
+	--memory-transform-layers 13 \
 	--memory-width 128

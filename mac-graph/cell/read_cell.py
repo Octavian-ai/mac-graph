@@ -97,7 +97,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 					vocab_embedding, 
 					in_signal, 
 					i,
-					use_indicator_row=True))
+					use_indicator_row=args["use_indicator_row"]))
 
 		if args["use_data_stack"]:
 			# Attentional read
@@ -110,7 +110,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		if args["use_read_comparison"]:
 			compare = tf.layers.dense(in_signal, read_data.shape[-1], activation=tf.nn.tanh)
 			comparison = tf.abs(read_data - compare)
-			read_data = tf.concat([reads, comparison], axis=-1)
+			read_data = tf.concat([read_data, comparison], axis=-1)
 
 		# --------------------------------------------------------------------------
 		# Shrink results

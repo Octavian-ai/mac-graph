@@ -66,7 +66,7 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--disable-data-stack', 		action='store_false', dest='use_data_stack')
 	parser.add_argument('--disable-control-cell', 		action='store_false', dest="use_control_cell")
 	parser.add_argument('--disable-read-comparison', 	action='store_false', dest="use_read_comparison")
-
+	parser.add_argument('--disable-indicator-row', 		action='store_false', dest="use_indicator_row")
 
 	parser.add_argument('--dynamic-decode', 			action='store_true')
 	parser.add_argument('--max-decode-iterations', 		type=int, default=8)
