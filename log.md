@@ -24,6 +24,8 @@ This is the first (easy) question I've got working. Here's a log of known workin
 	- Adding residual connections increased accuracy 25%, achieving 100% after 10k steps
 	- `./train-station-properties.sh`
 
+- Commit `636d354` as above
+
 
 ### Station Adjacency
 
