@@ -81,7 +81,11 @@ def deeep(tensor, width, n=2, residual_depth=2, activation=tf.nn.tanh):
 	return tensor
 
 
-
+def vector_to_barcode(tensor):
+	width = tf.shape(tensor)[-1]
+	barcode_height = tf.cast(tf.round(tf.div(tf.cast(width, tf.float32), 3.0)), tf.int32)
+	barcode_image = tf.tile(tf.reshape(tensor, [-1, 1, width, 1]), [1, barcode_height, 1, 1])
+	return barcode_image
 
 
 
