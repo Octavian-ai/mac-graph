@@ -6,7 +6,7 @@ from ..util import *
 from ..attention import *
 
 
-def read_from_table(features, in_signal, table, width, use_mask=True):
+def read_from_table(features, in_signal, table, width, use_mask=True, **kwargs):
 
 	query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
 
@@ -19,12 +19,12 @@ def read_from_table(features, in_signal, table, width, use_mask=True):
 	# Do lookup via attention
 	# --------------------------------------------------------------------------
 
-	output = attention(table, query, mask)
+	output = attention(table, query, mask, word_size=width, **kwargs)
 	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
 	return output
 
 
-def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun, table=None, use_mask=True):
+def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun, use_mask=True, **kwargs):
 	"""Perform attention based read from table
 
 	Will transform table into vocab embedding space
@@ -38,8 +38,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 		# Constants and validations
 		# --------------------------------------------------------------------------
 
-		if table is None:
-			table = features[f"{noun}s"]
+		table = features[f"{noun}s"]
 
 		width = args[f"{noun}_width"]
 		full_width = width * args["embed_width"]
@@ -63,7 +62,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 		# Read
 		# --------------------------------------------------------------------------
 
-		return read_from_table(features, in_signal, emb_kb, full_width, use_mask)
+		return read_from_table(features, in_signal, emb_kb, full_width, use_mask, **kwargs)
 
 
 
@@ -92,7 +91,13 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 
 		for i in ["kb_node", "kb_edge"]:
 			if args[f"use_{i}"]:
-				reads.append(read_from_table_with_embedding(args, features, vocab_embedding, in_signal, i))
+				reads.append(read_from_table_with_embedding(
+					args, 
+					features, 
+					vocab_embedding, 
+					in_signal, 
+					i,
+					use_indicator_row=True))
 
 		if args["use_data_stack"]:
 			# Attentional read
