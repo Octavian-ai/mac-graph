@@ -54,3 +54,6 @@ The successful station property model does no better than random guessing. I'm e
 - Commit `92d3146`
 	- Removing residual connections everywhere maxing out at 62% acc
 
+- Commit `d4bb4c9`
+	- Equal best evar
+
