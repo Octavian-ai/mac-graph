@@ -1,5 +1,6 @@
 
 import tensorflow as tf
+import math
 
 def assert_shape(tensor, shape, batchless=False):
 
@@ -53,9 +54,37 @@ def minimize_clipped(optimizer, value, max_gradient_norm):
 	return optimizer.apply_gradients(zip(clipped_gradients, var), global_step=global_step)
 
 
-# Quick way to throw in some deep dense action
-def deeep(tensor, width, n=2):
-	for i in range(n):
-		tensor = tf.layers.dense(tensor, width, activation=tf.nn.tanh)
+def deeep(tensor, width, n=2, residual_depth=2, activation=tf.nn.tanh):
+	"""
+	Quick 'n' dirty "let's slap on some layers" function. 
+
+	Implements residual connections and applys them when it can. Uses this schematic:
+	https://blog.waya.ai/deep-residual-learning-9610bb62c355
+	"""
+
+	for i in range(math.floor(n/residual_depth)):
+		tensor_in = tensor
+
+		for j in range(residual_depth-1):
+			tensor = tf.layers.dense(tensor, width, activation=activation)
+
+		tensor = tf.layers.dense(tensor, width)
+	
+		if tensor_in.shape[-1] == width:
+			tensor += tensor_in
+	
+		tensor = activation(tensor)
+
+	for i in range(n % residual_depth):
+		tensor = tf.layers.dense(tensor, width, activation=activation)
+
 	return tensor
+
+
+
+
+
+
+
+
 

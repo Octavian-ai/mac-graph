@@ -13,8 +13,8 @@ def get_args(extend=lambda parser:None):
 
 	parser.add_argument('--log-level',  				type=str, default='INFO')
 	parser.add_argument('--output-dir', 				type=str, default="./output")
-	parser.add_argument('--input-dir',  				type=str, default="./input_data/processed")
-	parser.add_argument('--model-dir',      			type=str, default="./output/model")
+	parser.add_argument('--input-dir',  				type=str, default="./input_data/processed/default")
+	parser.add_argument('--model-dir',      			type=str, default="./output/model/default")
 
 	# Used in train / predict / build
 	parser.add_argument('--limit',						type=int, default=None, help="How many rows of input data to read")
@@ -42,6 +42,10 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--learning-rate',         		type=float, default=0.001)
 	parser.add_argument('--dropout',               		type=float, default=0.2)
 
+	# --------------------------------------------------------------------------
+	# Network topology
+	# --------------------------------------------------------------------------
+
 	# DM: I don't know why yet, but putting answer classes and vocab up to 512 from min helps accuracy converge?!
 	parser.add_argument('--answer-classes',	       		type=int, default=512,  help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
 	parser.add_argument('--vocab-size',	           		type=int, default=512,  help="How many different words are in vocab")
@@ -53,6 +57,9 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--data-stack-len',         	type=int, default=20,   help="Length of stack")
 	parser.add_argument('--control-width',	           	type=int, default=64,	help="The width of control state")
 	parser.add_argument('--memory-width',	           	type=int, default=64,	help="The width of memory state")
+
+	parser.add_argument('--memory-transform-layers',	type=int, default=1, 	help="How many deep layers in memory transforms")
+
 
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')

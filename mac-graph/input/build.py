@@ -33,7 +33,11 @@ def generate_record(args, vocab, doc):
 
 	nodes, edges = graph_to_table(args, vocab, doc["graph"])
 
-	logger.debug(f"Record: {vocab.ids_to_string([label])}, {vocab.ids_to_string(q)}, {[vocab.ids_to_string(g) for g in nodes]}, {[vocab.ids_to_string(g) for g in edges]}")
+	logger.debug(f"""
+Answer={vocab.ids_to_string([label])} 
+{vocab.ids_to_string(q)}
+{[vocab.ids_to_string(g) for g in nodes]}
+{[vocab.ids_to_string(g) for g in edges]}""")
 
 	feature = {
 		"src": 				tf.train.Feature(int64_list=tf.train.Int64List(value=q)),
@@ -75,30 +79,34 @@ if __name__ == "__main__":
 
 	logger.info(f"Wrote {len(vocab)} vocab entries")
 
-	written = 0
-
 	question_types = Counter()
 	answer_classes = Counter()
 
 	logger.info("Generate TFRecords")
 	with Partitioner(args) as p:
-		for i in tqdm(read_gqa(args)):
-			try:
-				p.write(generate_record(args, vocab, i))
-				question_types[i["question"]["type_string"]] += 1
-				answer_classes[i["answer"]] += 1
-				written += 1
-			except ValueError as ex:
-				logger.debug(ex)
-				pass
+		with Balancer(p, args["balance_batch"]) as balancer:
+			for doc in tqdm(read_gqa(args)):
+				try:
+					record = generate_record(args, vocab, doc)
+					p.write(record)
+					question_types[doc["question"]["type_string"]] += 1
+					answer_classes[doc["answer"]] += 1
+					balancer.record_batch_item(doc, record)
+					balancer.oversample_every(args["balance_batch"])
 
-	logger.info(f"Wrote {written} TFRecords")
+				except ValueError as ex:
+					logger.debug(ex)
+					pass
 
+
+			with tf.gfile.GFile(args["answer_classes_path"], "w") as file:
+				yaml.dump(dict(balancer.total_classes), file)
+
+		logger.info(f"Wrote {p.written} TFRecords")
+
+		
 	with tf.gfile.GFile(args["question_types_path"], "w") as file:
 		yaml.dump(dict(question_types), file)
-
-	with tf.gfile.GFile(args["answer_classes_path"], "w") as file:
-		yaml.dump(dict(answer_classes), file)
 
 	
 
