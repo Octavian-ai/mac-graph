@@ -27,7 +27,7 @@ def write_cell(args, features, in_memory_state, in_data_read, in_control_state, 
 			return tf.concat([in_value, shortened], axis=1)
 
 
-		in_all = [in_memory_state, in_control_state]
+		in_all = [in_memory_state, in_data_read, in_control_state]
 		in_all = tf.concat(in_all, axis=-1)
 
 		# Pop bool

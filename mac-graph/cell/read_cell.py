@@ -81,11 +81,13 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		# Read data
 		# --------------------------------------------------------------------------
 
+		in_signal = [in_memory_state]
+
 		# We may run the network with no control cell
 		if in_control_state is not None:
-			in_signal = tf.concat([in_memory_state, in_control_state], -1)
-		else:
-			in_signal = in_memory_state
+			in_signal.append(in_control_state)
+
+		in_signal = tf.concat(in_signal, -1)
 
 		reads = []
 
@@ -107,6 +109,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 
 		read_data = tf.concat(reads, -1)
 
+		# DM: this /might/ be equivalent to residual component
 		if args["use_read_comparison"]:
 			compare = tf.layers.dense(in_signal, read_data.shape[-1], activation=tf.nn.tanh)
 			comparison = tf.abs(read_data - compare)
@@ -117,9 +120,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		# --------------------------------------------------------------------------
 
 		read_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink", activation=tf.nn.tanh)
-		
-		read_data = dynamic_assert_shape(read_data, 
-			[features["d_batch_size"], args["memory_width"]])
+		read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["memory_width"]])
 
 		return read_data
 

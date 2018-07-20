@@ -61,24 +61,25 @@ def deeep(tensor, width, n=2, residual_depth=2, activation=tf.nn.tanh):
 	Implements residual connections and applys them when it can. Uses this schematic:
 	https://blog.waya.ai/deep-residual-learning-9610bb62c355
 	"""
+	with tf.name_scope("deeep"):
 
-	for i in range(math.floor(n/residual_depth)):
-		tensor_in = tensor
+		for i in range(math.floor(n/residual_depth)):
+			tensor_in = tensor
 
-		for j in range(residual_depth-1):
+			for j in range(residual_depth-1):
+				tensor = tf.layers.dense(tensor, width, activation=activation)
+
+			tensor = tf.layers.dense(tensor, width)
+		
+			if tensor_in.shape[-1] == width:
+				tensor += tensor_in
+		
+			tensor = activation(tensor)
+
+		for i in range(n % residual_depth):
 			tensor = tf.layers.dense(tensor, width, activation=activation)
 
-		tensor = tf.layers.dense(tensor, width)
-	
-		if tensor_in.shape[-1] == width:
-			tensor += tensor_in
-	
-		tensor = activation(tensor)
-
-	for i in range(n % residual_depth):
-		tensor = tf.layers.dense(tensor, width, activation=activation)
-
-	return tensor
+		return tensor
 
 
 def vector_to_barcode(tensor):
