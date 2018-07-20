@@ -14,6 +14,6 @@ floyd run \
         --disable-data-stack \
         --disable-indicator-row \
         --disable-read-comparison \
-        --memory-transform-layers 3 \
+        --memory-transform-layers 14 \
         --memory-width 128
     "
