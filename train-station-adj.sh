@@ -8,4 +8,4 @@ python -m mac-graph.train \
 	--log-level DEBUG \
 	--disable-kb-node \
 	--memory-transform-layers 14 \
-	--memory-width 256
+	--memory-width 128
