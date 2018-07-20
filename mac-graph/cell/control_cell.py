@@ -24,7 +24,7 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 		# Skipping tf.dense(in_question_state, name="control_question_t"+iteration_step)
 		all_input = tf.concat([in_control_state, in_question_state], -1, name="all_input")
 
-		question_token_query = deeep(all_input, args["embed_width"])
+		question_token_query = deeep(all_input, args["embed_width"], residual_depth=None)
 		question_token_query = dynamic_assert_shape(question_token_query, 
 			[ features["d_batch_size"], args["embed_width"] ]
 		)

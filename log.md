@@ -51,3 +51,6 @@ The successful station property model does no better than random guessing. I'm e
 	- 64% accuracy after 14k training steps
 	- Suspected will struggle to rapidly gain accuracy based on other runs of same code
 
+- Commit `92d3146`
+	- Removing residual connections everywhere maxing out at 62% acc
+

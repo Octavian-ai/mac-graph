@@ -11,6 +11,9 @@ floyd run \
     	--output-dir /output \
     	--model-dir /output/model \
         --disable-kb-node \
-        --memory-transform-layers 14 \
+        --disable-data-stack \
+        --disable-indicator-row \
+        --disable-read-comparison \
+        --memory-transform-layers 3 \
         --memory-width 128
     "

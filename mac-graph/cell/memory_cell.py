@@ -15,7 +15,7 @@ def memory_cell(args, features, in_memory_state, in_data_read, in_control_state)
 			in_data_read
 		], -1)
 
-		new_memory_state = deeep(in_all, args["memory_width"], args["memory_transform_layers"])
+		new_memory_state = deeep(in_all, args["memory_width"], args["memory_transform_layers"], residual_depth=None)
 
 		# We can run this network without a control cell
 		if in_control_state is not None:
