@@ -10,5 +10,4 @@ python -m mac-graph.train \
 	--disable-data-stack \
 	--disable-indicator-row \
 	--disable-read-comparison \
-	--memory-transform-layers 13 \
-	--memory-width 128
+	--memory-transform-layers 3

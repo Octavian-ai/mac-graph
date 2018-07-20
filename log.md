@@ -19,7 +19,6 @@ This is the first (easy) question I've got working. Here's a log of known workin
 	- `python -m mac-graph.train --input-dir input_data/processed/stationProp_tiny_50k_12th`
 	- 80% acc after 6k steps
 
-
 - Commit `da4b306`
 	- Adding residual connections increased accuracy 25%, achieving 100% after 10k steps
 	- `./train-station-properties.sh`
@@ -47,3 +46,8 @@ The successful station property model does no better than random guessing. I'm e
 		--disable-read-comparison \
 		--memory-transform-layers 13 \
 		--memory-width 128```
+
+- Commit `be6bd07` branch `feature-station-adj-known-ok`
+	- 64% accuracy after 14k training steps
+	- Suspected will struggle to rapidly gain accuracy based on other runs of same code
+
