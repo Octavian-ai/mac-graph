@@ -13,3 +13,11 @@ Notes on past experiments and results
 	- Added kb_edges and data_stack
 	- `python -m mac-graph.train --input-dir input_data/processed/stationProp_tiny_50k_12th`
 	- 80% acc after 6k steps
+
+
+
+### Station adjacency
+
+- Commit `be6bd07`
+	- 64% accuracy after 14k training steps
+	- Suspected will struggle to rapidly gain accuracy based on other runs of same code
