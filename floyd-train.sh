@@ -1,7 +1,7 @@
 #!/bin/sh
 
 floyd run \
-    --message Speedtest: Dynamic decode \
+    --message "Read heads 4" \
 	--gpu \
 	--tensorboard \
 	--env tensorflow-1.8 \
@@ -17,6 +17,6 @@ floyd run \
         --memory-transform-layers 13 \
         --memory-width 128 \
         --embed-width 32 \
-        --max-steps 20000 \
-        --dynamic-decode
+        --read-heads 4 \
+        --max-steps 20000
     "

@@ -69,4 +69,17 @@ The successful station property model does no better than random guessing. I'm e
 	- Embed width 32 worked as well as 64. 128 failed.
 
 
+## Notes on training infrastructure
+
+- FloydHub seems to fail with static decoding, need to do dynamic
+- Steps per second:
+	- FloydHub 
+		- GPU
+			- Dynamic 9.6
+			- Static 11.9 - But fails to increase test accuracy
+		- CPU
+			- Dynamic 7.8
+	- MacBook Pro
+		- Dynamic 48
+		- Static 23
 
