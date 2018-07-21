@@ -32,7 +32,6 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 		control_out = attention(in_question_tokens, question_token_query)
 
 		if args["control_width"] != args["embed_width"]:
-			tf.logging.warn("Applying dense layer to control_out, this has caused failure in other runs")
 			control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
 		
 		control_out = dynamic_assert_shape(control_out, control_shape)

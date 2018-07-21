@@ -75,6 +75,9 @@ The successful station property model does no better than random guessing. I'm e
 - `6fdc835`
 	- Relu activation on deeep failed
 
+- `6fdc835`
+	- Memory cell sigmoid for forget signal made no difference (was in class of best performance seen so far)
+
 
 ## Notes on training infrastructure
 
