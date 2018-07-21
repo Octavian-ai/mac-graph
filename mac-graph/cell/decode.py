@@ -81,7 +81,7 @@ def static_decode(args, features, labels, question_tokens, question_state, vocab
 
 
 def execute_reasoning(args, **kwargs):
-	if args["dynamic_decode"]:
+	if not args["use_dynamic_decode"]:
 		return dynamic_decode(args, **kwargs)
 	else:
 		return static_decode(args, **kwargs)

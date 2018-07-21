@@ -68,6 +68,10 @@ The successful station property model does no better than random guessing. I'm e
 - Commit `eebb0e8`
 	- Embed width 32 worked as well as 64. 128 failed.
 
+- Commit `6e64305`
+	- Switched back to residual_depth=2 and it worked ok
+	- Decode iterations 4
+
 
 ## Notes on training infrastructure
 

@@ -110,12 +110,6 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 
 		read_data = tf.concat(reads, -1)
 
-		# DM: this /might/ be equivalent to residual component
-		if args["use_read_comparison"]:
-			compare = tf.layers.dense(in_signal, read_data.shape[-1], activation=tf.nn.tanh)
-			comparison = tf.abs(read_data - compare)
-			read_data = tf.concat([read_data, comparison], axis=-1)
-
 		# --------------------------------------------------------------------------
 		# Shrink results
 		# --------------------------------------------------------------------------

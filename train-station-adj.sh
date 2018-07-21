@@ -8,8 +8,9 @@ python -m mac-graph.train \
 	--log-level DEBUG \
 	--disable-kb-node \
 	--disable-data-stack \
-	--disable-read-comparison \
 	--memory-transform-layers 13 \
 	--read-heads 2 \
 	--memory-width 128 \
-	--embed-width 32
+	--embed-width 32 \
+	--max-steps 100000 \
+	--max-decode-iterations 4
