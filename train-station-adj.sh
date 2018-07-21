@@ -12,4 +12,4 @@ python -m mac-graph.train \
 	--memory-width 128 \
 	--embed-width 32 \
 	--max-steps 100000 \
-	--max-decode-iterations 4
+	--max-decode-iterations 2

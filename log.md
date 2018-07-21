@@ -78,6 +78,9 @@ The successful station property model does no better than random guessing. I'm e
 - `6fdc835`
 	- Memory cell sigmoid for forget signal made no difference (was in class of best performance seen so far)
 
+- `fcb13d0`
+	- Same performance, smaller network, faster convergence
+
 
 ## Notes on training infrastructure
 
@@ -85,7 +88,7 @@ The successful station property model does no better than random guessing. I'm e
 - Steps per second:
 	- FloydHub 
 		- GPU
-			- Dynamic 9.6
+			- Dynamic 9.6, 19.6 observed
 			- Static 11.9 - But fails to increase test accuracy
 		- CPU
 			- Dynamic 7.8
