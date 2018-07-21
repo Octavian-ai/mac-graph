@@ -33,6 +33,14 @@ whether a certain edge exists.
 
 The successful station property model does no better than random guessing. I'm exploring a range of extra operators to make this task possible.
 
+#### Thoughts
+- The problem is the network cannot formulate the query (test this!)
+- I believe that it's easy in embedding to detect none-exists as you can just set two bits on the records vs other records and amplify it using non-linearity. 
+- You don't need extra indicator row since every bit of unused vocab is one such row. 
+- Larger vocab = diluting down the attention >> maybe that is why it improves station properties
+
+#### Proof points
+
 - Commit `e820ae9`
 	- Increasing `--memory-transform-layers` from 1 to many (e.g. 13) seems to help
 	- 66% after 10k steps, then plateaus (earlier similar code seen achieving 70% after 3hrs)
@@ -56,4 +64,9 @@ The successful station property model does no better than random guessing. I'm e
 
 - Commit `d4bb4c9`
 	- Equal best evar
+
+- Commit `eebb0e8`
+	- Embed width 32 worked as well as 64. 128 failed.
+
+
 

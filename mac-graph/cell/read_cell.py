@@ -99,7 +99,8 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 					vocab_embedding, 
 					in_signal, 
 					i,
-					use_indicator_row=args["use_indicator_row"]))
+					use_indicator_row = (i=="kb_edge")
+				))
 
 		if args["use_data_stack"]:
 			# Attentional read

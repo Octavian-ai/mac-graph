@@ -11,4 +11,5 @@ python -m mac-graph.train \
 	--disable-indicator-row \
 	--disable-read-comparison \
 	--memory-transform-layers 13 \
-	--memory-width 128
+	--memory-width 128 \
+	--embed-width 32
