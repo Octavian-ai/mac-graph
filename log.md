@@ -72,6 +72,9 @@ The successful station property model does no better than random guessing. I'm e
 	- Switched back to residual_depth=2 and it worked ok
 	- Decode iterations 4
 
+- `6fdc835`
+	- Relu activation on deeep failed
+
 
 ## Notes on training infrastructure
 

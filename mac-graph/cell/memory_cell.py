@@ -19,9 +19,9 @@ def memory_cell(args, features, in_memory_state, in_data_read, in_control_state)
 
 		# We can run this network without a control cell
 		if in_control_state is not None:
-			forget_scalar = tf.layers.dense(in_control_state, 1, activation=tf.nn.tanh)
+			forget_scalar = tf.layers.dense(in_control_state, 1, activation=tf.nn.sigmoid)
 		else:
-			forget_scalar = tf.layers.dense(in_all, 1, activation=tf.nn.tanh)
+			forget_scalar = tf.layers.dense(in_all, 1, activation=tf.nn.sigmoid)
 	
 		out_memory_state = (new_memory_state * forget_scalar) + (in_memory_state * (1-forget_scalar))
 		out_memory_state = dynamic_assert_shape(out_memory_state, memory_shape)
