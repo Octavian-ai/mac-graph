@@ -8,7 +8,6 @@ python -m mac-graph.train \
 	--log-level DEBUG \
 	--disable-kb-node \
 	--disable-data-stack \
-	--disable-indicator-row \
 	--disable-read-comparison \
 	--memory-transform-layers 13 \
 	--memory-width 128 \

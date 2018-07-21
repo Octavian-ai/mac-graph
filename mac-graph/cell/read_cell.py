@@ -98,8 +98,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 					features, 
 					vocab_embedding, 
 					in_signal, 
-					i,
-					use_indicator_row = (i=="kb_edge")
+					i
 				))
 
 		if args["use_data_stack"]:

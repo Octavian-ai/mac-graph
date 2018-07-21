@@ -1,7 +1,7 @@
 
 from .util import *
 
-def attention(database, query, mask=None, word_size=None, use_dense=False, use_indicator_row=False):
+def attention(database, query, mask=None, word_size=None, use_dense=False):
 	"""
 	Apply attention
 
@@ -41,15 +41,6 @@ def attention(database, query, mask=None, word_size=None, use_dense=False, use_i
 		# --------------------------------------------------------------------------
 		# Run model
 		# --------------------------------------------------------------------------
-
-		if use_indicator_row:
-			indicator_row = tf.get_variable("indicator_row", shape=[1, 1, word_size], dtype=db.dtype)
-			ind_row_batched = tf.tile(indicator_row, [batch_size, 1, 1])
-			db = tf.concat([ind_row_batched, db], axis=1)
-			
-			# Update shapes for assertions
-			seq_len += 1
-			db_shape = [batch_size, seq_len, word_size]
 		
 		if mask is not None:
 			q  = q  * mask
