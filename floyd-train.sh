@@ -1,6 +1,7 @@
 #!/bin/sh
 
 floyd run \
+    --message Speedtest: Dynamic decode \
 	--gpu \
 	--tensorboard \
 	--env tensorflow-1.8 \
@@ -12,8 +13,10 @@ floyd run \
     	--model-dir /output/model \
         --disable-kb-node \
         --disable-data-stack \
-        --disable-indicator-row \
         --disable-read-comparison \
-        --memory-transform-layers 14 \
-        --memory-width 128
+        --memory-transform-layers 13 \
+        --memory-width 128 \
+        --embed-width 32 \
+        --max-steps 20000 \
+        --dynamic-decode
     "
