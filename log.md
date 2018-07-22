@@ -72,14 +72,16 @@ The successful station property model does no better than random guessing. I'm e
 	- Switched back to residual_depth=2 and it worked ok
 	- Decode iterations 4
 
-- `6fdc835`
-	- Relu activation on deeep failed
+- `6fdc835`: Relu activation on deeep failed
 
-- `6fdc835`
-	- Memory cell sigmoid for forget signal made no difference (was in class of best performance seen so far)
+- `6fdc835`: Memory cell sigmoid for forget signal made no difference (was in class of best performance seen so far)
 
-- `fcb13d0`
-	- Same performance, smaller network, faster convergence
+- `fcb13d0`: Same performance, smaller network, faster convergence
+
+- `e120afc`: 
+	- Fastest training seen (72% after 42min). 
+	- Achieved 80% after 600k (5hrs) training steps
+	- Should achieve 100% in 10 min!
 
 
 ## Notes on training infrastructure

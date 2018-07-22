@@ -1,7 +1,7 @@
 
 from .util import *
 
-def attention(database, query, mask=None, word_size=None, use_dense=False):
+def attention(database, query, mask=None, word_size=None, use_dense=False, output_taps=False):
 	"""
 	Apply attention
 
@@ -70,7 +70,10 @@ def attention(database, query, mask=None, word_size=None, use_dense=False):
 		output = tf.reduce_sum(weighted_db, 1)
 		output = dynamic_assert_shape(output, q_shape)
 
-		return output
+		if output_taps:
+			return output, scores
+		else:
+			return output
 
 
 

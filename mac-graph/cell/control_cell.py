@@ -29,12 +29,12 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 			[ features["d_batch_size"], args["embed_width"] ]
 		)
 
-		control_out = attention(in_question_tokens, question_token_query)
+		control_out, control_taps = attention(in_question_tokens, question_token_query, output_taps=True)
 
 		if args["control_width"] != args["embed_width"]:
 			control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
 		
 		control_out = dynamic_assert_shape(control_out, control_shape)
 
-		return control_out
+		return control_out, control_taps
 

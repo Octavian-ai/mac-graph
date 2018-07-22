@@ -55,7 +55,14 @@ def dynamic_decode(args, features, labels, question_tokens, question_state, voca
 
 		
 		# Take the final reasoning step output
-		final_output = decoded_outputs.rnn_output[:,-1,:]
+		final_output = decoded_outputs.rnn_output[:,-1,0,:]
+		
+		# Peek into the workings
+		taps =  decoded_outputs.rnn_output[:,:,1,:]
+		taps = tf.expand_dims(taps, -1)
+		tf.summary.image("Question word attn", taps)
+
+
 		assert_shape(final_output, [args["answer_classes"]])
 		return final_output
 

@@ -19,9 +19,9 @@ def read_from_table(features, in_signal, table, width, use_mask=True, **kwargs):
 	# Do lookup via attention
 	# --------------------------------------------------------------------------
 
-	output = attention(table, query, mask, word_size=width, **kwargs)
+	output, taps = attention(table, query, mask, word_size=width, output_taps=True, **kwargs)
 	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
-	return output
+	return output, taps
 
 
 def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun, use_mask=True, **kwargs):
@@ -90,25 +90,30 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		in_signal = tf.concat(in_signal, -1)
 
 		reads = []
+		taps = []
 
 		for i in ["kb_node", "kb_edge"]:
 			if args[f"use_{i}"]:
 				for j in range(args["read_heads"]):
-					reads.append(read_from_table_with_embedding(
+					read, tap = read_from_table_with_embedding(
 						args, 
 						features, 
 						vocab_embedding, 
 						in_signal, 
 						i
-					))
+					)
+					reads.append(read)
+					taps.append(tap)
 
 		if args["use_data_stack"]:
 			# Attentional read
-			reads.append(read_from_table(features, in_signal, in_data_stack, args["data_stack_width"]))
+			read, tap = read_from_table(features, in_signal, in_data_stack, args["data_stack_width"])
+			reads.append(read)
 			# Head read
 			reads.append(in_data_stack[:,0,:])
 
 		read_data = tf.concat(reads, -1)
+		out_taps = tf.concat(taps, axis=-1)
 
 		# --------------------------------------------------------------------------
 		# Shrink results
@@ -117,7 +122,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		read_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink", activation=tf.nn.tanh)
 		read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["memory_width"]])
 
-		return read_data
+		return read_data, out_taps
 
 
 
