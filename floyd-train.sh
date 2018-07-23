@@ -1,7 +1,7 @@
 #!/bin/sh
 
 floyd run \
-    --message "Read heads 4" \
+    --message "Baseline - early attn q dense + post scoring dense" \
 	--gpu \
 	--tensorboard \
 	--env tensorflow-1.8 \
@@ -12,11 +12,6 @@ floyd run \
     	--output-dir /output \
     	--model-dir /output/model \
         --disable-kb-node \
-        --disable-data-stack \
-        --disable-read-comparison \
-        --memory-transform-layers 13 \
-        --memory-width 128 \
-        --embed-width 32 \
-        --read-heads 4 \
-        --max-steps 20000
+        --max-decode-iterations 2 \
+        --max-steps 50000
     "

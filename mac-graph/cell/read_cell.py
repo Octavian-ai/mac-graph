@@ -19,7 +19,11 @@ def read_from_table(features, in_signal, table, width, use_mask=True, **kwargs):
 	# Do lookup via attention
 	# --------------------------------------------------------------------------
 
-	output, taps = attention(table, query, mask, word_size=width, output_taps=True, **kwargs)
+	output, taps = attention(table, query, mask, 
+		word_size=width, 
+		output_taps=True,
+		 **kwargs)
+
 	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
 	return output, taps
 
@@ -100,7 +104,8 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 						features, 
 						vocab_embedding, 
 						in_signal, 
-						i
+						noun=i,
+						max_len=args[f"{i}_max_len"]
 					)
 					reads.append(read)
 					taps.append(tap)

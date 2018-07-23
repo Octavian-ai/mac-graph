@@ -29,7 +29,9 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 		)
 
 		control_out, control_taps = attention(in_question_tokens, question_token_query, 
-			word_size=args["embed_width"], output_taps=True)
+			word_size=args["embed_width"], 
+			output_taps=True,
+			max_len=args["max_seq_len"])
 
 		if args["control_width"] != args["embed_width"]:
 			control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
