@@ -89,14 +89,13 @@ The successful station property model does no better than random guessing. I'm e
 
 - `956b4f6`:
 	- `--vocab-size 90 --answer-classes 8` seen to train alright
-	- Fastest ever accuracy growth 80% after 1hr = 124k steps
+	- Fastest ever accuracy growth 80% after 1hr = 124k steps. Network seems to choose 1 iteration.
 
 
 
 ## Notes on training infrastructure
 
 - FloydHub seems to fail with static decoding, need to do dynamic
-- Note: Due to bug in `6fdc835` I'm not certain of these results
 - Steps per second:
 	- FloydHub 
 		- GPU
@@ -107,4 +106,5 @@ The successful station property model does no better than random guessing. I'm e
 	- MacBook Pro 
 		- Dynamic 51, 53, 52, 23, 21, 23
 		- Static 30, 30, 30, 30, 29, 30
+- I believe the variation in dynamic decoding times is whether the network decides to do 1 or 2 iterations based on its finished flag.
 
