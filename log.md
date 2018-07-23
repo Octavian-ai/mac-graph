@@ -87,15 +87,15 @@ The successful station property model does no better than random guessing. I'm e
 	- Was using static decode when I believed dynamic decode
 	- Same performance, smaller network, faster convergence
 
-- `e120afc`: **gold standard so far**
+- `e120afc`:
 	- Was using static decode when I believed dynamic decode
 	- Fastest training seen (72% after 42min). 
 	- Achieved 80% after 600k (5hrs) training steps
 	- Should achieve 100% in 10 min!
 
-- `956b4f6`:
+- `956b4f6`:  **gold standard so far**
 	- `--vocab-size 90 --answer-classes 8` seen to train alright
-	- Fastest ever accuracy growth 80% after 1hr = 124k steps. Network seems to choose 1 iteration.
+	- Fastest ever accuracy growth 88% after 3hr46 = 500k steps
 
 
 
