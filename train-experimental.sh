@@ -1,3 +1,4 @@
+
 #!/bin/sh
 
 COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
@@ -8,5 +9,3 @@ python -m mac-graph.train \
 	--log-level DEBUG \
 	--disable-kb-node \
 	--max-decode-iterations 2 \
-	--max-steps 200000 \
-	--disable-dynamic-decode

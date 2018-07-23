@@ -4,7 +4,7 @@ import tensorflow as tf
 from ..util import *
 from ..attention import *
 
-def control_cell(args, features, in_control_state, in_question_state, in_question_tokens):
+def control_cell(args, features, inputs, in_control_state, in_question_state, in_question_tokens):
 	"""
 	Build a control cell
 
@@ -21,15 +21,15 @@ def control_cell(args, features, in_control_state, in_question_state, in_questio
 		control_shape = [ features["d_batch_size"], args["control_width"] ]
 		in_control_state = dynamic_assert_shape(in_control_state, control_shape)
 		
-		# Skipping tf.dense(in_question_state, name="control_question_t"+iteration_step)
-		all_input = tf.concat([in_control_state, in_question_state], -1, name="all_input")
+		all_input = tf.concat([in_control_state, inputs], -1, name="all_input")
 
-		question_token_query = deeep(all_input, args["embed_width"])
+		question_token_query = tf.layers.dense(all_input, args["embed_width"])
 		question_token_query = dynamic_assert_shape(question_token_query, 
 			[ features["d_batch_size"], args["embed_width"] ]
 		)
 
-		control_out, control_taps = attention(in_question_tokens, question_token_query, output_taps=True)
+		control_out, control_taps = attention(in_question_tokens, question_token_query, 
+			word_size=args["embed_width"], output_taps=True)
 
 		if args["control_width"] != args["embed_width"]:
 			control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")

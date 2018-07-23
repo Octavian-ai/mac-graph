@@ -27,7 +27,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		"""Run this RNN cell on inputs, starting from the given state.
 		
 		Args:
-			inputs: **Unused!** `2-D` tensor with shape `[batch_size, input_size]`.
+			inputs: `2-D` tensor with shape `[batch_size, input_size]`.
 			state: if `self.state_size` is an integer, this should be a `2-D Tensor`
 				with shape `[batch_size, self.state_size]`.	Otherwise, if
 				`self.state_size` is a tuple of integers, this should be a tuple
@@ -47,7 +47,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 			if self.args["use_control_cell"]:
 				out_control_state, control_taps = control_cell(self.args, self.features, 
-					in_control_state, self.question_state, self.question_tokens)
+					inputs, in_control_state, self.question_state, self.question_tokens)
 			else:
 				out_control_state = in_control_state
 
