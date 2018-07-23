@@ -1,7 +1,8 @@
 
 from .util import *
 
-def attention(database, query, mask=None, use_dense=False, use_unknown_row=True):
+
+def attention(database, query, mask=None, word_size=None, use_dense=True, output_taps=False):
 	"""
 	Apply attention
 
@@ -12,62 +13,71 @@ def attention(database, query, mask=None, use_dense=False, use_unknown_row=True)
 		- use_dense Whether to instantiate a free variable for comparison function
 
 	"""
-
-	q = query
-	db = database
-
-	# --------------------------------------------------------------------------
-	# Validate inputs
-	# --------------------------------------------------------------------------
-
-	assert len(database.shape) == 3, "Database should be shape [batch, len, width]"
-
-	batch_size = tf.shape(db)[0]
-	seq_len = tf.shape(db)[1]
-	word_size = tf.shape(db)[2]
-
-	q = dynamic_assert_shape(q, [batch_size, word_size])
-
-	if mask is not None:
-		mask = dynamic_assert_shape(mask, [batch_size, word_size])
-
-	# --------------------------------------------------------------------------
-	# Run model
-	# --------------------------------------------------------------------------
-
-	if use_unknown_row:
-		unknown_row = tf.get_variable("unknown_row", shape=[batch_size, 1, word_size], dtype=db.dtype)
-		db = tf.concat([[unknown_row], db], axis=1)
 	
-	if mask is not None:
-		q  = q  * mask
-		db = db * tf.expand_dims(mask, 1)
+	with tf.name_scope("attention"):
+
+		q = query
+		db = database
+
+		# --------------------------------------------------------------------------
+		# Validate inputs
+		# --------------------------------------------------------------------------
+
+		assert len(database.shape) == 3, "Database should be shape [batch, len, width]"
+
+		batch_size = tf.shape(db)[0]
+		seq_len = tf.shape(db)[1]
+
+		if word_size is None:
+			word_size = tf.shape(db)[2]
+
+		db_shape = tf.shape(database)
+		q_shape = [batch_size, word_size]
+		scores_shape = [batch_size, seq_len, 1]
 
 
-	db = dynamic_assert_shape(db, tf.shape(database))
+		q = dynamic_assert_shape(q, q_shape)
 
-	if use_dense:
-		assert q.shape[-1] is not None, "Cannot use_dense with unknown width query"
-		q = tf.layers.dense(q, q.shape[-1])
+		if mask is not None:
+			mask = dynamic_assert_shape(mask, q_shape)
 
-	scores = tf.matmul(db, tf.expand_dims(q, 2))
-	scores = tf.nn.softmax(scores, axis=1)
-	scores = dynamic_assert_shape(scores, (batch_size, seq_len, 1))
-	
-	# barcode_height = tf.cast(tf.round(tf.div(tf.cast(seq_len, tf.float32), 3.0)), tf.int32)
-	# barcode_image = tf.tile(tf.reshape(scores, [batch_size, 1, seq_len, 1]), [1, barcode_height, 1, 1])
+		# --------------------------------------------------------------------------
+		# Run model
+		# --------------------------------------------------------------------------
+		
+		if mask is not None:
+			q  = q  * mask
+			db = db * tf.expand_dims(mask, 1)
 
-	tf.summary.image("attention", 
-		vector_to_barcode(scores),# barcode_image,
-		max_outputs=1, 
-		family="Attention")
+		# Ensure masking didn't screw up the shape
+		db = dynamic_assert_shape(db, db_shape)
 
-	weighted_db = db * scores
 
-	output = tf.reduce_sum(weighted_db, 1)
-	output = dynamic_assert_shape(output, (batch_size, word_size))
+		if use_dense:
+			assert q.shape[-1] is not None, "Cannot use_dense with unknown width query"
+			q = tf.layers.dense(q, word_size)
 
-	return output
+		scores = tf.matmul(db, tf.expand_dims(q, 2))
+
+		# if use_dense:
+		# 	assert word_size is not None, "Cannot use_dense with unknown width query"
+		# 	scores = tf.squeeze(scores, axis=2)
+		# 	scores = tf.layers.dense(scores, word_size)
+		# 	scores = tf.expand_dims(scores, axis=2)
+		# 	scores = dynamic_assert_shape(scores, scores_shape)
+
+		scores = tf.nn.softmax(scores, axis=1)
+		scores = dynamic_assert_shape(scores, scores_shape)
+		
+		weighted_db = db * scores
+
+		output = tf.reduce_sum(weighted_db, 1)
+		output = dynamic_assert_shape(output, q_shape)
+
+		if output_taps:
+			return output, scores
+		else:
+			return output
 
 
 

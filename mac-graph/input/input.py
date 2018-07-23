@@ -60,7 +60,7 @@ def input_fn(args, mode, question=None):
 		d = d.filter(lambda features, labels: 
 			tf_startswith(features["type_string"], args["type_string_prefix"]))
 
-	d = d.shuffle(args["batch_size"]*10)
+	d = d.shuffle(args["batch_size"]*1000)
 
 	zero64 = tf.cast(0, tf.int64) 
 
