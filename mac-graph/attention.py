@@ -1,6 +1,7 @@
 
 from .util import *
 
+
 def attention(database, query, mask=None, word_size=None, use_dense=True, output_taps=False, max_len=None):
 	"""
 	Apply attention
@@ -34,6 +35,7 @@ def attention(database, query, mask=None, word_size=None, use_dense=True, output
 		q_shape = [batch_size, word_size]
 		scores_shape = [batch_size, seq_len, 1]
 
+
 		q = dynamic_assert_shape(q, q_shape)
 
 		if mask is not None:
@@ -49,10 +51,6 @@ def attention(database, query, mask=None, word_size=None, use_dense=True, output
 
 		# Ensure masking didn't screw up the shape
 		db = dynamic_assert_shape(db, db_shape)
-
-		# if use_dense:
-		# 	assert q.shape[-1] is not None, "Cannot use_dense with unknown width query"
-		# 	q = tf.layers.dense(q, word_size)
 
 		scores = tf.matmul(db, tf.expand_dims(q, 2))
 
