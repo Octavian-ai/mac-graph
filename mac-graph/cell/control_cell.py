@@ -32,7 +32,9 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 			)
 
 			a = attention(in_question_tokens, question_token_query, 
-				word_size=args["embed_width"], output_taps=True)
+        word_size=args["embed_width"], 
+        output_taps=True,
+        max_len=args["max_seq_len"])
 			attention_calls.append(a)
 
 		control_out  = [i[0] for i in attention_calls]
