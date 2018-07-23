@@ -52,7 +52,7 @@ def get_args(extend=lambda parser:None):
 
 	parser.add_argument('--kb-node-width',         		type=int, default=7,    help="Width of node entry into graph table aka the knowledge base")
 	parser.add_argument('--kb-edge-width',         		type=int, default=3,    help="Width of edge entry into graph table aka the knowledge base")
-	parser.add_argument('--read-heads',         		type=int, default=1,    help="Number of read heads for each knowledge base tabel")
+	parser.add_argument('--read-heads',         		type=int, default=2,    help="Number of read heads for each knowledge base tabel")
 	
 	parser.add_argument('--data-stack-width',         	type=int, default=64,   help="Width of stack entry")
 	parser.add_argument('--data-stack-len',         	type=int, default=20,   help="Length of stack")
