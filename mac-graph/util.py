@@ -54,7 +54,7 @@ def minimize_clipped(optimizer, value, max_gradient_norm):
 	return optimizer.apply_gradients(zip(clipped_gradients, var), global_step=global_step)
 
 
-def deeep(tensor, width, depth=2, residual_depth=2, activation=tf.nn.tanh):
+def deeep(tensor, width, depth=2, residual_depth=3, activation=tf.nn.tanh):
 	"""
 	Quick 'n' dirty "let's slap on some layers" function. 
 
@@ -96,6 +96,31 @@ def vector_to_barcode(tensor):
 
 
 
+def add_location_encoding_1d(tensor, dim=32, width_axis=1, concat_axis=2): 
+	'''
+	The function is based on https://github.com/stanfordnlp/mac-network
+
+	Computes sin/cos positional encoding for h x w x (4*dim). 
+	If outDim positive, casts positions to that dimension.
+	Based on positional encoding presented in "Attention is all you need"
+
+	Currently hard-coded for one setup of width_axis and concat_axis
+	'''   
+	locationBias = 1.0
+
+	w = tf.shape(tensor)[width_axis]
+	x = tf.expand_dims(tf.to_float(tf.linspace(-locationBias, locationBias, w)), axis=0)
+	i = tf.expand_dims(tf.to_float(tf.range(dim)), axis=1)
+
+	peSinX = tf.sin(x / (tf.pow(10000.0, i / dim)))
+	peCosX = tf.cos(x / (tf.pow(10000.0, i / dim)))
+
+	grid = tf.concat([peSinX, peCosX], axis=-1)
+	grid = tf.expand_dims(grid, axis=0)
+
+	tensor = tf.concat([tensor,grid], axis=concat_axis)
+
+	return tensor
 
 
 

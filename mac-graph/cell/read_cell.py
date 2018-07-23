@@ -9,6 +9,7 @@ from ..attention import *
 def read_from_table(features, in_signal, table, width, use_mask=True, **kwargs):
 
 	query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
+	query = tf.layers.dense(query, width)
 
 	if use_mask:
 		mask  = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)

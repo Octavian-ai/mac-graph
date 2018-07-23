@@ -27,6 +27,7 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 
 		for i in range(args["control_heads"]):
 			question_token_query = tf.layers.dense(all_input, args["embed_width"])
+			question_token_query = tf.layers.dense(question_token_query, args["embed_width"])
 			question_token_query = dynamic_assert_shape(question_token_query, 
 				[ features["d_batch_size"], args["embed_width"] ]
 			)

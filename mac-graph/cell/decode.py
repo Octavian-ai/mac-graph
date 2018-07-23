@@ -7,7 +7,7 @@ from ..util import *
 
 
 
-def dynamic_decode(args, features, inputs, question_state, labels, question_tokens, vocab_embedding):
+def dynamic_decode(args, features, inputs, question_state, question_tokens, labels, vocab_embedding):
 	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE) as decoder_scope:
 
 		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
@@ -27,7 +27,7 @@ def dynamic_decode(args, features, inputs, question_state, labels, question_toke
 		sample_fn = lambda time, outputs, state: tf.constant(0) # sampled output
 
 		def next_inputs_fn(time, outputs, state, sample_ids):
-			finished = tf.greater(tf.layers.dense(outputs[0], 1), 0.5)
+			finished = tf.greater(tf.layers.dense(outputs[0], 1, kernel_initializer=tf.zeros_initializer()), 0.5)
 			next_inputs = tf.gather(inputs, time+1)
 			next_state = state
 			return (finished, next_inputs, next_state)
@@ -68,7 +68,7 @@ def dynamic_decode(args, features, inputs, question_state, labels, question_toke
 
 
 
-def static_decode(args, features, inputs, question_state, labels, question_tokens, vocab_embedding):
+def static_decode(args, features, inputs, question_state, question_tokens, labels, vocab_embedding):
 	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE) as decoder_scope:
 
 		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
@@ -90,17 +90,23 @@ def static_decode(args, features, inputs, question_state, labels, question_token
 		return final_output, taps
 
 
-def execute_reasoning(args, features, question_state, **kwargs):
+def execute_reasoning(args, features, question_state, question_tokens, **kwargs):
 
 	inputs = [
 		tf.layers.dense(question_state, args["control_width"], name=f"question_state_inputs_t{i}") 
 		for i in range(args["max_decode_iterations"]+1)
 	]
 
+	# [batch, seq, width]
+	print(question_tokens)
+	# question_tokens_pos = add_location_encoding_1d(question_tokens, dim=args["question_token_pos"])
+	# print(question_tokens_pos)
+	question_tokens_pos = question_tokens
+
 	if args["use_dynamic_decode"]:
-		final_output, taps = dynamic_decode(args, features, inputs, question_state, **kwargs)
+		final_output, taps = dynamic_decode(args, features, inputs, question_state, question_tokens_pos, **kwargs)
 	else:
-		final_output, taps = static_decode(args, features, inputs, question_state, **kwargs)
+		final_output, taps = static_decode(args, features, inputs, question_state, question_tokens_pos, **kwargs)
 
 	tf.summary.image("Question_words", taps, family="Attention")
 
