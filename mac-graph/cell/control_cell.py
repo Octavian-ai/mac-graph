@@ -23,17 +23,27 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 		
 		all_input = tf.concat([in_control_state, inputs], -1, name="all_input")
 
-		question_token_query = tf.layers.dense(all_input, args["embed_width"])
-		question_token_query = dynamic_assert_shape(question_token_query, 
-			[ features["d_batch_size"], args["embed_width"] ]
-		)
+		attention_calls = []
 
-		control_out, control_taps = attention(in_question_tokens, question_token_query, 
-			word_size=args["embed_width"], 
-			output_taps=True,
-			max_len=args["max_seq_len"])
+		for i in range(args["control_heads"]):
+			question_token_query = tf.layers.dense(all_input, args["embed_width"])
+			question_token_query = dynamic_assert_shape(question_token_query, 
+				[ features["d_batch_size"], args["embed_width"] ]
+			)
 
-		if args["control_width"] != args["embed_width"]:
+			a = attention(in_question_tokens, question_token_query, 
+        word_size=args["embed_width"], 
+        output_taps=True,
+        max_len=args["max_seq_len"])
+			attention_calls.append(a)
+
+		control_out  = [i[0] for i in attention_calls]
+		control_out  = tf.concat(control_out, -1)
+
+		control_taps = [i[0] for i in attention_calls]
+		control_taps = tf.concat(control_taps, -1)
+
+		if control_out.shape[-1] != args["control_width"]:
 			control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
 		
 		control_out = dynamic_assert_shape(control_out, control_shape)

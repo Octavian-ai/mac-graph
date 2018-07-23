@@ -1,7 +1,7 @@
 #!/bin/sh
 
 floyd run \
-    --message "Baseline - early attn q dense + post scoring dense" \
+	--message "Baseline - early attn q dense + post scoring dense" \
 	--gpu \
 	--tensorboard \
 	--env tensorflow-1.8 \

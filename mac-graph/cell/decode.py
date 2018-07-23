@@ -56,6 +56,7 @@ def dynamic_decode(args, features, inputs, question_state, labels, question_toke
 
 		# Peek into the workings
 		taps =  decoded_outputs.rnn_output[1]
+		taps = tf.expand_dims(taps, -1)
 		# TODO reshape into [batch, decode_step, question_word, 1]
 		
 		# Take the final reasoning step output
