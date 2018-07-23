@@ -6,6 +6,8 @@ This codebase implements graph question answering (GQA), using [CLEVR-graph](htt
 
 ## Project status
 
+*Apologies that the training data isn't available - I've yet to find a quick solution to this, when I get the system working on more questions I'll publish a stable "all question" dataset with 1M items. For now, you can easily build you own data - ask David for help.*
+
 <table>
 	<thead>
 		<tr>
@@ -39,6 +41,8 @@ This codebase implements graph question answering (GQA), using [CLEVR-graph](htt
 </table>
 
 <img src="https://media.giphy.com/media/S5JSwmQYHOGMo/giphy.gif"/>
+
+For more in-depth information about what works/doesn't work, check out the [experiment log](log.md).
 
 ## Running the code
 
