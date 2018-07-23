@@ -19,6 +19,13 @@ This is the first (easy) question I've got working. Here's a log of known workin
 	- 80% acc after 6k steps
 
 
-- Commit <kb>da4b306</kb>
+### Station adjacency
+
+- `be6bd07`
+	- 64% accuracy after 14k training steps
+	- Suspected will struggle to rapidly gain accuracy based on other runs of same code
+
+- `da4b306`
 	- Adding residual connections increased accuracy 25%, achieving 100% after 10k steps
 	- `./train-cmp-station-prop.sh`
+
