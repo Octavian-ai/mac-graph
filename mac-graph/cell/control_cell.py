@@ -55,6 +55,7 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 		if control_out.shape[-1] != args["control_width"]:
 			control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
 		
+		control_out = tf.nn.dropout(control_out, 1.0-args["control_dropout"])
 		control_out = dynamic_assert_shape(control_out, control_shape)
 
 		return control_out, tap_qw_attn, tap_qw_query

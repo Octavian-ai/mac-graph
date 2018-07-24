@@ -104,6 +104,7 @@ The successful station property model does no better than random guessing. I'm e
 	- 90% observed on FloydHub, cpu, one hour, 116k steps 
 	- `--disable-kb-node --max-decode-iterations 2 --num-input-layers 1 --enable-indicator-row --disable-memory-cell`
 
+- `7b810f1`: Same arch as above, 74% after 50k steps `./train-station-adj.sh`
 
 
 ## Notes on training infrastructure

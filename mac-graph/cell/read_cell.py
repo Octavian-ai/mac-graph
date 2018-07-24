@@ -135,6 +135,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		# --------------------------------------------------------------------------
 
 		read_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink", activation=tf.nn.tanh)
+		read_data = tf.nn.dropout(read_data, 1.0-args["read_dropout"])
 		read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["memory_width"]])
 
 		return read_data, taps

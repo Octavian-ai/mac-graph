@@ -7,7 +7,7 @@ from ..util import *
 def basic_cell(args, i, unit_mul):
 
 	c = tf.contrib.rnn.LSTMCell(int(args['embed_width']*unit_mul))
-	c = tf.contrib.rnn.DropoutWrapper(c, args['dropout'])
+	c = tf.contrib.rnn.DropoutWrapper(c, args['input_dropout'])
 
 	if i > 1:
 		c = tf.contrib.rnn.ResidualWrapper(c)
