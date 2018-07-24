@@ -93,9 +93,12 @@ The successful station property model does no better than random guessing. I'm e
 	- Achieved 80% after 600k (5hrs) training steps
 	- Should achieve 100% in 10 min!
 
-- `956b4f6`:  **gold standard so far**
+- `956b4f6`:
 	- `--vocab-size 90 --answer-classes 8` seen to train alright
 	- Fastest ever accuracy growth 88% after 3hr46 = 500k steps
+
+- `8e4cc68`: **best so far**
+	- saw better performance, but accidentally kept editing code. This is best so far
 
 
 
