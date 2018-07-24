@@ -8,7 +8,7 @@ python -m mac-graph.train \
 	--model-dir output/model/sa/$COMMIT \
 	--log-level DEBUG \
 	--disable-kb-node \
-	--max-decode-iterations 1 \
+	--max-decode-iterations 2 \
 	--num-input-layers 1 \
 	--enable-indicator-row \
 	--disable-memory-cell
