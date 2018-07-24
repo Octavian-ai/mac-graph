@@ -9,7 +9,7 @@ def read_from_table(args, features, in_signal, noun, table, width, use_mask=Fals
 
 	if args["read_indicator_cols"] > 0:
 		ind_col = tf.get_variable(f"{noun}_indicator_col", [1, 1, args["read_indicator_cols"]])
-		ind_col = tf.tile(inc_col, [features["d_batch_size"], tf.shape(table)[1], 1])
+		ind_col = tf.tile(ind_col, [features["d_batch_size"], tf.shape(table)[1], 1])
 		table = tf.concat([table, ind_col], axis=2)
 
 	full_width = width + args["read_indicator_cols"]
