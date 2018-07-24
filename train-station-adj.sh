@@ -9,7 +9,7 @@ python -m mac-graph.train \
 	--disable-kb-node \
 	--max-decode-iterations 1 \
 	--num-input-layers 1 \
-	--enable-indicator-row \
+	--read-indicator-rows 1 \
 	--disable-memory-cell \
 
 
