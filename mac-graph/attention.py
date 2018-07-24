@@ -2,7 +2,7 @@
 from .util import *
 
 
-def attention(database, query, mask=None, word_size=None, use_dense=False, output_taps=False, max_len=None):
+def attention(database, query, mask=None, word_size=None, use_dense=True, output_taps=False, max_len=None):
 	"""
 	Apply attention
 

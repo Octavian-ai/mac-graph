@@ -98,10 +98,12 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	]
 
 	# [batch, seq, width]
-	print(question_tokens)
-	# question_tokens_pos = add_location_encoding_1d(question_tokens, dim=args["question_token_pos"])
-	# print(question_tokens_pos)
-	question_tokens_pos = question_tokens
+	if args["pos_enc_width"] is not None:
+		question_tokens_pos = add_location_encoding_1d(question_tokens, dim=args["pos_enc_width"])
+	else:
+		question_tokens_pos = question_tokens
+
+	tf.summary.image("question_tokens", tf.expand_dims(question_tokens_pos,-1))
 
 	if args["use_dynamic_decode"]:
 		final_output, taps = dynamic_decode(args, features, inputs, question_state, question_tokens_pos, **kwargs)

@@ -106,19 +106,24 @@ def add_location_encoding_1d(tensor, dim=32, width_axis=1, concat_axis=2):
 
 	Currently hard-coded for one setup of width_axis and concat_axis
 	'''   
-	locationBias = 1.0
+	locationBias = 1.5
 
+	batch = tf.shape(tensor)[0]
 	w = tf.shape(tensor)[width_axis]
-	x = tf.expand_dims(tf.to_float(tf.linspace(-locationBias, locationBias, w)), axis=0)
-	i = tf.expand_dims(tf.to_float(tf.range(dim)), axis=1)
+	halfdim = dim / 2
 
-	peSinX = tf.sin(x / (tf.pow(10000.0, i / dim)))
-	peCosX = tf.cos(x / (tf.pow(10000.0, i / dim)))
+	x = tf.expand_dims(tf.to_float(tf.linspace(-locationBias, locationBias, w)), axis=1)
+	i = tf.expand_dims(tf.to_float(tf.range(halfdim)), axis=0)
 
-	grid = tf.concat([peSinX, peCosX], axis=-1)
-	grid = tf.expand_dims(grid, axis=0)
+	peSinX = tf.sin(x / (tf.pow(10000.0, i / halfdim)))
+	peCosX = tf.cos(x / (tf.pow(10000.0, i / halfdim)))
 
-	tensor = tf.concat([tensor,grid], axis=concat_axis)
+	pe = tf.concat([peSinX, peCosX], axis=-1)
+	pe = tf.expand_dims(pe, 0)
+	pe = tf.tile(pe, [batch, 1, 1])
+	
+	tensor = tf.concat([tensor,pe], axis=concat_axis)
+	
 
 	return tensor
 

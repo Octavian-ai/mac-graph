@@ -6,7 +6,7 @@ from ..util import *
 from ..attention import *
 
 
-def read_from_table(features, in_signal, table, width, use_mask=True, **kwargs):
+def read_from_table(features, in_signal, table, width, use_mask=False, **kwargs):
 
 	query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
 	query = tf.layers.dense(query, width)
@@ -29,7 +29,7 @@ def read_from_table(features, in_signal, table, width, use_mask=True, **kwargs):
 	return output, taps
 
 
-def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun, use_mask=True, **kwargs):
+def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun, use_mask=False, **kwargs):
 	"""Perform attention based read from table
 
 	Will transform table into vocab embedding space
