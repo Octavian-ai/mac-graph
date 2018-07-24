@@ -1,6 +1,9 @@
 
 import argparse
 import os.path
+import yaml
+import pathlib
+import tensorflow as tf
 
 global_args = {}
 
@@ -90,6 +93,8 @@ def get_args(extend=lambda parser:None):
 		args[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
 
 	args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
+	args["config_path"] = os.path.join(args["model_dir"], "config.yaml")
+
 	args["question_types_path"] = os.path.join(args["input_dir"], "types.yaml")
 	args["answer_classes_path"] = os.path.join(args["input_dir"], "answer_classes.yaml")
 
@@ -99,3 +104,9 @@ def get_args(extend=lambda parser:None):
 
 
 	return args
+
+
+def save_args(args):
+	pathlib.Path(args["model_dir"]).mkdir(parents=True, exist_ok=True)
+	with tf.gfile.GFile(os.path.join(args["config_path"]), "w") as file:
+		yaml.dump(args, file)

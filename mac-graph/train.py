@@ -3,7 +3,7 @@ import tensorflow as tf
 
 from .estimator import get_estimator
 from .input import gen_input_fn
-from .args import get_args
+from .args import *
 from .predict import predict
 
 # Make TF be quiet
@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 def train(args):
+
+	# So I don't frigging forget what caused working models
+	save_args(args)
 
 	estimator = get_estimator(args)
 

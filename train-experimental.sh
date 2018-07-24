@@ -11,7 +11,4 @@ python -m mac-graph.train \
 	--max-decode-iterations 1 \
 	--num-input-layers 1 \
 	--enable-indicator-row \
-	--disable-memory-cell \
-
-	
-
+	--disable-memory-cell
