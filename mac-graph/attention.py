@@ -54,6 +54,7 @@ def attention(database, query, mask=None, word_size=None, use_dense=True, output
 
 		scores = tf.matmul(db, tf.expand_dims(q, 2))
 
+		# A big effort to do a dense layer on scores (it has a dynamic width)
 		if use_dense:
 			need_to_set_shape = scores.shape[1].value is None
 			assert word_size is not None, "Cannot use_dense with unknown width_size"

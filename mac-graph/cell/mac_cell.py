@@ -46,7 +46,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			in_control_state, in_memory_state, in_data_stack = state
 
 			if self.args["use_control_cell"]:
-				out_control_state, control_taps = control_cell(self.args, self.features, 
+				out_control_state, tap_attention, tap_query = control_cell(self.args, self.features, 
 					inputs, in_control_state, self.question_state, self.question_tokens)
 			else:
 				out_control_state = in_control_state
@@ -67,7 +67,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				self.question_state, out_memory_state, out_data_stack)	
 
 			out_state = (out_control_state, out_memory_state, out_data_stack)
-			out_data  = (output, control_taps)
+			out_data  = (output, tap_attention, tap_query)
 
 			return out_data, out_state
 
@@ -88,7 +88,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 	def output_size(self):
 		return (
 			self.args["answer_classes"],
-			self.features["d_seq_len"]
+			self.features["d_seq_len"],
+			self.features["d_seq_len"],
 		)
 
 

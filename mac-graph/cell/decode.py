@@ -55,14 +55,14 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 
 
 		# Peek into the workings
-		taps =  decoded_outputs.rnn_output[1]
-		taps = tf.expand_dims(taps, -1)
-		# TODO reshape into [batch, decode_step, question_word, 1]
+		tap_attn  = tf.expand_dims(decoded_outputs.rnn_output[1], -1)
+		tap_query = tf.expand_dims(decoded_outputs.rnn_output[2], -1)
+		
 		
 		# Take the final reasoning step output
 		final_output = decoded_outputs.rnn_output[0][:,-1,:]
 		
-		return final_output, taps
+		return final_output, tap_attn, tap_query
 
 
 
@@ -82,12 +82,14 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 		# print(states)
 		final_output = states[-1][0][0]
 
-		taps = [i[0][1] for i in states if i[0] is not None]
-		taps = tf.concat(taps, axis=-1)
-		taps = tf.transpose(taps, [0,2,1])
-		taps = tf.expand_dims(taps, axis=-1)
+		def get_tap(idx):
+			taps = [i[0][idx] for i in states if i[0] is not None]
+			taps = tf.concat(taps, axis=-1)
+			taps = tf.transpose(taps, [0,2,1])
+			taps = tf.expand_dims(taps, axis=-1)
+			return taps
 		
-		return final_output, taps
+		return final_output, get_tap(1), get_tap(2)
 
 
 def execute_reasoning(args, features, question_state, question_tokens, **kwargs):
@@ -98,19 +100,20 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	]
 
 	# [batch, seq, width]
-	if args["pos_enc_width"] is not None:
-		question_tokens_pos = add_location_encoding_1d(question_tokens, dim=args["pos_enc_width"])
-	else:
-		question_tokens_pos = question_tokens
+	# if args["pos_enc_width"] is not None:
+	question_tokens_pos = add_location_encoding_1d(question_tokens)
+	# else:
+		# question_tokens_pos = question_tokens
 
 	tf.summary.image("question_tokens", tf.expand_dims(question_tokens_pos,-1))
 
 	if args["use_dynamic_decode"]:
-		final_output, taps = dynamic_decode(args, features, inputs, question_state, question_tokens_pos, **kwargs)
+		final_output, tap_attn, tap_query = dynamic_decode(args, features, inputs, question_state, question_tokens_pos, **kwargs)
 	else:
-		final_output, taps = static_decode(args, features, inputs, question_state, question_tokens_pos, **kwargs)
+		final_output, tap_attn, tap_query = static_decode(args, features, inputs, question_state, question_tokens_pos, **kwargs)
 
-	tf.summary.image("Question_words", taps, family="Attention")
+	tf.summary.image("Question_attn", tap_attn, family="Attention")
+	tf.summary.image("Question_query", tap_query, family="Attention")
 
 	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["answer_classes"]])
 	return final_output

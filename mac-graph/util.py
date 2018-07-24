@@ -96,7 +96,7 @@ def vector_to_barcode(tensor):
 
 
 
-def add_location_encoding_1d(tensor, dim=32, width_axis=1, concat_axis=2): 
+def add_location_encoding_1d(tensor, seq_axis=1, word_axis=2, dtype=tf.float32): 
 	'''
 	The function is based on https://github.com/stanfordnlp/mac-network
 
@@ -104,15 +104,19 @@ def add_location_encoding_1d(tensor, dim=32, width_axis=1, concat_axis=2):
 	If outDim positive, casts positions to that dimension.
 	Based on positional encoding presented in "Attention is all you need"
 
-	Currently hard-coded for one setup of width_axis and concat_axis
+	Currently hard-coded for one setup of seq_axis and word_axis
 	'''   
 	locationBias = 1.5
 
-	batch = tf.shape(tensor)[0]
-	w = tf.shape(tensor)[width_axis]
-	halfdim = dim / 2
+	in_tensor_shape = tf.shape(tensor)
 
-	x = tf.expand_dims(tf.to_float(tf.linspace(-locationBias, locationBias, w)), axis=1)
+	batch_len = tf.shape(tensor)[0]
+	seq_len = tf.shape(tensor)[seq_axis]
+	word_len = tf.shape(tensor)[word_axis]
+	
+	halfdim = tf.cast(word_len / 2, dtype)
+
+	x = tf.expand_dims(tf.to_float(tf.range(seq_len)), axis=1)
 	i = tf.expand_dims(tf.to_float(tf.range(halfdim)), axis=0)
 
 	peSinX = tf.sin(x / (tf.pow(10000.0, i / halfdim)))
@@ -120,9 +124,15 @@ def add_location_encoding_1d(tensor, dim=32, width_axis=1, concat_axis=2):
 
 	pe = tf.concat([peSinX, peCosX], axis=-1)
 	pe = tf.expand_dims(pe, 0)
-	pe = tf.tile(pe, [batch, 1, 1])
+	# pe = tf.tile(pe, [batch, 1, 1])
+	# pe = dynamic_assert_shape(pe, tf.shape(tensor))
+
+	# Original paper
+	tensor = tensor + pe
+	tensor = dynamic_assert_shape(tensor, in_tensor_shape)
 	
-	tensor = tf.concat([tensor,pe], axis=concat_axis)
+	# Concat method
+	# tensor = tf.concat([tensor,pe], axis=word_axis)
 	
 
 	return tensor

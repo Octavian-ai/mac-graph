@@ -48,7 +48,7 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--answer-classes',	       		type=int, default=8,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
 	parser.add_argument('--vocab-size',	           		type=int, default=90,   help="How many different words are in vocab")
 	parser.add_argument('--embed-width',	       		type=int, default=32,   help="The width of token embeddings")
-	parser.add_argument('--pos-enc-width',	       		type=int, default=16,   help="The width of token embeddings")
+	parser.add_argument('--pos-enc-width',	       		type=int, default=0,   help="The width of token embeddings")
 	parser.add_argument('--num-input-layers',	   		type=int, default=3,    help="How many input layers are in the english encoding LSTM stack")
 	parser.add_argument('--max-seq-len',	  	 		type=int, default=20,   help="Maximum length of question token list")
 
