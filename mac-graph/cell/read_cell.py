@@ -6,7 +6,7 @@ from ..util import *
 from ..attention import *
 
 
-def read_from_table(features, in_signal, table, width, use_mask=False, **kwargs):
+def read_from_table(args, features, in_signal, noun, table, width, use_mask=False, **kwargs):
 
 	query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
 	query = tf.layers.dense(query, width)
@@ -20,13 +20,19 @@ def read_from_table(features, in_signal, table, width, use_mask=False, **kwargs)
 	# Do lookup via attention
 	# --------------------------------------------------------------------------
 
-	output, taps = attention(table, query, mask, 
+	if args["use_indicator_row"]:
+		# Add a trainable row to the table
+		row = tf.get_variable(f"{noun}_indicator_row", [1, 1, width])
+		row = tf.tile(row, [features["d_batch_size"], 1, 1])
+		table = tf.concat([table, row], axis=1)
+
+	output, score = attention(table, query, mask, 
 		word_size=width, 
 		output_taps=True,
 		 **kwargs)
 
 	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
-	return output, taps
+	return output, score
 
 
 def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun, use_mask=False, **kwargs):
@@ -67,7 +73,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 		# Read
 		# --------------------------------------------------------------------------
 
-		return read_from_table(features, in_signal, emb_kb, full_width, use_mask, **kwargs)
+		return read_from_table(args, features, in_signal, noun, emb_kb, full_width, use_mask, **kwargs)
 
 
 
@@ -113,13 +119,13 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 
 		if args["use_data_stack"]:
 			# Attentional read
-			read, tap = read_from_table(features, in_signal, in_data_stack, args["data_stack_width"])
+			read, tap = read_from_table(args, features, in_signal, noun, in_data_stack, args["data_stack_width"])
 			reads.append(read)
 			# Head read
 			reads.append(in_data_stack[:,0,:])
 
 		read_data = tf.concat(reads, -1)
-		out_taps = tf.concat(taps, axis=-1)
+		taps = tf.concat(taps, axis=-1)
 
 		# --------------------------------------------------------------------------
 		# Shrink results
@@ -128,7 +134,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		read_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink", activation=tf.nn.tanh)
 		read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["memory_width"]])
 
-		return read_data, out_taps
+		return read_data, taps
 
 
 

@@ -23,7 +23,7 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 		
 		all_input = tf.concat([in_control_state, inputs], -1, name="all_input")
 
-		token_full_width = args["embed_width"] + args["pos_enc_width"]
+		token_full_width = args["embed_width"]
 
 		attention_calls = []
 		queries = []

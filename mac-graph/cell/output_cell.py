@@ -2,7 +2,7 @@
 import tensorflow as tf
 
 
-def output_cell(args, features, in_question_state, in_memory_state, in_data_stack):
+def output_cell(args, features, in_question_state, in_memory_state):
 
 	with tf.name_scope("output_cell"):
 		in_all = [in_question_state, in_memory_state]

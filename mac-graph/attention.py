@@ -1,8 +1,10 @@
 
 from .util import *
 
+from .args import global_args
 
-def attention(database, query, mask=None, word_size=None, use_dense=True, output_taps=False, max_len=None):
+
+def attention(database, query, mask=None, word_size=None, output_taps=False, max_len=None):
 	"""
 	Apply attention
 
@@ -55,7 +57,7 @@ def attention(database, query, mask=None, word_size=None, use_dense=True, output
 		scores = tf.matmul(db, tf.expand_dims(q, 2))
 
 		# A big effort to do a dense layer on scores (it has a dynamic width)
-		if use_dense:
+		if global_args["use_attn_score_dense"]:
 			need_to_set_shape = scores.shape[1].value is None
 			assert word_size is not None, "Cannot use_dense with unknown width_size"
 			assert not need_to_set_shape or max_len is not None, f"Please supply max seq len since seq len {db.name} is dynamic"

@@ -2,6 +2,8 @@
 import argparse
 import os.path
 
+global_args = {}
+
 def get_args(extend=lambda parser:None):
 
 	parser = argparse.ArgumentParser()
@@ -48,7 +50,6 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--answer-classes',	       		type=int, default=8,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
 	parser.add_argument('--vocab-size',	           		type=int, default=90,   help="How many different words are in vocab")
 	parser.add_argument('--embed-width',	       		type=int, default=32,   help="The width of token embeddings")
-	parser.add_argument('--pos-enc-width',	       		type=int, default=0,   help="The width of token embeddings")
 	parser.add_argument('--num-input-layers',	   		type=int, default=3,    help="How many input layers are in the english encoding LSTM stack")
 	parser.add_argument('--max-seq-len',	  	 		type=int, default=20,   help="Maximum length of question token list")
 
@@ -68,10 +69,15 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--memory-width',	           	type=int, default=128,	help="The width of memory state")
 	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
 
+
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
 	parser.add_argument('--enable-data-stack', 			action='store_true',  dest='use_data_stack')
+	parser.add_argument('--enable-indicator-row', 		action='store_true',  dest='use_indicator_row')
+	parser.add_argument('--enable-attn-score-dense', 	action='store_true',  dest='use_attn_score_dense')
+	parser.add_argument('--enable-position-encoding', 	action='store_true',  dest='use_position_encoding')
 	parser.add_argument('--disable-control-cell', 		action='store_false', dest="use_control_cell")
+	parser.add_argument('--disable-memory-cell', 		action='store_false', dest="use_memory_cell")
 	parser.add_argument('--disable-dynamic-decode', 	action='store_false', dest="use_dynamic_decode")
 	parser.add_argument('--max-decode-iterations', 		type=int, default=2)
 	
@@ -86,6 +92,9 @@ def get_args(extend=lambda parser:None):
 	args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
 	args["question_types_path"] = os.path.join(args["input_dir"], "types.yaml")
 	args["answer_classes_path"] = os.path.join(args["input_dir"], "answer_classes.yaml")
+
+	global_args.clear()
+	global_args.update(args)
 
 
 
