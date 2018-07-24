@@ -100,6 +100,10 @@ The successful station property model does no better than random guessing. I'm e
 - `8e4cc68`: **best so far**
 	- saw better performance, but accidentally kept editing code. This is best so far
 
+- `8312228`
+	- 90% observed on FloydHub, cpu, one hour, 116k steps 
+	- `--disable-kb-node --max-decode-iterations 2 --num-input-layers 1 --enable-indicator-row --disable-memory-cell`
+
 
 
 ## Notes on training infrastructure

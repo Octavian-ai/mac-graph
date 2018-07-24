@@ -2,36 +2,39 @@
 import tensorflow as tf
 
 from ..util import *
-
 from ..attention import *
 
 
 def read_from_table(args, features, in_signal, noun, table, width, use_mask=False, **kwargs):
 
-	query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
-	query = tf.layers.dense(query, width)
+	if args["read_indicator_cols"] > 0:
+		ind_col = tf.get_variable(f"{noun}_indicator_col", [1, 1, args["read_indicator_cols"]])
+		ind_col = tf.tile(inc_col, [features["d_batch_size"], tf.shape(table)[1], 1])
+		table = tf.concat([table, ind_col], axis=2)
+
+	full_width = width + args["read_indicator_cols"]
+
+	query = tf.layers.dense(in_signal, full_width, activation=tf.nn.tanh)
+	query = tf.layers.dense(query, full_width)
 
 	if use_mask:
-		mask  = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
+		mask  = tf.layers.dense(in_signal, full_width, activation=tf.nn.tanh)
 	else:
 		mask = None
 
-	# --------------------------------------------------------------------------
-	# Do lookup via attention
-	# --------------------------------------------------------------------------
-
-	if args["use_indicator_row"]:
+	if args["read_indicator_rows"] > 0:
 		# Add a trainable row to the table
-		row = tf.get_variable(f"{noun}_indicator_row", [1, 1, width])
-		row = tf.tile(row, [features["d_batch_size"], 1, 1])
-		table = tf.concat([table, row], axis=1)
+		ind_row = tf.get_variable(f"{noun}_indicator_row", [1, args["read_indicator_rows"], full_width])
+		ind_row = tf.tile(ind_row, [features["d_batch_size"], 1, 1])
+		table = tf.concat([table, ind_row], axis=1)
+
 
 	output, score = attention(table, query, mask, 
-		word_size=width, 
+		word_size=full_width, 
 		output_taps=True,
 		 **kwargs)
 
-	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
+	output = dynamic_assert_shape(output, [features["d_batch_size"], full_width])
 	return output, score
 
 
