@@ -5,9 +5,21 @@ from .mac_cell import *
 from ..util import *
 
 
+# --------------------------------------------------------------------------
+# Helpers
+# --------------------------------------------------------------------------
+
+def expand_if_needed(t, target=4):
+	while len(t.shape) < target:
+		t = tf.expand_dims(t, -1)
+	return t
 
 
-def dynamic_decode(args, features, inputs, question_state, question_tokens, labels, vocab_embedding):
+# --------------------------------------------------------------------------
+# RNN loops
+# --------------------------------------------------------------------------
+
+def dynamic_decode(args, features, inputs, question_state, question_tokens, taps, labels, vocab_embedding):
 	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE) as decoder_scope:
 
 		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
@@ -53,22 +65,21 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 			maximum_iterations=args["max_decode_iterations"],
 			scope=decoder_scope)
 
-
-		# Peek into the workings
-		taps =  decoded_outputs.rnn_output[1]
-		taps = tf.expand_dims(taps, -1)
-		# TODO reshape into [batch, decode_step, question_word, 1]
+		out_taps = {
+			key: expand_if_needed(decoded_outputs.rnn_output[idx+1])
+			for idx, key in enumerate(taps)
+		}
 		
 		# Take the final reasoning step output
 		final_output = decoded_outputs.rnn_output[0][:,-1,:]
 		
-		return final_output, taps
+		return final_output, out_taps
 
 
 
 
 
-def static_decode(args, features, inputs, question_state, question_tokens, labels, vocab_embedding):
+def static_decode(args, features, inputs, question_state, question_tokens, taps, labels, vocab_embedding):
 	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE) as decoder_scope:
 
 		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
@@ -82,12 +93,19 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 		# print(states)
 		final_output = states[-1][0][0]
 
-		taps = [i[0][1] for i in states if i[0] is not None]
-		taps = tf.concat(taps, axis=-1)
-		taps = tf.transpose(taps, [0,2,1])
-		taps = tf.expand_dims(taps, axis=-1)
+		def get_tap(idx):
+			tap = [i[0][idx] for i in states if i[0] is not None]
+			tap = tf.concat(tap, axis=-1)
+			tap = tf.transpose(tap, [0,2,1])
+			tap = expand_if_needed(tap)
+			return tap
+
+		out_taps = {
+			key: get_tap(idx+1)
+			for idx, key in enumerate(taps)
+		}
 		
-		return final_output, taps
+		return final_output, out_taps
 
 
 def execute_reasoning(args, features, question_state, question_tokens, **kwargs):
@@ -97,18 +115,24 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 		for i in range(args["max_decode_iterations"]+1)
 	]
 
-	# [batch, seq, width]
-	print(question_tokens)
-	# question_tokens_pos = add_location_encoding_1d(question_tokens, dim=args["question_token_pos"])
-	# print(question_tokens_pos)
-	question_tokens_pos = question_tokens
+	if args["use_position_encoding"]:
+		question_tokens = add_location_encoding_1d(question_tokens)
+	
+	tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))
+
+	taps = [
+		"question_word_attn", "question_word_query", "KB_attn", "control_state"
+	]
 
 	if args["use_dynamic_decode"]:
-		final_output, taps = dynamic_decode(args, features, inputs, question_state, question_tokens_pos, **kwargs)
+		r = dynamic_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
 	else:
-		final_output, taps = static_decode(args, features, inputs, question_state, question_tokens_pos, **kwargs)
+		d = static_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
 
-	tf.summary.image("Question_words", taps, family="Attention")
+	final_output, out_taps = r
+
+	for k, v in out_taps.items():
+		tf.summary.image(k, v)
 
 	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["answer_classes"]])
 	return final_output

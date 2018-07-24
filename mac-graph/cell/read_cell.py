@@ -2,34 +2,43 @@
 import tensorflow as tf
 
 from ..util import *
-
 from ..attention import *
 
 
-def read_from_table(features, in_signal, table, width, use_mask=True, **kwargs):
+def read_from_table(args, features, in_signal, noun, table, width, use_mask=False, **kwargs):
 
-	query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
-	query = tf.layers.dense(query, width)
+	if args["read_indicator_cols"] > 0:
+		ind_col = tf.get_variable(f"{noun}_indicator_col", [1, 1, args["read_indicator_cols"]])
+		ind_col = tf.tile(ind_col, [features["d_batch_size"], tf.shape(table)[1], 1])
+		table = tf.concat([table, ind_col], axis=2)
+
+	full_width = width + args["read_indicator_cols"]
+
+	query = tf.layers.dense(in_signal, full_width, activation=tf.nn.tanh)
+	query = tf.layers.dense(query, full_width)
 
 	if use_mask:
-		mask  = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
+		mask  = tf.layers.dense(in_signal, full_width, activation=tf.nn.tanh)
 	else:
 		mask = None
 
-	# --------------------------------------------------------------------------
-	# Do lookup via attention
-	# --------------------------------------------------------------------------
+	if args["read_indicator_rows"] > 0:
+		# Add a trainable row to the table
+		ind_row = tf.get_variable(f"{noun}_indicator_row", [1, args["read_indicator_rows"], full_width])
+		ind_row = tf.tile(ind_row, [features["d_batch_size"], 1, 1])
+		table = tf.concat([table, ind_row], axis=1)
 
-	output, taps = attention(table, query, mask, 
-		word_size=width, 
+
+	output, score = attention(table, query, mask, 
+		word_size=full_width, 
 		output_taps=True,
 		 **kwargs)
 
-	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
-	return output, taps
+	output = dynamic_assert_shape(output, [features["d_batch_size"], full_width])
+	return output, score
 
 
-def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun, use_mask=True, **kwargs):
+def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun, use_mask=False, **kwargs):
 	"""Perform attention based read from table
 
 	Will transform table into vocab embedding space
@@ -67,7 +76,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 		# Read
 		# --------------------------------------------------------------------------
 
-		return read_from_table(features, in_signal, emb_kb, full_width, use_mask, **kwargs)
+		return read_from_table(args, features, in_signal, noun, emb_kb, full_width, use_mask, **kwargs)
 
 
 
@@ -113,13 +122,13 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 
 		if args["use_data_stack"]:
 			# Attentional read
-			read, tap = read_from_table(features, in_signal, in_data_stack, args["data_stack_width"])
+			read, tap = read_from_table(args, features, in_signal, noun, in_data_stack, args["data_stack_width"])
 			reads.append(read)
 			# Head read
 			reads.append(in_data_stack[:,0,:])
 
 		read_data = tf.concat(reads, -1)
-		out_taps = tf.concat(taps, axis=-1)
+		taps = tf.concat(taps, axis=-1)
 
 		# --------------------------------------------------------------------------
 		# Shrink results
@@ -128,7 +137,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		read_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink", activation=tf.nn.tanh)
 		read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["memory_width"]])
 
-		return read_data, out_taps
+		return read_data, taps
 
 
 

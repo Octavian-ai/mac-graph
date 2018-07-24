@@ -46,16 +46,19 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			in_control_state, in_memory_state, in_data_stack = state
 
 			if self.args["use_control_cell"]:
-				out_control_state, control_taps = control_cell(self.args, self.features, 
+				out_control_state, tap_question_attn, tap_question_query = control_cell(self.args, self.features, 
 					inputs, in_control_state, self.question_state, self.question_tokens)
 			else:
 				out_control_state = in_control_state
 
-			read, read_taps = read_cell(self.args, self.features, self.vocab_embedding,
+			read, tap_read_attn = read_cell(self.args, self.features, self.vocab_embedding,
 				in_memory_state, out_control_state, in_data_stack)
 			
-			out_memory_state = memory_cell(self.args, self.features,
-				in_memory_state, read, out_control_state)
+			if self.args["use_memory_cell"]:
+				out_memory_state = memory_cell(self.args, self.features,
+					in_memory_state, read, out_control_state)
+			else:
+				out_memory_state = in_memory_state
 
 			if self.args["use_data_stack"]:
 				out_data_stack = write_cell(self.args, self.features, 
@@ -63,11 +66,15 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			else:
 				out_data_stack = in_data_stack
 			
-			output = output_cell(self.args, self.features,
-				self.question_state, out_memory_state, out_data_stack)	
+			if self.args["use_memory_cell"]:
+				output = output_cell(self.args, self.features,
+					self.question_state, out_memory_state)	
+			else:
+				output = output_cell(self.args, self.features,
+					self.question_state, read)	
 
 			out_state = (out_control_state, out_memory_state, out_data_stack)
-			out_data  = (output, control_taps)
+			out_data  = (output, tap_question_attn, tap_question_query, tap_read_attn, out_control_state)
 
 			return out_data, out_state
 
@@ -86,9 +93,19 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 	@property
 	def output_size(self):
+
+		read_attn_width = 0
+		for i in ["kb_edge", "kb_node"]:
+			if self.args["use_"+i]:
+				read_attn_width += self.args[i+"_width"] * self.args["embed_width"]
+		
+
 		return (
 			self.args["answer_classes"],
-			self.features["d_seq_len"]
+			self.features["d_seq_len"],
+			self.features["d_seq_len"],
+			read_attn_width,
+			self.args["control_width"],
 		)
 
 

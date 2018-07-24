@@ -84,7 +84,7 @@ def encode_input(args, features, vocab_embedding):
 		)
 
 		# Top layer, output layer
-		question_state = tf.concat( (fw_states[1].c, bw_states[1].c), axis=-1)
+		question_state = tf.concat( (fw_states[-1].c, bw_states[-1].c), axis=-1)
 		question_state = dynamic_assert_shape(question_state,
 			[ features["d_batch_size"], args["embed_width"] ]
 		)
