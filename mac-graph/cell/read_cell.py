@@ -14,7 +14,7 @@ def read_from_table(args, features, in_signal, noun, table, width, use_mask=Fals
 
 	full_width = width + args["read_indicator_cols"]
 
-	query = tf.layers.dense(in_signal, full_width, activation=tf.nn.tanh)
+	# query = tf.layers.dense(in_signal, full_width, activation=tf.nn.tanh)
 	query = tf.layers.dense(query, full_width)
 
 	if use_mask:
@@ -80,7 +80,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 
 
 
-def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state, in_data_stack):
+def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state, in_data_stack, in_question_tokens):
 	"""
 	A read cell
 
@@ -100,6 +100,10 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		# We may run the network with no control cell
 		if in_control_state is not None:
 			in_signal.append(in_control_state)
+
+		# hack to take questions in
+		# are <space> number <space> and <space> number ...
+		in_signal = [in_question_tokens[2], in_question_tokens[6]]
 
 		in_signal = tf.concat(in_signal, -1)
 
@@ -134,7 +138,9 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		# Shrink results
 		# --------------------------------------------------------------------------
 
-		read_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink", activation=tf.nn.tanh)
+		# read_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink", activation=tf.nn.tanh)
+		read_data = deeep(read_data, args["memory_width"], depth=3, residual_depth=2)
+
 		read_data = tf.nn.dropout(read_data, 1.0-args["read_dropout"])
 		read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["memory_width"]])
 

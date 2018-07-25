@@ -76,6 +76,8 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--memory-width',	           	type=int, default=128,	help="The width of memory state")
 	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
 
+	parser.add_argument('--output-activation',			type=str, default="tanh")
+
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
 	parser.add_argument('--enable-data-stack', 			action='store_true',  dest='use_data_stack')

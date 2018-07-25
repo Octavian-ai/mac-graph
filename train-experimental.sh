@@ -9,8 +9,7 @@ python -m mac-graph.train \
 	--disable-kb-node \
 	--max-decode-iterations 1 \
 	--num-input-layers 1 \
-	--read-indicator-rows 1 \
 	--disable-memory-cell \
 	--read-dropout 0.2 \
 	--control-dropout 0.2 \
-	--control-heads 2 \
+	--memory-width 8 \
