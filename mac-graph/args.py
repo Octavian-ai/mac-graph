@@ -106,6 +106,14 @@ def get_args(extend=lambda parser:None):
 	global_args.update(args)
 
 
+	# Expand activation args to callables
+	act = {
+		"tanh": tf.tanh,
+		"relu": tf.nn.relu,
+	}
+
+	for i in ["output_activation"]:
+		args[i] = act[args[i]]
 
 	return args
 

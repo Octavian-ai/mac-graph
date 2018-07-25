@@ -51,8 +51,12 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			else:
 				out_control_state = in_control_state
 
-			read, tap_read_attn = read_cell(self.args, self.features, self.vocab_embedding,
-				in_memory_state, out_control_state, in_data_stack, self.question_tokens)
+			if self.args["use_control_cell"]:
+				read, tap_read_attn = read_cell(self.args, self.features, self.vocab_embedding,
+					in_memory_state, out_control_state, in_data_stack, self.question_tokens)
+			else:
+				read, tap_read_attn = read_cell(self.args, self.features, self.vocab_embedding,
+					in_memory_state, None, in_data_stack, self.question_tokens)
 			
 			if self.args["use_memory_cell"]:
 				out_memory_state = memory_cell(self.args, self.features,

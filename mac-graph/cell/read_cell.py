@@ -15,7 +15,7 @@ def read_from_table(args, features, in_signal, noun, table, width, use_mask=Fals
 	full_width = width + args["read_indicator_cols"]
 
 	# query = tf.layers.dense(in_signal, full_width, activation=tf.nn.tanh)
-	query = tf.layers.dense(query, full_width)
+	query = tf.layers.dense(in_signal, full_width)
 
 	if use_mask:
 		mask  = tf.layers.dense(in_signal, full_width, activation=tf.nn.tanh)
@@ -103,7 +103,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 
 		# hack to take questions in
 		# are <space> number <space> and <space> number ...
-		in_signal = [in_question_tokens[2], in_question_tokens[6]]
+		in_signal = [in_question_tokens[:,2], in_question_tokens[:,6]]
 
 		in_signal = tf.concat(in_signal, -1)
 
