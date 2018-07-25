@@ -139,12 +139,17 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		# --------------------------------------------------------------------------
 
 		# read_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink", activation=tf.nn.tanh)
-		read_data = deeep(read_data, args["memory_width"], depth=3, residual_depth=2)
+		
+		# in theory compare if the output and signal are similar
+		out_data = deeep(
+			tf.concat([in_signal, read_data], -1), 
+			args["memory_width"], 
+			depth=3, residual_depth=2)
 
-		read_data = tf.nn.dropout(read_data, 1.0-args["read_dropout"])
-		read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["memory_width"]])
+		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
+		out_data = dynamic_assert_shape(out_data, [features["d_batch_size"], args["memory_width"]])
 
-		return read_data, taps
+		return out_data, taps
 
 
 
