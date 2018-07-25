@@ -106,6 +106,10 @@ The successful station property model does no better than random guessing. I'm e
 
 - `7b810f1`: Same arch as above, 74% after 50k steps `./train-station-adj.sh`
 
+- `4667b13`: 
+	- Dropout improved things! best ever.
+	- 91% after 200k steps
+
 
 ## Notes on training infrastructure
 
