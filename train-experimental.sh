@@ -13,3 +13,4 @@ python -m mac-graph.train \
 	--disable-memory-cell \
 	--read-dropout 0.2 \
 	--control-dropout 0.2 \
+	--control-heads 2 \

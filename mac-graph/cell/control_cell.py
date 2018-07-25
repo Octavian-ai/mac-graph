@@ -47,7 +47,7 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 		control_out  = tf.concat(control_out, -1)
 
 		tap_qw_attn = [i[1] for i in attention_calls]
-		tap_qw_attn = tf.concat(tap_qw_attn, -1)
+		tap_qw_attn = tf.concat(tap_qw_attn, -2)
 
 		tap_qw_query = tf.concat(queries, -1)
 
