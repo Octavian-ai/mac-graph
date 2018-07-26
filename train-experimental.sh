@@ -14,4 +14,4 @@ python -m mac-graph.train \
 	--read-indicator-rows 1 \
 	--read-indicator-cols 1 \
 	--disable-control-cell \
-	--use-attn-score-dense \
+	--enable-attn-score-dense \

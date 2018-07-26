@@ -122,7 +122,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 
 		# hack to take questions in
 		# are <space> number <space> and <space> number ...
-		in_signal = [in_question_tokens[:,2], in_question_tokens[:,6]]
+		in_signal = [feature["src"][:,2], feature["src"][:,6]]
 
 		in_signal = tf.concat(in_signal, -1)
 
