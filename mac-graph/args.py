@@ -64,14 +64,14 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--read-heads',         		type=int, default=1,    help="Number of read heads for each knowledge base table")
 	parser.add_argument('--read-indicator-rows',        type=int, default=0,    help="Number of extra trainable rows")
 	parser.add_argument('--read-indicator-cols',        type=int, default=0,    help="Number of extra trainable rows")
-	parser.add_argument('--read-dropout',         		type=float, default=0.0,    help="Dropout on read heads")
-	
+	parser.add_argument('--read-dropout',         		type=float, default=0.2,    help="Dropout on read heads")
+	parser.add_argument('--read-activation',			type=str, default="tanh")
 
 	parser.add_argument('--data-stack-width',         	type=int, default=64,   help="Width of stack entry")
 	parser.add_argument('--data-stack-len',         	type=int, default=20,   help="Length of stack")
 	parser.add_argument('--control-width',	           	type=int, default=64,	help="The width of control state")
 	parser.add_argument('--control-heads',	           	type=int, default=1,	help="The number of control question-word attention heads")
-	parser.add_argument('--control-dropout',	        type=float, default=0.0, help="Dropout on the control unit")
+	parser.add_argument('--control-dropout',	        type=float, default=0.2, help="Dropout on the control unit")
 
 	parser.add_argument('--memory-width',	           	type=int, default=128,	help="The width of memory state")
 	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
@@ -110,10 +110,11 @@ def get_args(extend=lambda parser:None):
 	act = {
 		"tanh": tf.tanh,
 		"relu": tf.nn.relu,
+		"sigmoid": tf.nn.sigmoid,
 	}
 
-	for i in ["output_activation"]:
-		args[i] = act[args[i]]
+	for i in ["output_activation", "read_activation"]:
+		args[i] = act[args[i].lower()]
 
 	return args
 

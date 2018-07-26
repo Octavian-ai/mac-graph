@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RUNTIME=$(expr 60 \* 60 \* 1)
+RUNTIME=$(expr 60 \* 60 \* 2)
 COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
 floyd run \
@@ -17,8 +17,5 @@ floyd run \
 		--max-decode-iterations 1 \
 		--num-input-layers 1 \
 		--disable-memory-cell \
-		--read-dropout 0.2 \
-		--control-dropout 0.2 \
 		--memory-width 8 \
-		--disable-control-cell \
 	"

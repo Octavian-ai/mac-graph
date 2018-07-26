@@ -40,7 +40,8 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, taps
 
 		def next_inputs_fn(time, outputs, state, sample_ids):
 			finished = tf.greater(tf.layers.dense(outputs[0], 1, kernel_initializer=tf.zeros_initializer()), 0.5)
-			next_inputs = tf.gather(inputs, time+1)
+			next_inputs = tf.gather(inputs, time)
+			assert time > 0, "You need to put time + 1 above"
 			next_state = state
 			return (finished, next_inputs, next_state)
 
@@ -86,9 +87,9 @@ def static_decode(args, features, inputs, question_state, question_tokens, taps,
 		d_cell_initial = d_cell.zero_state(dtype=tf.float32, batch_size=features["d_batch_size"])
 
 		# Hard-coded unroll of the reasoning network for simplicity
-		states = [(inputs[0], d_cell_initial)]
+		states = [(None, d_cell_initial)]
 		for i in range(args["max_decode_iterations"]):
-			states.append(d_cell(inputs[i+1], states[-1][1]))
+			states.append(d_cell(inputs[i], states[-1][1]))
 
 		# print(states)
 		final_output = states[-1][0][0]
@@ -112,7 +113,7 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 
 	inputs = [
 		tf.layers.dense(question_state, args["control_width"], name=f"question_state_inputs_t{i}") 
-		for i in range(args["max_decode_iterations"]+1)
+		for i in range(args["max_decode_iterations"])
 	]
 
 	if args["use_position_encoding"]:
@@ -121,7 +122,7 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))
 
 	taps = [
-		"question_word_attn", "question_word_query", "KB_attn", "control_state"
+		"question_word_attn", "question_word_query", "KB_attn", "KB_table", "control_state"
 	]
 
 	if args["use_dynamic_decode"]:
@@ -132,7 +133,8 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	final_output, out_taps = r
 
 	for k, v in out_taps.items():
-		tf.summary.image(k, v)
+		if v is not None:
+			tf.summary.image(k, v)
 
 	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["answer_classes"]])
 	return final_output

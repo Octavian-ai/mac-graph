@@ -8,8 +8,10 @@ python -m mac-graph.train \
 	--log-level DEBUG \
 	--disable-kb-node \
 	--max-decode-iterations 1 \
+	--disable-dynamic-decode \
 	--num-input-layers 1 \
 	--disable-memory-cell \
-	--read-dropout 0.2 \
-	--control-dropout 0.2 \
 	--memory-width 8 \
+	--disable-control-cell \
+	--output-activation relu \
+	--read-activation relu \
