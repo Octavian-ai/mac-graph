@@ -15,7 +15,7 @@ def read_from_table(args, features, in_signal, noun, table, width, table_len, ta
 		table = tf.concat([table, ind_col], axis=2)
 		width += args["read_indicator_cols"]
 
-	query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
+	# query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
 	query = tf.layers.dense(in_signal, width)
 
 	if use_mask:
