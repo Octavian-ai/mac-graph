@@ -54,7 +54,7 @@ def model_fn(features, labels, mode, params):
 		question_tokens=question_tokens, 
 		vocab_embedding=vocab_embedding)
 
-	tf.summary.image("logits", tf.expand_dims(tf.expand_dims(logits, -1), -1))
+	tf.summary.image("logits", tf.expand_dims(tf.expand_dims(tf.nn.softmax(logits), 1), -1))
 
 	# --------------------------------------------------------------------------
 	# Calc loss

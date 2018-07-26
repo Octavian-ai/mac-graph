@@ -106,8 +106,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 		return (
 			self.args["answer_classes"],
-			self.features["d_seq_len"],
-			self.features["d_seq_len"],
+			self.features["d_src_len"],
+			self.features["d_src_len"],
 			read_attn_width,
 			self.args["control_width"],
 		)

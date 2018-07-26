@@ -10,6 +10,9 @@ from ..util import *
 # --------------------------------------------------------------------------
 
 def expand_if_needed(t, target=4):
+	if t is None:
+		return t
+
 	while len(t.shape) < target:
 		t = tf.expand_dims(t, -1)
 	return t
@@ -95,11 +98,17 @@ def static_decode(args, features, inputs, question_state, question_tokens, taps,
 		final_output = states[-1][0][0]
 
 		def get_tap(idx):
-			tap = [i[0][idx] for i in states if i[0] is not None]
-			tap = tf.concat(tap, axis=-1)
-			tap = tf.transpose(tap, [0,2,1])
-			tap = expand_if_needed(tap)
-			return tap
+			with tf.name_scope(f"get_tap_{idx}"):
+				tap = [i[0][idx] for i in states if i[0] is not None]
+				for i in tap:
+					if i is None:
+						return None
+
+				tap = tf.concat(tap, axis=-1)
+				if len(tap.shape) == 3:
+					tap = tf.transpose(tap, [0,2,1])
+				tap = expand_if_needed(tap)
+				return tap
 
 		out_taps = {
 			key: get_tap(idx+1)
@@ -128,7 +137,7 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	if args["use_dynamic_decode"]:
 		r = dynamic_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
 	else:
-		d = static_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
+		r = static_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
 
 	final_output, out_taps = r
 

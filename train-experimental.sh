@@ -9,9 +9,7 @@ python -m mac-graph.train \
 	--disable-kb-node \
 	--max-decode-iterations 1 \
 	--disable-dynamic-decode \
-	--num-input-layers 1 \
+	--input-layers 1 \
 	--disable-memory-cell \
-	--memory-width 8 \
+	--read-indicator-rows 1 \
 	--disable-control-cell \
-	--output-activation relu \
-	--read-activation relu \

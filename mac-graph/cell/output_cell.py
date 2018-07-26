@@ -2,7 +2,7 @@
 import tensorflow as tf
 
 
-def output_cell(args, features, in_question_state, in_memory_state):
+def output_cell(args, features, in_question_state, in_memory_state, in_read):
 
 	with tf.name_scope("output_cell"):
 		
@@ -10,6 +10,8 @@ def output_cell(args, features, in_question_state, in_memory_state):
 
 		if args["use_memory_cell"]:
 			in_all.append(in_memory_state)
+		else:
+			in_all.append(in_read)
 
 		v = tf.concat(in_all, -1)
 
