@@ -3,41 +3,34 @@ import tensorflow as tf
 
 from ..util import *
 from ..attention import *
+from ..input import UNK_ID
 
+# TODO: Make indicator row data be special token
 
-# TODO: make len and indicator_rows work together, or remove one arg
 def read_from_table(args, features, in_signal, noun, table, width, table_len, table_max_len, use_mask=False):
 
 	if args["read_indicator_cols"] > 0:
 		ind_col = tf.get_variable(f"{noun}_indicator_col", [1, 1, args["read_indicator_cols"]])
 		ind_col = tf.tile(ind_col, [features["d_batch_size"], tf.shape(table)[1], 1])
 		table = tf.concat([table, ind_col], axis=2)
+		width += args["read_indicator_cols"]
 
-	full_width = width + args["read_indicator_cols"]
-
-	query = tf.layers.dense(in_signal, full_width, activation=tf.nn.tanh)
-	query = tf.layers.dense(in_signal, full_width)
+	query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
+	query = tf.layers.dense(in_signal, width)
 
 	if use_mask:
-		mask  = tf.layers.dense(in_signal, full_width, activation=tf.nn.tanh)
+		mask  = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
 	else:
 		mask = None
 
-	if args["read_indicator_rows"] > 0:
-		# Add a trainable row to the table
-		ind_row = tf.get_variable(f"{noun}_indicator_row", [1, args["read_indicator_rows"], full_width])
-		ind_row = tf.tile(ind_row, [features["d_batch_size"], 1, 1])
-		table = tf.concat([table, ind_row], axis=1)
-		table_len += args["read_indicator_rows"]
-
 
 	output, score = attention(table, query, mask, 
-		word_size=full_width, 
+		word_size=width, 
 		table_len=table_len,
 		table_max_len=table_max_len,
 	)
 
-	output = dynamic_assert_shape(output, [features["d_batch_size"], full_width])
+	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
 	return output, score, table
 
 
@@ -56,12 +49,26 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 		# --------------------------------------------------------------------------
 
 		table = features[f"{noun}s"]
+		table_len = features[f"{noun}s_len"]
 
 		width = args[f"{noun}_width"]
 		full_width = width * args["embed_width"]
 
 		d_len = tf.shape(table)[1]
 		assert table.shape[-1] == width
+
+
+		# --------------------------------------------------------------------------
+		# Extend table if desired
+		# --------------------------------------------------------------------------
+
+		if args["read_indicator_rows"] > 0:
+			# Add a trainable row to the table
+			ind_row_shape = [features["d_batch_size"], args["read_indicator_rows"], width]
+			ind_row = tf.fill(ind_row_shape, tf.cast(UNK_ID, table.dtype))
+			table = tf.concat([table, ind_row], axis=1)
+			table_len += args["read_indicator_rows"]
+			d_len += args["read_indicator_rows"]
 
 		# --------------------------------------------------------------------------
 		# Embed graph tokens
@@ -84,7 +91,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 			noun,
 			emb_kb, 
 			width=full_width, 
-			table_len=features[f"{noun}s_len"], 
+			table_len=table_len, 
 			table_max_len=args[f"{noun}_max_len"])
 
 

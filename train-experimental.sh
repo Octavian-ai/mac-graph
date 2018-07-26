@@ -12,4 +12,5 @@ python -m mac-graph.train \
 	--input-layers 1 \
 	--disable-memory-cell \
 	--read-indicator-rows 1 \
+	--read-indicator-cols 1 \
 	--disable-control-cell \
