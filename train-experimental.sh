@@ -8,10 +8,8 @@ python -m mac-graph.train \
 	--log-level DEBUG \
 	--disable-kb-node \
 	--max-decode-iterations 1 \
-	--disable-dynamic-decode \
 	--input-layers 1 \
 	--disable-memory-cell \
 	--read-indicator-rows 1 \
-	--read-indicator-cols 1 \
 	--disable-control-cell \
-	--enable-attn-score-dense \
+	--disable-dynamic-decode \

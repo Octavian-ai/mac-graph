@@ -4,6 +4,7 @@ import tensorflow as tf
 from ..util import *
 from ..attention import *
 from ..input import UNK_ID
+from ..minception import *
 
 # TODO: Make indicator row data be special token
 
@@ -122,7 +123,10 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 
 		# hack to take questions in
 		# are <space> number <space> and <space> number ...
-		in_signal = [feature["src"][:,2], feature["src"][:,6]]
+		# src  = tf.nn.embedding_lookup(vocab_embedding, features["src"])
+		# src = dynamic_assert_shape(src, [batch_size, seq_len, args["embed_width"]])
+
+		in_signal = [in_question_tokens[:,2], in_question_tokens[:,6]]
 
 		in_signal = tf.concat(in_signal, -1)
 
@@ -164,8 +168,10 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		# final_signal = tf.concat([in_signal, read_data], -1)
 		# final_signal = read_data
 
-		out_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink", activation=tf.nn.tanh)
-		
+		out_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink")
+		out_data = dynamic_assert_shape(out_data, [features["d_batch_size"], args["memory_width"]])
+
+		out_data = mi_activation(out_data)
 
 		# out_data = deeep(
 		# 	final_signal, 
