@@ -176,7 +176,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		out_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink")
 		out_data = dynamic_assert_shape(out_data, [features["d_batch_size"], args["memory_width"]])
 
-		out_data = mi_activation(out_data)
+		out_data, tap_act = mi_activation(out_data, tap=True)
 
 		# out_data = deeep(
 		# 	final_signal, 
@@ -188,7 +188,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 		out_data = dynamic_assert_shape(out_data, [features["d_batch_size"], args["memory_width"]])
 
-		return score, out_data, tap_attns, tap_table
+		return score, out_data, tap_attns, tap_table, tap_act
 
 
 

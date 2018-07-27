@@ -13,7 +13,7 @@ on the bilevel optimization, so let's see how it goes!!
 '''
 
 
-def mi_activation(tensor):
+def mi_activation(tensor, tap=False):
 	with tf.name_scope("mi_activation"):
 		activations = [
 			tf.tanh, tf.nn.sigmoid, tf.nn.relu, tf.identity
@@ -28,7 +28,10 @@ def mi_activation(tensor):
 
 		t = dynamic_assert_shape(t, tf.shape(tensor))
 
-		return t
+		if tap:
+			return t, choice
+		else:
+			return t
 
 
 def mi_residual(tensor, width):

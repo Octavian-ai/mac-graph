@@ -70,7 +70,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, taps
 			scope=decoder_scope)
 
 		out_taps = {
-			key: expand_if_needed(decoded_outputs.rnn_output[idx+1])
+			key: decoded_outputs.rnn_output[idx+1]
 			for idx, key in enumerate(taps)
 		}
 		
@@ -107,7 +107,6 @@ def static_decode(args, features, inputs, question_state, question_tokens, taps,
 				tap = tf.concat(tap, axis=-1)
 				if len(tap.shape) == 3:
 					tap = tf.transpose(tap, [0,2,1])
-				tap = expand_if_needed(tap)
 				return tap
 
 		out_taps = {
@@ -130,20 +129,18 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	
 	tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))
 
-	
+	taps = ["question_word_attn", "question_word_query", "KB_attn", "control_state", "read_act"]
 
 	if args["use_dynamic_decode"]:
-		taps = ["question_word_attn", "question_word_query", "KB_attn", "control_state"]
 		r = dynamic_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
 	else:
-		taps = ["question_word_attn", "question_word_query", "KB_attn", "KB_table", "control_state"]
 		r = static_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
 
 	final_output, out_taps = r
 
 	for k, v in out_taps.items():
 		if v is not None:
-			tf.summary.image(k, v)
+			tf.summary.image(k, expand_if_needed(v))
 
 	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["answer_classes"]])
 	return final_output

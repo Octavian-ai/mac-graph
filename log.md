@@ -110,6 +110,10 @@ The successful station property model does no better than random guessing. I'm e
 	- Dropout improved things! best ever.
 	- 91% after 200k steps
 
+- `6253b97`:
+	- Simplifed down to just a read and transform 
+	- Highest ever 93% after 200k
+
 
 ## Notes on training infrastructure
 
