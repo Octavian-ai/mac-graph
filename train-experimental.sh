@@ -12,4 +12,3 @@ python -m mac-graph.train \
 	--disable-memory-cell \
 	--read-indicator-rows 1 \
 	--disable-control-cell \
-	--disable-dynamic-decode \

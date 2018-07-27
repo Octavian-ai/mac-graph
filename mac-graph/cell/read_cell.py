@@ -168,6 +168,11 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		# final_signal = tf.concat([in_signal, read_data], -1)
 		# final_signal = read_data
 
+		delta = read_data - tf.layers.dense(in_signal, read_data.shape[-1])
+		t_abs = tf.nn.relu(delta) + tf.nn.relu(-delta)
+		score = tf.layers.dense(t_abs, args["answer_classes"])
+		score = mi_activation(score)
+
 		out_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink")
 		out_data = dynamic_assert_shape(out_data, [features["d_batch_size"], args["memory_width"]])
 
@@ -183,7 +188,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 		out_data = dynamic_assert_shape(out_data, [features["d_batch_size"], args["memory_width"]])
 
-		return out_data, tap_attns, tap_table
+		return score, out_data, tap_attns, tap_table
 
 
 
