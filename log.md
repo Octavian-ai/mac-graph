@@ -114,6 +114,8 @@ The successful station property model does no better than random guessing. I'm e
 	- Simplifed down to just a read and transform 
 	- Highest ever 93% after 200k
 
+- `a9651df`: embedding width 64 gave 97% accuracy
+
 
 ## Notes on training infrastructure
 
