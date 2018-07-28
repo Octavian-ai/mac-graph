@@ -13,4 +13,5 @@ python -m mac-graph.train \
 	--read-indicator-rows 1 \
 	--disable-control-cell \
 	--disable-dynamic-decode \
-	--embed-width 64 \
+	--disable-question-state \
+	--read-dropout 0.0 \
