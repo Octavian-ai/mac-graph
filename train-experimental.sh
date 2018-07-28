@@ -14,4 +14,4 @@ python -m mac-graph.train \
 	--disable-control-cell \
 	--disable-dynamic-decode \
 	--disable-question-state \
-	--read-dropout 0.0 \
+	--read-dropout 0.2 \
