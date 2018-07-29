@@ -70,7 +70,20 @@ def model_fn(features, labels, mode, params):
 
 	if mode == tf.estimator.ModeKeys.TRAIN:
 		global_step = tf.train.get_global_step()
-		optimizer = tf.train.AdamOptimizer(args["learning_rate"])
+
+		learning_rate = args["learning_rate"]
+
+		if args["use_lr_finder"]:
+			learning_rate = tf.train.exponential_decay(
+				1E-06, 
+				global_step,
+                decay_steps=1000, 
+                decay_rate=1.1)
+
+		tf.summary.scalar("learning_rate", learning_rate)
+		tf.summary.scalar("global_step", global_step, family="global_step")
+
+		optimizer = tf.train.AdamOptimizer(learning_rate)
 		train_op = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
 
 
@@ -107,7 +120,8 @@ def model_fn(features, labels, mode, params):
 						eval_metric_ops["type_accuracy_"+type_string] = tf.metrics.accuracy(
 							labels=labels, 
 							predictions=predicted_labels, 
-							weights=tf.equal(features["type_string"], type_string))
+							weights=tf.equal(features["type_string"], type_string),
+							family="type_string")
 
 
 			with tf.gfile.GFile(args["answer_classes_path"]) as file:
@@ -118,7 +132,8 @@ def model_fn(features, labels, mode, params):
 					eval_metric_ops["class_accuracy_"+str(answer_class)] = tf.metrics.accuracy(
 						labels=labels, 
 						predictions=predicted_labels, 
-						weights=weights)
+						weights=weights,
+						family="class_accuracy")
 
 		except tf.errors.NotFoundError:
 			pass

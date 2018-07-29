@@ -43,8 +43,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, taps
 
 		def next_inputs_fn(time, outputs, state, sample_ids):
 			finished = tf.greater(tf.layers.dense(outputs[0], 1, kernel_initializer=tf.zeros_initializer()), 0.5)
-			next_inputs = tf.gather(inputs, time+1)
-			# assert time > 0, "You need to put time + 1 above"
+			next_inputs = tf.gather(inputs, time)
 			next_state = state
 			return (finished, next_inputs, next_state)
 

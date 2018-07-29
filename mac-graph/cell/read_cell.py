@@ -156,7 +156,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 			reads.append(in_data_stack[:,0,:])
 
 		read_data = tf.concat(reads, -1)
-		tap_attns = tf.concat(tap_attns, axis=-1)
+		tap_attns = tf.concat(tap_attns, axis=1)
 
 
 		# --------------------------------------------------------------------------

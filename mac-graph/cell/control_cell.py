@@ -36,9 +36,13 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 			)
 			queries.append(question_token_query)
 
-			a = attention(in_question_tokens, question_token_query, 
+			a = attention(
+				table=in_question_tokens, 
+				query=question_token_query, 
 				word_size=token_full_width, 
-				max_len=args["max_seq_len"])
+				table_len=features["src_len"],
+				table_max_len=args["max_seq_len"],
+			)
 
 			attention_calls.append(a)
 

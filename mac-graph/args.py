@@ -92,6 +92,8 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--disable-dynamic-decode', 	action='store_false', dest="use_dynamic_decode")
 	parser.add_argument('--disable-question-state', 	action='store_false', dest="use_question_state")
 	parser.add_argument('--disable-read-abs', 			action='store_false', dest="use_read_abs")
+	parser.add_argument('--enable-lr-finder', 			action='store_true',  dest="use_lr_finder")
+
 
 
 	parser.add_argument('--max-decode-iterations', 		type=int, default=2)
