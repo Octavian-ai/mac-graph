@@ -16,14 +16,18 @@ on the bilevel optimization, so let's see how it goes!!
 def mi_activation(tensor, tap=False):
 	with tf.name_scope("mi_activation"):
 		activations = [
-			tf.tanh, tf.nn.sigmoid, tf.nn.relu, tf.identity
+			tf.tanh, 
+			tf.nn.sigmoid, 
+			tf.nn.relu, 
+			tf.identity, 
+			lambda x: tf.nn.relu(x) + tf.nn.relu(-x)
 		]
 
 		choice = tf.get_variable("activation_choice", [len(activations)])
 		choice = tf.nn.softmax(choice)
 
-		t = [i(tensor) for i in activations]
-		t = [t[i] * choice[i] for i in range(len(activations))]
+		t = [activations[i](tensor) * choice[i] 
+				for i in range(len(activations))]
 		t = sum(t)
 
 		t = dynamic_assert_shape(t, tf.shape(tensor))

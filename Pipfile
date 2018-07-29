@@ -16,6 +16,7 @@ numpy = "*"
 pyyaml = "*"
 tqdm = "*"
 tableprint = "*"
+comet-ml = "*"
 
 
 [requires]

@@ -127,14 +127,17 @@ The successful station property model does no better than random guessing. I'm e
 		- Read output module made big difference:
 			- 97.7%: `read_data - dense(in_signal, 128)` then relu_abs 
 			- 86%: `dense(read_data, width=128)` then tanh
-			- XX%: `dense(read_data, width=128)` then mi_activation
-			- XX%: read_data - dense(in_signal, 128) then plain relu relu(x) performs worse (experiment currently running)
+			- 77%: `dense(read_data, width=128)` then mi_activation
+			- 67%: `read_data - dense(in_signal, 128)` then plain relu relu(x) 
 			- XX%: read_data then relu_abs, i.e. without subtraction of in_signal, performs worse (experiment currently running)
 		- 97%: Having/removing indicator row (e.g. row just containing vocab unknown token) in edges DB made no difference
 		- Output cell activation made big difference:
 			- 50%: tanh (e.g. no better than random)
 			- 97%: mi_activation
 		- Read dropout causes slower convergence but same max accuracy
+
+	- Restoring rest of network:
+		- 96.5%: baseline + read dropout, dynamic decode, question state (2hrs)
 
 
 

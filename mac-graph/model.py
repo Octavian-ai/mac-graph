@@ -80,8 +80,15 @@ def model_fn(features, labels, mode, params):
                 decay_steps=1000, 
                 decay_rate=1.1)
 
-		tf.summary.scalar("learning_rate", learning_rate)
-		tf.summary.scalar("global_step", global_step, family="global_step")
+		tf.summary.scalar("learning_rate", learning_rate, family="hyperparam")
+		tf.summary.scalar("current_step", global_step, family="hyperparam")
+
+		var = tf.trainable_variables()
+		gradients = tf.gradients(loss, var)
+		norms = [tf.norm(i, 2) for i in gradients if i is not None]
+
+		tf.summary.histogram("grad_norm", norms)
+		tf.summary.scalar("grad_norm", tf.reduce_max(norms), family="hyperparam")
 
 		optimizer = tf.train.AdamOptimizer(learning_rate)
 		train_op = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
@@ -120,8 +127,7 @@ def model_fn(features, labels, mode, params):
 						eval_metric_ops["type_accuracy_"+type_string] = tf.metrics.accuracy(
 							labels=labels, 
 							predictions=predicted_labels, 
-							weights=tf.equal(features["type_string"], type_string),
-							family="type_string")
+							weights=tf.equal(features["type_string"], type_string))
 
 
 			with tf.gfile.GFile(args["answer_classes_path"]) as file:
@@ -132,8 +138,7 @@ def model_fn(features, labels, mode, params):
 					eval_metric_ops["class_accuracy_"+str(answer_class)] = tf.metrics.accuracy(
 						labels=labels, 
 						predictions=predicted_labels, 
-						weights=weights,
-						family="class_accuracy")
+						weights=weights)
 
 		except tf.errors.NotFoundError:
 			pass

@@ -1,4 +1,6 @@
 
+from comet_ml import Experiment
+
 import tensorflow as tf
 
 from .estimator import get_estimator
@@ -19,6 +21,9 @@ def train(args):
 
 	# So I don't frigging forget what caused working models
 	save_args(args)
+
+	experiment = Experiment(api_key="bRptcjkrwOuba29GcyiNaGDbj", project_name="macgraph")
+	experiment.log_multiple_params(args)
 
 	estimator = get_estimator(args)
 
