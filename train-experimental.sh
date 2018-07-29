@@ -15,3 +15,4 @@ python -m mac-graph.train \
 	--disable-dynamic-decode \
 	--disable-question-state \
 	--read-dropout 0.0 \
+	--max-gradient-norm 1.0 \

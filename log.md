@@ -120,8 +120,22 @@ The successful station property model does no better than random guessing. I'm e
 	- Sometimes get NaN loss - LR reduction, max norm reduction, seem to help
 
 - `d503000`: 
-	- 97.7%: read_data - dense(in_signal, 128) then "abs" operator (relu(x) + relu(-x)), 
-	- 86%: dense(width=128) then tanh
+	- Achieved best ever performance on station adjacency task (97% 1hr on Floyd CPU, 99% after 1.5hrs on MBP)
+	- This network has an "equality" operator of relu_abs(read_value - expected_value) where `relu_abs(x)=relu(x) + relu(-x)` 
+	- Vocab embedding width of 64 floats
+	- Ablation analysis:
+		- Read output module made big difference:
+			- 97.7%: `read_data - dense(in_signal, 128)` then relu_abs 
+			- 86%: `dense(read_data, width=128)` then tanh
+			- XX%: `dense(read_data, width=128)` then mi_activation
+			- XX%: read_data - dense(in_signal, 128) then plain relu relu(x) performs worse (experiment currently running)
+			- XX%: read_data then relu_abs, i.e. without subtraction of in_signal, performs worse (experiment currently running)
+		- 97%: Having/removing indicator row (e.g. row just containing vocab unknown token) in edges DB made no difference
+		- Output cell activation made big difference:
+			- 50%: tanh (e.g. no better than random)
+			- 97%: mi_activation
+		- Read dropout causes slower convergence but same max accuracy
+
 
 
 ## Notes on training infrastructure
