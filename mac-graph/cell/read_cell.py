@@ -170,7 +170,7 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 
 		if args["use_read_abs"]:
 			# Achieves 97.7%
-			delta = read_data - tf.layers.dense(in_signal, read_data.shape[-1])
+			delta = read_data
 			t_abs = tf.nn.relu(delta) + tf.nn.relu(-delta)
 			out_data = t_abs
 

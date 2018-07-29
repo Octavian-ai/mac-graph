@@ -129,7 +129,7 @@ The successful station property model does no better than random guessing. I'm e
 			- 86%: `dense(read_data, width=128)` then tanh
 			- 77%: `dense(read_data, width=128)` then mi_activation
 			- 67%: `read_data - dense(in_signal, 128)` then plain relu relu(x) 
-			- XX%: read_data then relu_abs, i.e. without subtraction of in_signal, performs worse (experiment currently running)
+			- 97.7%: read_data then relu_abs, i.e. without subtraction of in_signal
 		- 97%: Having/removing indicator row (e.g. row just containing vocab unknown token) in edges DB made no difference
 		- Output cell activation made big difference:
 			- 50%: tanh (e.g. no better than random)
@@ -138,6 +138,13 @@ The successful station property model does no better than random guessing. I'm e
 
 	- Restoring rest of network:
 		- 96.5%: baseline + read dropout, dynamic decode, question state (2hrs)
+
+- `2d434c1`: 
+	- Adding back control, memory, dynamic decode worked fine
+	- causes of nan loss
+		- 2 decode iterations
+		- enabling kb_nodes
+		- adding input layer
 
 
 
