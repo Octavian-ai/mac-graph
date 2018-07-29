@@ -89,7 +89,7 @@ The successful station property model does no better than random guessing. I'm e
 
 - `e120afc`:
 	- Was using static decode when I believed dynamic decode
-	- Fastest training seen (72% after 42min). 
+	- Fastest training seen (72% after 42min).
 	- Achieved 80% after 600k (5hrs) training steps
 	- Should achieve 100% in 10 min!
 
@@ -115,7 +115,13 @@ The successful station property model does no better than random guessing. I'm e
 	- Highest ever 93% after 200k
 
 - `a9651df`: embedding width 64 gave 97% accuracy
-- `55f0039`: After an 1 1/2 hours saw 99% max accuracy
+- `55f0039`: 
+	- After 1 1/2 hours saw 99% max accuracy
+	- Sometimes get NaN loss - LR reduction, max norm reduction, seem to help
+
+- `d503000`: 
+	- 97.7%: read_data - dense(in_signal, 128) then "abs" operator (relu(x) + relu(-x)), 
+	- 86%: dense(width=128) then tanh
 
 
 ## Notes on training infrastructure

@@ -168,20 +168,19 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		# final_signal = tf.concat([in_signal, read_data], -1)
 		# final_signal = read_data
 
-		delta = read_data - tf.layers.dense(in_signal, read_data.shape[-1])
-		t_abs = tf.nn.relu(delta) + tf.nn.relu(-delta)
-		out_data = tf.nn.dropout(t_abs, 1.0-args["read_dropout"])
-		# score = tf.layers.dense(t_abs, args["answer_classes"])
-		# score, tap_act = mi_activation(score)
+		if args["use_read_abs"]:
+			# Achieves 97.7%
+			delta = read_data - tf.layers.dense(in_signal, read_data.shape[-1])
+			t_abs = tf.nn.relu(delta) + tf.nn.relu(-delta)
+			out_data = t_abs
 
+		else:
+			# Achieves 86%
+			out_data = tf.layers.dense(read_data, args["memory_width"], 
+				name="data_read_shrink", 
+				activation=args["read_activation"])
 
-		# old style
-
-		# out_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink")
-		# out_data = dynamic_assert_shape(out_data, [features["d_batch_size"], args["memory_width"]])
-		# out_data, tap_act = mi_activation(out_data, tap=True)
-		# out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
-		# out_data = dynamic_assert_shape(out_data, [features["d_batch_size"], args["memory_width"]])
+		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 
 		return out_data, tap_attns, tap_table
 

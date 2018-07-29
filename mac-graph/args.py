@@ -5,6 +5,8 @@ import yaml
 import pathlib
 import tensorflow as tf
 
+from .minception import mi_activation
+
 global_args = {}
 
 def get_args(extend=lambda parser:None):
@@ -77,7 +79,7 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--memory-width',	           	type=int, default=128,	help="The width of memory state")
 	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
 
-	parser.add_argument('--output-activation',			type=str, default="tanh")
+	parser.add_argument('--output-activation',			type=str, default="mi")
 	parser.add_argument('--answer-classes',	       		type=int, default=8,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
 	
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
@@ -89,6 +91,8 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--disable-memory-cell', 		action='store_false', dest="use_memory_cell")
 	parser.add_argument('--disable-dynamic-decode', 	action='store_false', dest="use_dynamic_decode")
 	parser.add_argument('--disable-question-state', 	action='store_false', dest="use_question_state")
+	parser.add_argument('--disable-read-abs', 			action='store_false', dest="use_read_abs")
+
 
 	parser.add_argument('--max-decode-iterations', 		type=int, default=2)
 	
@@ -115,6 +119,7 @@ def get_args(extend=lambda parser:None):
 		"tanh": tf.tanh,
 		"relu": tf.nn.relu,
 		"sigmoid": tf.nn.sigmoid,
+		"mi": mi_activation
 	}
 
 	for i in ["output_activation", "read_activation"]:

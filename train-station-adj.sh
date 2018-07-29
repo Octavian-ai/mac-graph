@@ -8,8 +8,10 @@ python -m mac-graph.train \
 	--log-level DEBUG \
 	--disable-kb-node \
 	--max-decode-iterations 1 \
-	--num-input-layers 1 \
-	--read-indicator-rows 1 \
+	--input-layers 1 \
 	--disable-memory-cell \
-	--read-dropout 0.2 \
-	--control-dropout 0.2 \
+	--read-indicator-rows 1 \
+	--disable-control-cell \
+	--disable-dynamic-decode \
+	--disable-question-state \
+	--read-dropout 0.0 \
