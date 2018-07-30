@@ -140,11 +140,14 @@ The successful station property model does no better than random guessing. I'm e
 		- 96.5%: baseline + read dropout, dynamic decode, question state (2hrs)
 
 - `2d434c1`: 
-	- Adding back control, memory, dynamic decode worked fine
+	- Adding back memory, dynamic decode worked fine
 	- causes of nan loss
+		- or did it already have this problem?!??
 		- 2 decode iterations
 		- enabling kb_nodes
 		- adding input layer
+		- add back control
+		- read-dropout 0.2
 
 
 

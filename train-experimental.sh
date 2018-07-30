@@ -9,4 +9,9 @@ python -m mac-graph.train \
 	--disable-kb-node \
 	--max-decode-iterations 1 \
 	--input-layers 1 \
+	--disable-memory-cell \
+	--read-indicator-rows 1 \
+	--disable-control-cell \
+	--disable-dynamic-decode \
+	--disable-question-state \
 	--read-dropout 0.0 \
