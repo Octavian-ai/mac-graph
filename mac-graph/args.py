@@ -93,6 +93,8 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--disable-question-state', 	action='store_false', dest="use_question_state")
 	parser.add_argument('--disable-read-abs', 			action='store_false', dest="use_read_abs")
 	parser.add_argument('--enable-lr-finder', 			action='store_true',  dest="use_lr_finder")
+	parser.add_argument('--enable-tf-debug', 			action='store_true',  dest="use_tf_debug")
+	parser.add_argument('--enable-comet', 				action='store_true',  dest="use_comet")
 
 
 

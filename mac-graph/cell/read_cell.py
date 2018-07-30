@@ -8,7 +8,7 @@ from ..minception import *
 
 # TODO: Make indicator row data be special token
 
-def read_from_table(args, features, in_signal, noun, table, width, table_len, table_max_len, use_mask=False):
+def read_from_table(args, features, in_signal, noun, table, width, table_len, table_max_len):
 
 	if args["read_indicator_cols"] > 0:
 		ind_col = tf.get_variable(f"{noun}_indicator_col", [1, 1, args["read_indicator_cols"]])
@@ -19,13 +19,7 @@ def read_from_table(args, features, in_signal, noun, table, width, table_len, ta
 	# query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
 	query = tf.layers.dense(in_signal, width)
 
-	if use_mask:
-		mask  = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
-	else:
-		mask = None
-
-
-	output, score = attention(table, query, mask, 
+	output, score = attention(table, query,
 		word_size=width, 
 		table_len=table_len,
 		table_max_len=table_max_len,

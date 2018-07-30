@@ -2,6 +2,7 @@
 import tensorflow as tf
 
 from .util import dynamic_assert_shape
+from .const import EPSILON
 
 '''
 The mini-inception (mi) library
