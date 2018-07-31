@@ -17,7 +17,7 @@ def assert_rank(tensor, rank):
 	assert len(tensor.shape) == rank, f"{tensor.name} is wrong rank, expected {rank} got {len(tensor.shape)}"
 
 
-def dynamic_assert_shape(tensor, shape):
+def dynamic_assert_shape(tensor, shape, name=None):
 	"""
 	Check that a tensor has a shape given by a list of constants and tensor values.
 
@@ -40,10 +40,11 @@ def dynamic_assert_shape(tensor, shape):
 	lhs = tf.shape(tensor)
 	rhs = tf.convert_to_tensor(shape, dtype=lhs.dtype)
 
-	assert_op = tf.assert_equal(lhs, rhs, message=f"Asserting shape of {tensor.name}", summarize=10)
+	assert_op = tf.assert_equal(lhs, rhs, message=f"Asserting shape of {tensor.name}", summarize=10, name=name)
 
 	with tf.control_dependencies([assert_op]):
 		return tf.identity(tensor, name="dynamic_assert_shape")
+
 
 
 def minimize_clipped(optimizer, value, max_gradient_norm):

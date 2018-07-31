@@ -6,21 +6,34 @@ from .const import EPSILON
 
 
 def softmax_with_masking(logits, mask, axis):
-	assert mask.dtype == tf.bool
-	mask = dynamic_assert_shape(mask, tf.shape(logits))
-	assert axis < len(logits.shape)
+	with tf.name_scope("softmax_with_masking"):
+		assert mask.dtype == tf.bool
+		mask = dynamic_assert_shape(mask, tf.shape(logits))
+		assert axis < len(logits.shape)
+		logits = tf.check_numerics(logits, "logits")
 
-	# For numerical stability shrink the values
-	logit_max = tf.reduce_max(tf.boolean_mask(logits, mask))
 
-	# Numerator
-	l = tf.exp(logits - logit_max) * tf.cast(mask, logits.dtype)
-	
-	# Denominator
-	d = tf.reduce_sum(l, axis) 
-	d = tf.expand_dims(d, axis)
+		# For numerical stability shrink the values
+		logits_max = tf.reduce_max(tf.boolean_mask(logits, mask))
+		logits_max = tf.check_numerics(logits_max, "logit_max")
 
-	return l / (d + EPSILON)
+		# Numerator
+		l_delta = (logits * tf.cast(mask, logits.dtype)) - logits_max
+		l_delta = tf.check_numerics(l_delta, "l_delta")
+
+		with tf.control_dependencies([tf.assert_less_equal(l_delta, 0.0)]):
+			
+			l = tf.exp(l_delta)
+			l = tf.check_numerics(l, "numerator pre mask")
+			l *= tf.cast(mask, logits.dtype)
+			l = tf.check_numerics(l, "numerator")
+			
+			# Denominator
+			d = tf.reduce_sum(l, axis) 
+			d = tf.expand_dims(d, axis)
+			d = tf.check_numerics(d, "denominator")
+
+			return l / (d + EPSILON)
 
 
 def attention(table, query, word_size=None, table_len=None, table_max_len=None):
@@ -70,7 +83,7 @@ def attention(table, query, word_size=None, table_len=None, table_max_len=None):
 			scores_mask = dynamic_assert_shape(scores_mask, scores_shape)
 			scores = softmax_with_masking(scores, mask=scores_mask, axis=1)
 		else:
-			scores = tf.nn.softmax(scores, axis=1)
+			scores = tf.nn.softmax(scores + EPSILON, axis=1)
 
 		scores = dynamic_assert_shape(scores, scores_shape)
 		
@@ -78,6 +91,7 @@ def attention(table, query, word_size=None, table_len=None, table_max_len=None):
 
 		output = tf.reduce_sum(weighted_db, 1)
 		output = dynamic_assert_shape(output, q_shape)
+		output = tf.check_numerics(output, "attention_output")
 
 		return output, scores
 

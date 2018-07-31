@@ -1,7 +1,7 @@
 
 import tensorflow as tf
 
-from .util import dynamic_assert_shape
+from .util import *
 from .const import EPSILON
 
 '''
@@ -26,6 +26,7 @@ def mi_activation(tensor, tap=False):
 
 		choice = tf.get_variable("activation_choice", [len(activations)])
 		choice = tf.nn.softmax(choice)
+		choice = tf.check_numerics(choice, "activation_choice")
 
 		t = [activations[i](tensor) * choice[i] 
 				for i in range(len(activations))]

@@ -72,12 +72,12 @@ if __name__ == "__main__":
 	if not args["skip_vocab"]:
 		logger.info("Build vocab")
 		vocab = Vocab.build(args, lambda i:gqa_to_tokens(args, i))
+		logger.info(f"Wrote {len(vocab)} vocab entries")
 		logger.debug(f"vocab: {vocab.table}")
 		print()
 	else:
 		vocab = Vocab.load(args)
 
-	logger.info(f"Wrote {len(vocab)} vocab entries")
 
 	question_types = Counter()
 	answer_classes = Counter()

@@ -51,7 +51,9 @@ def get_args(extend=lambda parser:None):
 	# Network topology
 	# --------------------------------------------------------------------------
 
-	parser.add_argument('--vocab-size',	           		type=int, default=90,   help="How many different words are in vocab")
+	parser.add_argument('--vocab-size',	           		type=int, default=128,   help="How many different words are in vocab")
+	parser.add_argument('--answer-classes',	       		type=int, default=128,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
+	
 	parser.add_argument('--max-seq-len',	  	 		type=int, default=20,   help="Maximum length of question token list")
 	
 	parser.add_argument('--input-layers',	   			type=int, default=3,    help="How many input layers are in the english encoding LSTM stack")
@@ -80,7 +82,6 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
 
 	parser.add_argument('--output-activation',			type=str, default="mi")
-	parser.add_argument('--answer-classes',	       		type=int, default=8,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
 	
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')

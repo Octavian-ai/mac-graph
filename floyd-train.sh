@@ -15,8 +15,4 @@ floyd run \
 		--input-dir /input \
 		--output-dir /output \
 		--model-dir /output/model \
-		--max-decode-iterations 1 \
-		--input-layers 1 \
-		--answer-classes 86 \
-		--vocab-size 86 \
 	"
