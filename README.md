@@ -25,8 +25,8 @@ This codebase implements graph question answering (GQA), using [CLEVR-graph](htt
 			<td>99% accuracy after 10k training steps</td></tr>
 		<tr>
 			<td>Answer if stations adjacent</td>
-			<td><strong>In progress</strong></td>
-			<td>Unknown</td>
+			<td><strong>Complete</strong></td>
+			<td>99% accuracy after 200k training steps</td>
 		</tr>
 		<tr>
 			<td>Count length of shortest path between nodes</td>

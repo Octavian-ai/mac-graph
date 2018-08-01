@@ -12,16 +12,16 @@ def softmax_with_masking(logits, mask, axis):
 		assert axis < len(logits.shape)
 		logits = tf.check_numerics(logits, "logits")
 
-
 		# For numerical stability shrink the values
 		logits_max = tf.reduce_max(tf.boolean_mask(logits, mask))
 		logits_max = tf.check_numerics(logits_max, "logit_max")
 
 		# Numerator
-		l_delta = (logits * tf.cast(mask, logits.dtype)) - logits_max
+		l_delta = (logits - logits_max) * tf.cast(mask, logits.dtype)
 		l_delta = tf.check_numerics(l_delta, "l_delta")
 
-		with tf.control_dependencies([tf.assert_less_equal(l_delta, 0.0)]):
+		# This assert fails, howwwww??
+		with tf.control_dependencies([tf.assert_less_equal(l_delta, 0.0, summarize=100000, data=[logits_max, mask, logits])]):
 			
 			l = tf.exp(l_delta)
 			l = tf.check_numerics(l, "numerator pre mask")

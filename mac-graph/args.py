@@ -44,8 +44,8 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--batch-size',            		type=int, default=32,   help="Number of items in a full batch")
 	parser.add_argument('--max-steps',             		type=int, default=None)
 		
-	parser.add_argument('--max-gradient-norm',     		type=float, default=4.0)
-	parser.add_argument('--learning-rate',         		type=float, default=0.001)
+	parser.add_argument('--max-gradient-norm',     		type=float, default=30.0)
+	parser.add_argument('--learning-rate',         		type=float, default=1E-2)
 
 	# --------------------------------------------------------------------------
 	# Network topology

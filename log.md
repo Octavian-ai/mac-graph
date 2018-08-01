@@ -24,7 +24,9 @@ This is the first (easy) question I've got working. Here's a log of known workin
 	- Adding residual connections increased accuracy 25%, achieving 100% after 10k steps
 	- `./train-station-properties.sh`
 
-- Commit `636d354` as above
+- `636d354`: as above
+
+- `e901f89`: 82% after an hour on Floyd
 
 
 ### Station Adjacency
@@ -140,7 +142,8 @@ The successful station property model does no better than random guessing. I'm e
 		- 96.5%: baseline + read dropout, dynamic decode, question state (2hrs)
 
 - `2d434c1`: 
-	- currently exeriences nan loss at times
+	- currently exeriences nan loss at times from softmax
+	- softmax args are more than 0 despite subtracting max
 
 
 
