@@ -82,6 +82,8 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
 
 	parser.add_argument('--output-activation',			type=str, default="mi")
+	parser.add_argument('--output-layers',				type=int, default=2)
+
 	
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')

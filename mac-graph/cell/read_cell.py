@@ -115,13 +115,6 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		if in_control_state is not None and args["use_control_cell"]:
 			in_signal.append(in_control_state)
 
-		# hack to take questions in
-		# are <space> number <space> and <space> number ...
-		# src  = tf.nn.embedding_lookup(vocab_embedding, features["src"])
-		# src = dynamic_assert_shape(src, [batch_size, seq_len, args["embed_width"]])
-
-		in_signal = [in_question_tokens[:,2], in_question_tokens[:,6]]
-
 		in_signal = tf.concat(in_signal, -1)
 
 		reads = []
@@ -152,27 +145,14 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		read_data = tf.concat(reads, -1)
 		tap_attns = tf.concat(tap_attns, axis=1)
 
-
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
 		
-		# in theory compare if the output and signal are similar
-
-		# final_signal = tf.concat([in_signal, read_data], -1)
-		# final_signal = read_data
-
-		if args["use_read_abs"]:
-			# Achieves 97.7%
-			delta = read_data
-			t_abs = tf.nn.relu(delta) + tf.nn.relu(-delta)
-			out_data = t_abs
-
-		else:
-			# Achieves 86%
-			out_data = tf.layers.dense(read_data, args["memory_width"], 
-				name="data_read_shrink", 
-				activation=args["read_activation"])
+		# This may or may not decrease accuracy as it's an extra dense layer and mixed activation
+		out_data = tf.layers.dense(read_data, read_data.shape[-1], 
+			name="read_data_out", 
+			activation=args["read_activation"])
 
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 

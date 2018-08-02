@@ -17,11 +17,11 @@ on the bilevel optimization, so let's see how it goes!!
 def mi_activation(tensor, tap=False):
 	with tf.name_scope("mi_activation"):
 		activations = [
+			tf.nn.relu, 
+			lambda x: tf.nn.relu(-x), # Combining this with previous gives PRelu
 			tf.tanh, 
 			tf.nn.sigmoid, 
-			tf.nn.relu, 
 			tf.identity, 
-			lambda x: tf.nn.relu(x) + tf.nn.relu(-x)
 		]
 
 		choice = tf.get_variable("activation_choice", [len(activations)])
