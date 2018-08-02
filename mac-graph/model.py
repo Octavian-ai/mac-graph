@@ -9,6 +9,7 @@ from .cell import *
 from .util import *
 from .hooks import *
 from .input import *
+from .optimizer import *
 
 def model_fn(features, labels, mode, params):
 
@@ -77,16 +78,17 @@ def model_fn(features, labels, mode, params):
 			learning_rate = tf.train.exponential_decay(
 				1E-06, 
 				global_step,
-                decay_steps=1000, 
-                decay_rate=1.1)
+				decay_steps=1000, 
+				decay_rate=1.1)
 
-		else:
-			# Exponential decay with restarts
-			learning_rate = tf.train.exponential_decay(
-				1E-06, 
-				tf.mod(global_step, 85*1000),
-                decay_steps=1000, 
-                decay_rate=1.1)
+		elif args["use_lr_decay"]:
+			learning_rate = args["learning_rate"] - tf.train.exponential_decay(
+				args["learning_rate"], 
+				global_step,
+				decay_steps=10000, 
+				decay_rate=0.9)
+
+
 
 		tf.summary.scalar("learning_rate", learning_rate, family="hyperparam")
 		tf.summary.scalar("current_step", global_step, family="hyperparam")
@@ -100,7 +102,7 @@ def model_fn(features, labels, mode, params):
 
 		optimizer = tf.train.AdamOptimizer(learning_rate)
 		train_op = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
-
+	
 
 	# --------------------------------------------------------------------------
 	# Predictions

@@ -47,9 +47,10 @@ def dynamic_assert_shape(tensor, shape, name=None):
 
 
 
-def minimize_clipped(optimizer, value, max_gradient_norm):
+def minimize_clipped(optimizer, value, max_gradient_norm, var_blacklist=[]):
 	global_step = tf.train.get_global_step()
 	var = tf.trainable_variables()
+	var = list(set(var) - set(var_blacklist))
 	gradients = tf.gradients(value, var)
 	clipped_gradients, _ = tf.clip_by_global_norm(gradients, max_gradient_norm)
 	return optimizer.apply_gradients(zip(clipped_gradients, var), global_step=global_step)

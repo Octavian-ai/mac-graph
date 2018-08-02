@@ -45,7 +45,7 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--max-steps',             		type=int, default=None)
 		
 	parser.add_argument('--max-gradient-norm',     		type=float, default=30.0)
-	parser.add_argument('--learning-rate',         		type=float, default=1E-2)
+	parser.add_argument('--learning-rate',         		type=float, default=2.4E-3)
 
 	# --------------------------------------------------------------------------
 	# Network topology
@@ -78,7 +78,7 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--control-heads',	           	type=int, default=1,	help="The number of control question-word attention heads")
 	parser.add_argument('--control-dropout',	        type=float, default=0.2, help="Dropout on the control unit")
 
-	parser.add_argument('--memory-width',	           	type=int, default=128,	help="The width of memory state")
+	parser.add_argument('--memory-width',	           	type=int, default=64,	help="The width of memory state")
 	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
 
 	parser.add_argument('--output-activation',			type=str, default="mi")
@@ -94,12 +94,14 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--disable-question-state', 	action='store_false', dest="use_question_state")
 	parser.add_argument('--disable-read-abs', 			action='store_false', dest="use_read_abs")
 	parser.add_argument('--enable-lr-finder', 			action='store_true',  dest="use_lr_finder")
+	parser.add_argument('--enable-lr-decay', 			action='store_true',  dest="use_lr_decay")
+
 	parser.add_argument('--enable-tf-debug', 			action='store_true',  dest="use_tf_debug")
 	parser.add_argument('--enable-comet', 				action='store_true',  dest="use_comet")
 
 
 
-	parser.add_argument('--max-decode-iterations', 		type=int, default=2)
+	parser.add_argument('--max-decode-iterations', 		type=int, default=8)
 	
 
 	args = vars(parser.parse_args())
