@@ -44,16 +44,13 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 			in_control_state, in_memory_state = state
 
-			if self.args["use_control_cell"]:
-				out_control_state = control_cell(self.args, self.features, 
-					in_control_state, self.question_state, self.question_tokens)
-			else:
-				out_control_state = None
+			out_control_state = control_cell(self.args, self.features, 
+				in_control_state, self.question_state, self.question_tokens)
 
 			read = read_cell(self.args, self.features, 
 				in_memory_state, out_control_state, self.vocab_embedding)
 			
-			out_memory_state = memory_cell(self.args, self.features,
+			out_memory_state = memory_cell(self.args, 
 				in_memory_state, read, out_control_state)
 			
 			output = output_cell(self.args, self.features,
@@ -68,7 +65,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		"""
 		Returns a size tuple (control_state, memory_state)
 		"""
-		return (self.args["control_width"], self.args["memory_width"])
+		return (self.args["bus_width"], self.args["bus_width"])
 
 	@property
 	def output_size(self):

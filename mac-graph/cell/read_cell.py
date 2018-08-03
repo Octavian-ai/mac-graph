@@ -54,7 +54,7 @@ def read_from_kb(args, features, vocab_embedding, in_all, noun="node"):
 
 
 
-def read_cell(args, features, in_memory_state, in_control_state, vocab_embedding):
+def read_cell(args, features, in_memory_state, in_control, vocab_embedding):
 	"""
 	A read cell
 
@@ -69,30 +69,22 @@ def read_cell(args, features, in_memory_state, in_control_state, vocab_embedding
 		# Read data
 		# --------------------------------------------------------------------------
 
-		# We may run the network with no control cell
-		if in_control_state is not None:
-			in_all = tf.concat([in_memory_state, in_control_state], -1)
-		else:
-			in_all = in_memory_state
+		assert_shape(in_memory_state, [args["bus_width"]])
+		assert_shape(in_control,      [args["bus_width"]])
 
-		reads = []
-
-		if args["use_kb_nodes"]:
-			reads.append(read_from_kb(args, features, vocab_embedding, in_all, "node"))
-
-		if args["use_kb_edges"]:
-			reads.append(read_from_kb(args, features, vocab_embedding, in_all, "edge"))
-
-		read_data = tf.concat(reads, -1)
+		in_all = tf.concat([in_memory_state, in_control], -1)
+		
+		read_node = read_from_kb(args, features, vocab_embedding, in_all, "node")
+		read_edge = read_from_kb(args, features, vocab_embedding, in_all, "edge")
+		read_data = tf.concat([read_node, read_edge], -1)
 
 		# --------------------------------------------------------------------------
 		# Shrink results
 		# --------------------------------------------------------------------------
 
-		read_data = tf.layers.dense(read_data, args["memory_width"], name="data_read_shrink", activation=tf.nn.tanh)
-		
-		read_data = dynamic_assert_shape(read_data, 
-			[features["d_batch_size"], args["memory_width"]])
+		read_data = tf.layers.dense(read_data, args["bus_width"], name="data_read_shrink", activation=tf.nn.tanh)
+		read_data = dynamic_assert_shape(read_data, [features["d_batch_size"], args["bus_width"]])
+
 
 		return read_data
 

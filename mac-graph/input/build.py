@@ -3,12 +3,11 @@ import tensorflow as tf
 import pathlib
 from collections import Counter
 import yaml
-from tqdm import tqdm
 
 from .graph_util import *
 from .text_util import *
 from .util import *
-from .args import *
+from ..args import *
 
 import logging
 logger = logging.getLogger(__name__)
@@ -26,10 +25,10 @@ def generate_record(args, vocab, doc):
 	label = vocab.lookup(pretokenize_json(doc["answer"]))
 
 	if label == UNK_ID:
-		raise ValueError(f"We're only including questions that have in-vocab answers ({doc['answer']})")
+		raise ValueError("We're only including questions that have in-vocab answers")
 
 	if label >= args["answer_classes"]:
-		raise ValueError(f"Label {label} greater than answer classes {args['answer_classes']}")
+		raise ValueError("Label greater than answer classes")
 
 	nodes, edges = graph_to_table(args, vocab, doc["graph"])
 
@@ -57,11 +56,14 @@ def generate_record(args, vocab, doc):
 
 if __name__ == "__main__":
 
-	args = get_args()
+	def extras(parser):
+		parser.add_argument('--skip-vocab', action='store_true')
+		parser.add_argument('--gqa-path', type=str, default="./input_data/raw/gqa.yaml")
+
+	args = get_args(extras)
 
 	logging.basicConfig()
 	logger.setLevel(args["log_level"])
-	logging.getLogger("mac-graph.input.util").setLevel(args["log_level"])
 
 	pathlib.Path(args["input_dir"]).mkdir(parents=True, exist_ok=True)
 
@@ -73,34 +75,26 @@ if __name__ == "__main__":
 	else:
 		vocab = Vocab.load(args)
 
-	logger.info(f"Wrote {len(vocab)} vocab entries")
-
 	written = 0
 
-	question_types = Counter()
-	answer_classes = Counter()
+	types = Counter()
 
 	logger.info("Generate TFRecords")
 	with Partitioner(args) as p:
-		for i in tqdm(read_gqa(args)):
+		for i in read_gqa(args):
 			try:
 				p.write(generate_record(args, vocab, i))
-				question_types[i["question"]["type_string"]] += 1
-				answer_classes[i["answer"]] += 1
+				types[i["question"]["type_string"]] += 1
 				written += 1
 			except ValueError as ex:
 				logger.debug(ex)
 				pass
 
+
+	with tf.gfile.GFile(args["types_path"], "w") as file:
+		yaml.dump(dict(types), file)
+
 	logger.info(f"Wrote {written} TFRecords")
-
-	with tf.gfile.GFile(args["question_types_path"], "w") as file:
-		yaml.dump(dict(question_types), file)
-
-	with tf.gfile.GFile(args["answer_classes_path"], "w") as file:
-		yaml.dump(dict(answer_classes), file)
-
-	
 
 
 

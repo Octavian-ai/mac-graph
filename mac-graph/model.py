@@ -3,12 +3,13 @@ import tensorflow as tf
 import numpy as np
 import yaml
 
+from pbt import gen_scaffold
+
 from .cell import execute_reasoning
 from .encoder import encode_input
 from .cell import *
 from .util import *
 from .hooks import *
-from .input import *
 
 def model_fn(features, labels, mode, params):
 
@@ -24,8 +25,6 @@ def model_fn(features, labels, mode, params):
 	eval_metric_ops = None
 	predictions = None
 	eval_hooks = None
-
-	vocab = Vocab.load(args)
 
 	# --------------------------------------------------------------------------
 	# Shared variables
@@ -47,14 +46,10 @@ def model_fn(features, labels, mode, params):
 	
 	question_tokens, question_state = encode_input(args, features, vocab_embedding)
 
-	logits = execute_reasoning(args, 
-		features=features, 
-		labels=labels,
+	logits = execute_reasoning(args, features, labels,
 		question_tokens=question_tokens, 
 		question_state=question_state,
 		vocab_embedding=vocab_embedding)
-
-	tf.summary.histogram("answer", logits)
 
 	# --------------------------------------------------------------------------
 	# Calc loss
@@ -99,29 +94,13 @@ def model_fn(features, labels, mode, params):
 			"accuracy": tf.metrics.accuracy(labels=labels, predictions=predicted_labels),
 		}
 	
-		try:
-			with tf.gfile.GFile(args["question_types_path"]) as file:
-				doc = yaml.load(file)
-				for type_string in doc.keys():
-					if args["type_string_prefix"] is None or type_string.startswith(args["type_string_prefix"]):
-						eval_metric_ops["type_accuracy_"+type_string] = tf.metrics.accuracy(
-							labels=labels, 
-							predictions=predicted_labels, 
-							weights=tf.equal(features["type_string"], type_string))
-
-
-			with tf.gfile.GFile(args["answer_classes_path"]) as file:
-				doc = yaml.load(file)
-				for answer_class in doc.keys():
-					e = vocab.lookup(pretokenize_json(answer_class))
-					weights = tf.equal(labels, tf.cast(e, tf.int64))
-					eval_metric_ops["class_accuracy_"+str(answer_class)] = tf.metrics.accuracy(
-						labels=labels, 
-						predictions=predicted_labels, 
-						weights=weights)
-
-		except tf.errors.NotFoundError:
-			pass
+		with tf.gfile.GFile(args["types_path"]) as file:
+			doc = yaml.load(file)
+			for type_string in doc.keys():
+				eval_metric_ops["z_accuracy_"+type_string] = tf.metrics.accuracy(
+					labels=labels, 
+					predictions=predicted_labels, 
+					weights=tf.equal(features["type_string"], type_string))
 
 		eval_hooks = [FloydHubMetricHook(eval_metric_ops)]
 
@@ -137,7 +116,7 @@ def model_fn(features, labels, mode, params):
 		export_outputs=None,
 		training_chief_hooks=None,
 		training_hooks=None,
-		scaffold=None,
+		scaffold=gen_scaffold(params),
 		evaluation_hooks=eval_hooks,
 		prediction_hooks=None
 	)

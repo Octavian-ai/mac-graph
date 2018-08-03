@@ -3,28 +3,24 @@ import tensorflow as tf
 import numpy as np
 from collections import Counter
 
-from .args import get_args
-from .estimator import get_estimator
+from .model import model_fn
 from .input import *
+from .args import get_args
+
 
 
 def predict(args):
-	estimator = get_estimator(args)
+	estimator = tf.estimator.Estimator(model_fn, model_dir=args["model_dir"], params=args)
 	predictions = estimator.predict(input_fn=gen_input_fn(args, "predict"))
 
 	vocab   = Vocab.load(args)
 	stats = Counter()
-	answer_classes = Counter()
-	predicted_classes = Counter()
 
-	# print("Failed predictions:")
+	print("Failed predictions:")
 
 	for p in predictions:
 
 		type_string = vocab.prediction_value_to_string(p["type_string"])
-		answer_classes[vocab.prediction_value_to_string(p["actual_label"])] += 1
-		predicted_classes[vocab.prediction_value_to_string(p["predicted_label"])] += 1
-
 
 		if p["predicted_label"] == p["actual_label"]:
 			stats["correct"] += 1
@@ -35,21 +31,13 @@ def predict(args):
 			stats["incorrect_"+type_string] += 1
 
 
-		for k, v in p.items():
-			s = vocab.prediction_value_to_string(v)
-			print(f"{k}: {s}")
-		print("-------")
+			for k, v in p.items():
+				s = vocab.prediction_value_to_string(v)
+				print(f"{k}: {s}")
+			print("-------")
 
-	print(f"\nStats:")
+	print(f"Stats:")
 	for k, v in stats.items():
-		print(f"{k}: {v}")
-
-	print(f"\nPredicted classes:")
-	for k, v in predicted_classes.items():
-		print(f"{k}: {v}")
-
-	print(f"\nAnswer classes:")
-	for k, v in answer_classes.items():
 		print(f"{k}: {v}")
 
 
