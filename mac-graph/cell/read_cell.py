@@ -154,6 +154,10 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 			name="read_data_out", 
 			activation=args["read_activation"])
 
+		# Add residual
+		out_data += read_data
+		out_data = mi_activation(out_data)
+
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 
 		return out_data, tap_attns, tap_table

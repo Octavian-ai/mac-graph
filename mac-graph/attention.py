@@ -16,8 +16,10 @@ def softmax_with_masking(logits, mask, axis):
 		logits_max = tf.reduce_max(tf.boolean_mask(logits, mask))
 		logits_max = tf.check_numerics(logits_max, "logit_max")
 
+		f_mask = tf.cast(mask, logits.dtype)
+
 		# Numerator
-		l_delta = (logits - logits_max) * tf.cast(mask, logits.dtype)
+		l_delta = (logits - logits_max) * f_mask
 		l_delta = tf.check_numerics(l_delta, "l_delta")
 
 		# This assert fails, howwwww??

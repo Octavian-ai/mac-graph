@@ -80,7 +80,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			out_data  = (output, 
 				tap_question_attn, tap_question_query,
 				tap_read_attn,
-				out_control_state)
+				out_control_state,
+				out_memory_state)
 
 			return out_data, out_state
 
@@ -111,8 +112,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			self.features["d_src_len"], # tap_question_attn
 			self.features["d_src_len"], # tap_question_query
 			read_attn_width, # tap_read_attn
-			self.args["control_width"], # out_control_state
-			
+			self.args["control_width"], # tap_control_state
+			self.args["memory_width"], # tap_control_state
 		)
 
 

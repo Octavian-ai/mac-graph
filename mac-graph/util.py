@@ -40,7 +40,9 @@ def dynamic_assert_shape(tensor, shape, name=None):
 	lhs = tf.shape(tensor)
 	rhs = tf.convert_to_tensor(shape, dtype=lhs.dtype)
 
-	assert_op = tf.assert_equal(lhs, rhs, message=f"Asserting shape of {tensor.name}", summarize=10, name=name)
+	t_name = "tensor" if tf.executing_eagerly() else tensor.name
+
+	assert_op = tf.assert_equal(lhs, rhs, message=f"Asserting shape of {t_name}", summarize=10, name=name)
 
 	with tf.control_dependencies([assert_op]):
 		return tf.identity(tensor, name="dynamic_assert_shape")
