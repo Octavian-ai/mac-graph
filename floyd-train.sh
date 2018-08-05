@@ -10,7 +10,7 @@ floyd run \
 	--env tensorflow-1.8 \
 	--data davidmack/datasets/mac-graph-sa-sp:/input \
 	--max-runtime $RUNTIME \
-	"python -m mac-graph.train \
+	"python -m macgraph.train \
 		--input-dir /input \
 		--output-dir /output \
 		--model-dir /output/model \
@@ -22,7 +22,7 @@ floyd run \
 	--env tensorflow-1.8 \
 	--data davidmack/datasets/mac-graph-station-properties:/input \
 	--max-runtime $RUNTIME \
-	"python -m mac-graph.train \
+	"python -m macgraph.train \
 		--input-dir /input \
 		--output-dir /output \
 		--model-dir /output/model \
@@ -35,7 +35,7 @@ floyd run \
 	--env tensorflow-1.8 \
 	--data davidmack/datasets/mac-graph-station-adjacent:/input \
 	--max-runtime $RUNTIME \
-	"python -m mac-graph.train \
+	"python -m macgraph.train \
 		--input-dir /input \
 		--output-dir /output \
 		--model-dir /output/model \

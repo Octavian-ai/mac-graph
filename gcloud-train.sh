@@ -9,8 +9,8 @@ PROJECT_ID=$(gcloud config list project --format "value(core.project)")
  
 gcloud ml-engine jobs submit training "$JOB_NAME" \
     --stream-logs \
-    --module-name mac-graph.train \
-    --package-path mac-graph \
+    --module-name macgraph.train \
+    --package-path macgraph \
     --staging-bucket "gs://${BUCKET_NAME}" \
     --region "$REGION" \
     --runtime-version=1.8 \
