@@ -5,6 +5,7 @@ from .read_cell import *
 from .memory_cell import *
 from .control_cell import *
 from .output_cell import *
+from .write_cell import *
 from ..util import *
 
 
@@ -22,11 +23,11 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 
 
-	def __call__(self, inputs, state):
+	def __call__(self, inputs, in_state):
 		"""Run this RNN cell on inputs, starting from the given state.
 		
 		Args:
-			inputs: **Unused!** `2-D` tensor with shape `[batch_size, input_size]`.
+			inputs: `2-D` tensor with shape `[batch_size, input_size]`.
 			state: if `self.state_size` is an integer, this should be a `2-D Tensor`
 				with shape `[batch_size, self.state_size]`.	Otherwise, if
 				`self.state_size` is a tuple of integers, this should be a tuple
@@ -42,21 +43,47 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 		with tf.variable_scope("mac_cell", reuse=tf.AUTO_REUSE):
 
-			in_control_state, in_memory_state = state
+			in_control_state, in_memory_state, in_data_stack = in_state
 
-			out_control_state = control_cell(self.args, self.features, 
-				in_control_state, self.question_state, self.question_tokens)
+			if self.args["use_control_cell"]:
+				out_control_state, tap_question_attn, tap_question_query = control_cell(self.args, self.features, 
+					inputs, in_control_state, self.question_state, self.question_tokens)
+			else:
+				out_control_state = in_control_state
+				tap_question_attn  = tf.fill([self.features["d_src_len"]], 0.0)
+				tap_question_query = tf.fill([self.features["d_src_len"]], 0.0)
 
-			read = read_cell(self.args, self.features, 
-				in_memory_state, out_control_state, self.vocab_embedding)
+		
+			read, tap_read_attn, tap_read_table = read_cell(
+				self.args, self.features, self.vocab_embedding,
+				in_memory_state, out_control_state, in_data_stack, 
+				self.question_tokens)
+		
 			
-			out_memory_state = memory_cell(self.args, 
-				in_memory_state, read, out_control_state)
+			if self.args["use_memory_cell"]:
+				out_memory_state = memory_cell(self.args, self.features,
+					in_memory_state, read, out_control_state)
+			else:
+				out_memory_state = in_memory_state
+
+			if self.args["use_data_stack"]:
+				out_data_stack = write_cell(self.args, self.features, 
+					out_memory_state, read, out_control_state, in_data_stack)
+			else:
+				out_data_stack = in_data_stack
 			
+		
 			output = output_cell(self.args, self.features,
-				self.question_state, out_memory_state)	
+				self.question_state, out_memory_state, read)	
 
-			return output, (out_control_state, out_memory_state)
+			out_state = (out_control_state, out_memory_state, out_data_stack)
+			out_data  = (output, 
+				tap_question_attn, tap_question_query,
+				tap_read_attn,
+				out_control_state,
+				out_memory_state)
+
+			return out_data, out_state
 
 
 
@@ -65,11 +92,30 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		"""
 		Returns a size tuple (control_state, memory_state)
 		"""
-		return (self.args["bus_width"], self.args["bus_width"])
+		return (
+			self.args["control_width"], 
+			self.args["memory_width"], 
+			tf.TensorShape([self.args["data_stack_len"], self.args["data_stack_width"]]),
+		)
 
 	@property
 	def output_size(self):
-		return self.args["answer_classes"]
+
+		read_attn_width = 0
+		for i in ["kb_edge", "kb_node"]:
+			if self.args["use_"+i]:
+				read_attn_width += self.args[i+"_width"] * self.args["embed_width"]
+		
+
+		return (
+			self.args["answer_classes"], 
+			self.features["d_src_len"], # tap_question_attn
+			self.features["d_src_len"], # tap_question_query
+			read_attn_width, # tap_read_attn
+			self.args["control_width"], # tap_control_state
+			self.args["memory_width"], # tap_control_state
+		)
+
 
 
 

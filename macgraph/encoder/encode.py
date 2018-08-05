@@ -7,7 +7,7 @@ from ..util import *
 def basic_cell(args, i, unit_mul):
 
 	c = tf.contrib.rnn.LSTMCell(int(args['embed_width']*unit_mul))
-	c = tf.contrib.rnn.DropoutWrapper(c, args['dropout'])
+	c = tf.contrib.rnn.DropoutWrapper(c, args['input_dropout'])
 
 	if i > 1:
 		c = tf.contrib.rnn.ResidualWrapper(c)
@@ -16,7 +16,7 @@ def basic_cell(args, i, unit_mul):
 
 def cell_stack(args, layer_mul=1, unit_mul=1):
 	cells = []
-	for i in range(int(args["num_input_layers"]*layer_mul)):
+	for i in range(int(args["input_layers"]*layer_mul)):
 		cells.append(basic_cell(args, i, unit_mul))
 
 	cell = tf.contrib.rnn.MultiRNNCell(cells)
@@ -35,8 +35,8 @@ def encode_input(args, features, vocab_embedding):
 
 	Returns:
 		(
-			Tensor("outputs",     [batch_size, seq_len, bus_width * 2]), 
-			Tensor("final_state", [batch_size, bus_width * 2])
+			Tensor("outputs",     [batch_size, seq_len, control_width * 2]), 
+			Tensor("final_state", [batch_size, control_width * 2])
 		)
 	"""
 	with tf.name_scope("encoder"):
@@ -49,7 +49,7 @@ def encode_input(args, features, vocab_embedding):
 		assert "src_len" in features
 
 		batch_size = features["d_batch_size"]
-		seq_len    = features["d_seq_len"]
+		seq_len    = features["d_src_len"]
 
 		# Trim down to the residual batch size (e.g. when at end of input data)
 		padded_src_len = features["src_len"][0 : batch_size]
@@ -65,7 +65,7 @@ def encode_input(args, features, vocab_embedding):
 		# Encoder
 		# --------------------------------------------------------------------------
 		
-		# 1/2 multiplier so that when we concat the layers together we get bus_width
+		# 1/2 multiplier so that when we concat the layers together we get control_width
 		fw_cell = cell_stack(args, unit_mul=0.5)
 		bw_cell = cell_stack(args, unit_mul=0.5)
 		
@@ -80,11 +80,11 @@ def encode_input(args, features, vocab_embedding):
 		
 		question_tokens = tf.concat( (fw_output, bw_output), axis=-1)
 		question_tokens = dynamic_assert_shape(question_tokens, 
-			[ features["d_batch_size"], features["d_seq_len"], args["embed_width"] ]
+			[ features["d_batch_size"], features["d_src_len"], args["embed_width"] ]
 		)
 
 		# Top layer, output layer
-		question_state = tf.concat( (fw_states[1].c, bw_states[1].c), axis=-1)
+		question_state = tf.concat( (fw_states[-1].c, bw_states[-1].c), axis=-1)
 		question_state = dynamic_assert_shape(question_state,
 			[ features["d_batch_size"], args["embed_width"] ]
 		)

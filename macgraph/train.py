@@ -1,19 +1,44 @@
 
-import tensorflow as tf
+# from comet_ml import Experiment
 
-from .model import model_fn
+import tensorflow as tf
+from tensorflow.python import debug as tf_debug
+
+from .estimator import get_estimator
 from .input import gen_input_fn
-from experiment.args import get_args
+from .args import *
 from .predict import predict
+
+# Make TF be quiet
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"]="2"
+
+import logging
+logger = logging.getLogger(__name__)
+
+
 
 def train(args):
 
-	estimator = tf.estimator.Estimator(model_fn, 
-		model_dir=args["model_dir"],
-		warm_start_from=args["warm_start_dir"],
-		params=args)
+	# So I don't frigging forget what caused working models
+	save_args(args)
 
-	train_spec = tf.estimator.TrainSpec(input_fn=gen_input_fn(args, "train"), max_steps=args["max_steps"])
+	if args["use_comet"]:
+		experiment = Experiment(api_key="bRptcjkrwOuba29GcyiNaGDbj", project_name="macgraph")
+		experiment.log_multiple_params(args)
+
+	estimator = get_estimator(args)
+
+	if args["use_tf_debug"]:
+		hooks = [tf_debug.LocalCLIDebugHook()]
+	else:
+		hooks = []
+
+	train_spec = tf.estimator.TrainSpec(
+		input_fn=gen_input_fn(args, "train"), 
+		max_steps=args["max_steps"],
+		hooks=hooks)
+	
 	eval_spec  = tf.estimator.EvalSpec(input_fn=gen_input_fn(args, "eval"))
 
 	tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
@@ -21,12 +46,20 @@ def train(args):
 
 
 if __name__ == "__main__":
-	tf.logging.set_verbosity(tf.logging.DEBUG)
 	args = get_args()
 
-	train_size = sum(1 for _ in tf.python_io.tf_record_iterator(args["train_input_path"]))
-	tf.logging.debug(f"Training on {train_size} records")
+	# Logging setup
+	logging.basicConfig()
+	tf.logging.set_verbosity(args["log_level"])
+	logger.setLevel(args["log_level"])
+	logging.getLogger("mac-graph").setLevel(args["log_level"])
 
+	# Info about the experiment, for the record
+	train_size = sum(1 for _ in tf.python_io.tf_record_iterator(args["train_input_path"]))
+	logger.info(args)
+	logger.info(f"Training on {train_size} records")
+
+	# DO IT!
 	train(args)
 	predict(args)
 
