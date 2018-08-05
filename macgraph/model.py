@@ -116,7 +116,7 @@ def model_fn(features, labels, mode, params):
 		export_outputs=None,
 		training_chief_hooks=None,
 		training_hooks=None,
-		scaffold=gen_scaffold(params),
+		scaffold=None,
 		evaluation_hooks=eval_hooks,
 		prediction_hooks=None
 	)

@@ -2,10 +2,11 @@
 import argparse
 import os
 
-def get_args(extend=lambda parser:None):
+def get_args(args=None):
 
 	parser = argparse.ArgumentParser()
-	extend(parser)
+
+	parser.add_argument('--run',					type=str,  default=os.getenv("RUN", "default"), help="Prefix used for file storage and messaging")
 
 	parser.add_argument('--log-level',  type=str, default='INFO')
 	parser.add_argument('--output-dir', type=str, default="./output")
@@ -32,17 +33,6 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--max-gradient-norm',     type=float, default=4.0)
 	parser.add_argument('--learning-rate',         type=float, default=0.001)
 	parser.add_argument('--dropout',               type=float, default=0.2)
-
-	args = vars(parser.parse_args())
-
-	args["modes"] = ["eval", "train", "predict"]
-
-	for i in [*args["modes"], "all"]:
-		args[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
-
-	args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
-	args["types_path"] = os.path.join(args["input_dir"], "types.yaml")
-
 
 	# For storing to Google Cloud
 	parser.add_argument('--bucket',					type=str,  default=None)
@@ -86,5 +76,15 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--queue-type',				type=str,  default="rabbitmq", choices=["rabbitmq","google"])
 	parser.add_argument('--amqp-url',				type=str,  default=os.getenv("AMQP_URL", 'amqp://guest:guest@172.17.0.2:5672/ashwath'))
 
+
+	args = vars(parser.parse_args())
+
+	args["modes"] = ["eval", "train", "predict"]
+
+	for i in [*args["modes"], "all"]:
+		args[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
+
+	args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
+	args["types_path"] = os.path.join(args["input_dir"], "types.yaml")
 
 	return parser.parse_args(args)
