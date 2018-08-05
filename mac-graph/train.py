@@ -1,5 +1,8 @@
 
+# from comet_ml import Experiment
+
 import tensorflow as tf
+from tensorflow.python import debug as tf_debug
 
 from .estimator import get_estimator
 from .input import gen_input_fn
@@ -20,9 +23,22 @@ def train(args):
 	# So I don't frigging forget what caused working models
 	save_args(args)
 
+	if args["use_comet"]:
+		experiment = Experiment(api_key="bRptcjkrwOuba29GcyiNaGDbj", project_name="macgraph")
+		experiment.log_multiple_params(args)
+
 	estimator = get_estimator(args)
 
-	train_spec = tf.estimator.TrainSpec(input_fn=gen_input_fn(args, "train"), max_steps=args["max_steps"])
+	if args["use_tf_debug"]:
+		hooks = [tf_debug.LocalCLIDebugHook()]
+	else:
+		hooks = []
+
+	train_spec = tf.estimator.TrainSpec(
+		input_fn=gen_input_fn(args, "train"), 
+		max_steps=args["max_steps"],
+		hooks=hooks)
+	
 	eval_spec  = tf.estimator.EvalSpec(input_fn=gen_input_fn(args, "eval"))
 
 	tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)

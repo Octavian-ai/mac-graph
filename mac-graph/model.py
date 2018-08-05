@@ -9,6 +9,7 @@ from .cell import *
 from .util import *
 from .hooks import *
 from .input import *
+from .optimizer import *
 
 def model_fn(features, labels, mode, params):
 
@@ -54,6 +55,8 @@ def model_fn(features, labels, mode, params):
 		question_tokens=question_tokens, 
 		vocab_embedding=vocab_embedding)
 
+	tf.summary.image("logits", tf.expand_dims(tf.expand_dims(tf.nn.softmax(logits), 1), -1))
+
 	# --------------------------------------------------------------------------
 	# Calc loss
 	# --------------------------------------------------------------------------	
@@ -68,9 +71,38 @@ def model_fn(features, labels, mode, params):
 
 	if mode == tf.estimator.ModeKeys.TRAIN:
 		global_step = tf.train.get_global_step()
-		optimizer = tf.train.AdamOptimizer(args["learning_rate"])
-		train_op = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
 
+		learning_rate = args["learning_rate"]
+
+		if args["use_lr_finder"]:
+			learning_rate = tf.train.exponential_decay(
+				1E-06, 
+				global_step,
+				decay_steps=1000, 
+				decay_rate=1.1)
+
+		elif args["use_lr_decay"]:
+			learning_rate = args["learning_rate"] - tf.train.exponential_decay(
+				args["learning_rate"], 
+				global_step,
+				decay_steps=10000, 
+				decay_rate=0.9)
+
+
+
+		tf.summary.scalar("learning_rate", learning_rate, family="hyperparam")
+		tf.summary.scalar("current_step", global_step, family="hyperparam")
+
+		var = tf.trainable_variables()
+		gradients = tf.gradients(loss, var)
+		norms = [tf.norm(i, 2) for i in gradients if i is not None]
+
+		tf.summary.histogram("grad_norm", norms)
+		tf.summary.scalar("grad_norm", tf.reduce_max(norms), family="hyperparam")
+
+		optimizer = tf.train.AdamOptimizer(learning_rate)
+		train_op = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
+	
 
 	# --------------------------------------------------------------------------
 	# Predictions

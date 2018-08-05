@@ -10,6 +10,9 @@ from ..util import *
 # --------------------------------------------------------------------------
 
 def expand_if_needed(t, target=4):
+	if t is None:
+		return t
+
 	while len(t.shape) < target:
 		t = tf.expand_dims(t, -1)
 	return t
@@ -40,7 +43,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, taps
 
 		def next_inputs_fn(time, outputs, state, sample_ids):
 			finished = tf.greater(tf.layers.dense(outputs[0], 1, kernel_initializer=tf.zeros_initializer()), 0.5)
-			next_inputs = tf.gather(inputs, time+1)
+			next_inputs = tf.gather(inputs, time)
 			next_state = state
 			return (finished, next_inputs, next_state)
 
@@ -66,7 +69,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, taps
 			scope=decoder_scope)
 
 		out_taps = {
-			key: expand_if_needed(decoded_outputs.rnn_output[idx+1])
+			key: decoded_outputs.rnn_output[idx+1]
 			for idx, key in enumerate(taps)
 		}
 		
@@ -86,19 +89,24 @@ def static_decode(args, features, inputs, question_state, question_tokens, taps,
 		d_cell_initial = d_cell.zero_state(dtype=tf.float32, batch_size=features["d_batch_size"])
 
 		# Hard-coded unroll of the reasoning network for simplicity
-		states = [(inputs[0], d_cell_initial)]
+		states = [(None, d_cell_initial)]
 		for i in range(args["max_decode_iterations"]):
-			states.append(d_cell(inputs[i+1], states[-1][1]))
+			states.append(d_cell(inputs[i], states[-1][1]))
 
 		# print(states)
 		final_output = states[-1][0][0]
 
 		def get_tap(idx):
-			tap = [i[0][idx] for i in states if i[0] is not None]
-			tap = tf.concat(tap, axis=-1)
-			tap = tf.transpose(tap, [0,2,1])
-			tap = expand_if_needed(tap)
-			return tap
+			with tf.name_scope(f"get_tap_{idx}"):
+				tap = [i[0][idx] for i in states if i[0] is not None]
+				for i in tap:
+					if i is None:
+						return None
+
+				tap = tf.concat(tap, axis=-1)
+				if len(tap.shape) == 3:
+					tap = tf.transpose(tap, [0,2,1])
+				return tap
 
 		out_taps = {
 			key: get_tap(idx+1)
@@ -112,7 +120,7 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 
 	inputs = [
 		tf.layers.dense(question_state, args["control_width"], name=f"question_state_inputs_t{i}") 
-		for i in range(args["max_decode_iterations"]+1)
+		for i in range(args["max_decode_iterations"])
 	]
 
 	if args["use_position_encoding"]:
@@ -120,19 +128,18 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	
 	tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))
 
-	taps = [
-		"question_word_attn", "question_word_query", "KB_attn", "control_state"
-	]
+	taps = ["question_word_attn", "question_word_query", "KB_attn", "control_state", "memory_state"]
 
 	if args["use_dynamic_decode"]:
 		r = dynamic_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
 	else:
-		d = static_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
+		r = static_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
 
 	final_output, out_taps = r
 
 	for k, v in out_taps.items():
-		tf.summary.image(k, v)
+		if v is not None:
+			tf.summary.image(k, expand_if_needed(v))
 
 	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["answer_classes"]])
 	return final_output

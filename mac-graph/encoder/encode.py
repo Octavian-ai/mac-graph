@@ -16,7 +16,7 @@ def basic_cell(args, i, unit_mul):
 
 def cell_stack(args, layer_mul=1, unit_mul=1):
 	cells = []
-	for i in range(int(args["num_input_layers"]*layer_mul)):
+	for i in range(int(args["input_layers"]*layer_mul)):
 		cells.append(basic_cell(args, i, unit_mul))
 
 	cell = tf.contrib.rnn.MultiRNNCell(cells)
@@ -49,7 +49,7 @@ def encode_input(args, features, vocab_embedding):
 		assert "src_len" in features
 
 		batch_size = features["d_batch_size"]
-		seq_len    = features["d_seq_len"]
+		seq_len    = features["d_src_len"]
 
 		# Trim down to the residual batch size (e.g. when at end of input data)
 		padded_src_len = features["src_len"][0 : batch_size]
@@ -80,7 +80,7 @@ def encode_input(args, features, vocab_embedding):
 		
 		question_tokens = tf.concat( (fw_output, bw_output), axis=-1)
 		question_tokens = dynamic_assert_shape(question_tokens, 
-			[ features["d_batch_size"], features["d_seq_len"], args["embed_width"] ]
+			[ features["d_batch_size"], features["d_src_len"], args["embed_width"] ]
 		)
 
 		# Top layer, output layer

@@ -17,7 +17,7 @@ def assert_rank(tensor, rank):
 	assert len(tensor.shape) == rank, f"{tensor.name} is wrong rank, expected {rank} got {len(tensor.shape)}"
 
 
-def dynamic_assert_shape(tensor, shape):
+def dynamic_assert_shape(tensor, shape, name=None):
 	"""
 	Check that a tensor has a shape given by a list of constants and tensor values.
 
@@ -40,15 +40,19 @@ def dynamic_assert_shape(tensor, shape):
 	lhs = tf.shape(tensor)
 	rhs = tf.convert_to_tensor(shape, dtype=lhs.dtype)
 
-	assert_op = tf.assert_equal(lhs, rhs, message=f"Asserting shape of {tensor.name}", summarize=10)
+	t_name = "tensor" if tf.executing_eagerly() else tensor.name
+
+	assert_op = tf.assert_equal(lhs, rhs, message=f"Asserting shape of {t_name}", summarize=10, name=name)
 
 	with tf.control_dependencies([assert_op]):
 		return tf.identity(tensor, name="dynamic_assert_shape")
 
 
-def minimize_clipped(optimizer, value, max_gradient_norm):
+
+def minimize_clipped(optimizer, value, max_gradient_norm, var_blacklist=[]):
 	global_step = tf.train.get_global_step()
 	var = tf.trainable_variables()
+	var = list(set(var) - set(var_blacklist))
 	gradients = tf.gradients(value, var)
 	clipped_gradients, _ = tf.clip_by_global_norm(gradients, max_gradient_norm)
 	return optimizer.apply_gradients(zip(clipped_gradients, var), global_step=global_step)

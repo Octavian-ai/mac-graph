@@ -24,7 +24,9 @@ This is the first (easy) question I've got working. Here's a log of known workin
 	- Adding residual connections increased accuracy 25%, achieving 100% after 10k steps
 	- `./train-station-properties.sh`
 
-- Commit `636d354` as above
+- `636d354`: as above
+
+- `e901f89`: 82% after an hour on Floyd
 
 
 ### Station Adjacency
@@ -89,7 +91,7 @@ The successful station property model does no better than random guessing. I'm e
 
 - `e120afc`:
 	- Was using static decode when I believed dynamic decode
-	- Fastest training seen (72% after 42min). 
+	- Fastest training seen (72% after 42min).
 	- Achieved 80% after 600k (5hrs) training steps
 	- Should achieve 100% in 10 min!
 
@@ -109,6 +111,40 @@ The successful station property model does no better than random guessing. I'm e
 - `4667b13`: 
 	- Dropout improved things! best ever.
 	- 91% after 200k steps
+
+- `6253b97`:
+	- Simplifed down to just a read and transform 
+	- Highest ever 93% after 200k
+
+- `a9651df`: embedding width 64 gave 97% accuracy
+- `55f0039`: 
+	- After 1 1/2 hours saw 99% max accuracy
+	- Sometimes get NaN loss - LR reduction, max norm reduction, seem to help
+
+- `d503000`: 
+	- Achieved best ever performance on station adjacency task (97% 1hr on Floyd CPU, 99% after 1.5hrs on MBP)
+	- This network has an "equality" operator of relu_abs(read_value - expected_value) where `relu_abs(x)=relu(x) + relu(-x)` 
+	- Vocab embedding width of 64 floats
+	- Ablation analysis:
+		- Read output module made big difference:
+			- 97.7%: `read_data - dense(in_signal, 128)` then relu_abs 
+			- 86%: `dense(read_data, width=128)` then tanh
+			- 77%: `dense(read_data, width=128)` then mi_activation
+			- 67%: `read_data - dense(in_signal, 128)` then plain relu relu(x) 
+			- 97.7%: read_data then relu_abs, i.e. without subtraction of in_signal
+		- 97%: Having/removing indicator row (e.g. row just containing vocab unknown token) in edges DB made no difference
+		- Output cell activation made big difference:
+			- 50%: tanh (e.g. no better than random)
+			- 97%: mi_activation
+		- Read dropout causes slower convergence but same max accuracy
+
+	- Restoring rest of network:
+		- 96.5%: baseline + read dropout, dynamic decode, question state (2hrs)
+
+- `2d434c1`: 
+	- currently exeriences nan loss at times from softmax
+	- softmax args are more than 0 despite subtracting max
+
 
 
 ## Notes on training infrastructure

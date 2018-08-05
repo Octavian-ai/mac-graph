@@ -23,7 +23,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 
 
-	def __call__(self, inputs, state):
+	def __call__(self, inputs, in_state):
 		"""Run this RNN cell on inputs, starting from the given state.
 		
 		Args:
@@ -43,16 +43,22 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 		with tf.variable_scope("mac_cell", reuse=tf.AUTO_REUSE):
 
-			in_control_state, in_memory_state, in_data_stack = state
+			in_control_state, in_memory_state, in_data_stack = in_state
 
 			if self.args["use_control_cell"]:
 				out_control_state, tap_question_attn, tap_question_query = control_cell(self.args, self.features, 
 					inputs, in_control_state, self.question_state, self.question_tokens)
 			else:
 				out_control_state = in_control_state
+				tap_question_attn  = tf.fill([self.features["d_src_len"]], 0.0)
+				tap_question_query = tf.fill([self.features["d_src_len"]], 0.0)
 
-			read, tap_read_attn = read_cell(self.args, self.features, self.vocab_embedding,
-				in_memory_state, out_control_state, in_data_stack)
+		
+			read, tap_read_attn, tap_read_table = read_cell(
+				self.args, self.features, self.vocab_embedding,
+				in_memory_state, out_control_state, in_data_stack, 
+				self.question_tokens)
+		
 			
 			if self.args["use_memory_cell"]:
 				out_memory_state = memory_cell(self.args, self.features,
@@ -66,15 +72,16 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			else:
 				out_data_stack = in_data_stack
 			
-			if self.args["use_memory_cell"]:
-				output = output_cell(self.args, self.features,
-					self.question_state, out_memory_state)	
-			else:
-				output = output_cell(self.args, self.features,
-					self.question_state, read)	
+		
+			output = output_cell(self.args, self.features,
+				self.question_state, out_memory_state, read)	
 
 			out_state = (out_control_state, out_memory_state, out_data_stack)
-			out_data  = (output, tap_question_attn, tap_question_query, tap_read_attn, out_control_state)
+			out_data  = (output, 
+				tap_question_attn, tap_question_query,
+				tap_read_attn,
+				out_control_state,
+				out_memory_state)
 
 			return out_data, out_state
 
@@ -101,11 +108,12 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		
 
 		return (
-			self.args["answer_classes"],
-			self.features["d_seq_len"],
-			self.features["d_seq_len"],
-			read_attn_width,
-			self.args["control_width"],
+			self.args["answer_classes"], 
+			self.features["d_src_len"], # tap_question_attn
+			self.features["d_src_len"], # tap_question_query
+			read_attn_width, # tap_read_attn
+			self.args["control_width"], # tap_control_state
+			self.args["memory_width"], # tap_control_state
 		)
 
 
