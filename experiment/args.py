@@ -2,9 +2,10 @@
 import argparse
 import os
 
-def get_args(args=None):
+def get_args(extend=lambda parser:None):
 
 	parser = argparse.ArgumentParser()
+	extend(parser)
 
 	parser.add_argument('--run',					type=str,  default=os.getenv("RUN", "default"), help="Prefix used for file storage and messaging")
 
@@ -87,4 +88,4 @@ def get_args(args=None):
 	args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
 	args["types_path"] = os.path.join(args["input_dir"], "types.yaml")
 
-	return parser.parse_args(args)
+	return args

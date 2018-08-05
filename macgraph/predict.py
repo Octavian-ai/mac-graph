@@ -5,7 +5,7 @@ from collections import Counter
 
 from .model import model_fn
 from .input import *
-from .args import get_args
+from experiment.args import get_args
 
 
 

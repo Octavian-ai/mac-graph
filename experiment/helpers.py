@@ -18,7 +18,7 @@ from pbt import *
 def gen_param_spec(args):
 	return ParamSpec({
 		"heritage": Heritage,
-		"model_id": ModelId,
+		"model_id": ModelId
 	})
 
 def gen_worker_init_params(args):
@@ -50,7 +50,7 @@ def name_fn(worker):
 
 
 def get_supervisor(args):
-	return Supervisor(args, gen_param_spec(args), score, name_fn, False)
+	return Supervisor(args, gen_param_spec(args), score, name_fn, False, None)
 
 
 
