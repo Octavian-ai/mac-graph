@@ -10,12 +10,11 @@ def get_args(args=None):
 	parser.add_argument('--log-level',  			type=str, default='INFO')
 
 	parser.add_argument('--output-dir', 			type=str, default="./output/cluster/")
-	parser.add_argument('--input-dir',  			type=str, default="./input_data/processed/default")
 	parser.add_argument('--model-dir',  		    type=str, default="./output/cluster/model")
+	parser.add_argument('--input-dir',  			type=str, default="./input_data/processed/default")
 
 	parser.add_argument('--queue-type',				type=str,  default="rabbitmq", choices=["rabbitmq","google"])
 	parser.add_argument('--amqp-url',				type=str,  default=os.getenv("AMQP_URL", 'amqp://guest:guest@localhost'))
-
 	
 
 	# For storing to Google Cloud
