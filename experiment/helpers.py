@@ -11,43 +11,47 @@ import logging
 logger = logging.getLogger(__name__)
 
 from .args import get_args
-from macgraph.model import model_fn 
-from macgraph.input import *
+from macgraph.model import model_fn
+from macgraph.input import gen_input_fn
+from macgraph import get_args as get_macgraph_args
+from macgraph import generate_args_derivatives
 
 from pbt import *
 
 def gen_param_spec(args):
-	return ParamSpec({
-		"heritage": Heritage,
-		"model_id": ModelId
-	})
-    
-def dummy(args):
-    args = vars(args)
-    args["modes"] = ["eval", "train", "predict"]
-    
-    for i in [*args["modes"], "all"]:
-    	args[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
-    
-    args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
-    args["types_path"] = os.path.join(args["input_dir"], "types.yaml")
-    
-    return args
-   
+    return ParamSpec({
+        "heritage": Heritage,
+        "model_id": ModelId,
+        "vocab_size":  IntParamOf(128, 4, 2048),
+		"embed_width": IntParamOf(64, 4, 2048),
+		"learning_rate": LRParam,
+    })
+
+
 
 def gen_worker_init_params(args):
-	args = dummy(args)
-	p = {
-		"model_fn": model_fn, 
-		"train_input_fn": gen_input_fn(args, "train"), 
-		"eval_input_fn":  gen_input_fn(args, "eval"),
-		"run_config": tf.estimator.RunConfig(save_checkpoints_steps=99999999999,save_checkpoints_secs=None)
-	}
 
-	args.update(p)
-	print("gen_worker_init_params args", args)
+	p = {}
 
-	return args
+	# Get the defaults for macgraph arguments 
+	# These will likely be overrided by ParamSpec items
+	# and can be overrided by command line args from PBT
+	p.update(get_macgraph_args(argv=[]))
+
+	# Add all command line args from PBT
+	p.update(vars(args))
+
+	p.update(generate_args_derivatives(p))
+	
+	# Key pieces for Estimator
+	p.update({
+		"model_fn": model_fn,
+		"train_input_fn": lambda params: gen_input_fn(p, "train"),
+		"eval_input_fn":  lambda params: gen_input_fn(p, "eval"),
+		"run_config": tf.estimator.RunConfig(save_checkpoints_steps=99999999999, save_checkpoints_secs=None)
+	})
+
+	return p
 
 def get_drone(args):
     return Drone(args, EstimatorWorker, gen_worker_init_params(args))
@@ -55,8 +59,7 @@ def get_drone(args):
 
 def score(worker):
 	try:
-		# return (worker.results["loss"] + 1) / worker.results["total_elements"]
-		return worker.results["correct_elements"] - worker.results["loss"]/10
+		return worker.results["loss"]
 	except Exception:
 		return None
 
@@ -65,10 +68,4 @@ def name_fn(worker):
 
 
 def get_supervisor(args):
-    return Supervisor(args, gen_param_spec(args), score, name_fn, False, None)
-
-
-
-
-
-
+    return Supervisor(args, gen_param_spec(args), score, name_fn, True)

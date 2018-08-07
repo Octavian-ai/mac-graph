@@ -16,9 +16,9 @@ def model_fn(features, labels, mode, params):
 	# --------------------------------------------------------------------------
 	# Setup input
 	# --------------------------------------------------------------------------
-	
+
 	args = params
-	
+
 	# EstimatorSpec slots
 	loss = None
 	train_op = None
@@ -31,22 +31,23 @@ def model_fn(features, labels, mode, params):
 	# --------------------------------------------------------------------------
 	# Shared variables
 	# --------------------------------------------------------------------------
-	
+
 	vocab_embedding = tf.get_variable(
-		"vocab_embedding", 
-		[args["vocab_size"], args["embed_width"]], 
+		"vocab_embedding",
+		[args["vocab_size"], args["embed_width"]],
 		tf.float32)
 
 	# vocab_embedding = tf.Variable(tf.eye(args["vocab_size"], args["embed_width"]), name="vocab_embedding")
 
-	tf.summary.image("vocab_embedding", tf.reshape(vocab_embedding, 
+	tf.summary.image("vocab_embedding", tf.reshape(vocab_embedding,
 		[-1, args["vocab_size"], args["embed_width"], 1]))
 
 	# --------------------------------------------------------------------------
 	# Model for realz
 	# --------------------------------------------------------------------------
-	
+
 	question_tokens, question_state = encode_input(args, features, vocab_embedding)
+
 
 	logits = execute_reasoning(args, 
 		features=features, 
@@ -59,12 +60,12 @@ def model_fn(features, labels, mode, params):
 
 	# --------------------------------------------------------------------------
 	# Calc loss
-	# --------------------------------------------------------------------------	
+	# --------------------------------------------------------------------------
 
-	if mode in [tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL]:		
+	if mode in [tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL]:
 		crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
 		loss = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
-		
+
 	# --------------------------------------------------------------------------
 	# Optimize
 	# --------------------------------------------------------------------------
@@ -107,7 +108,7 @@ def model_fn(features, labels, mode, params):
 	# --------------------------------------------------------------------------
 	# Predictions
 	# --------------------------------------------------------------------------
-	
+
 	if mode in [tf.estimator.ModeKeys.PREDICT, tf.estimator.ModeKeys.EVAL]:
 
 		predicted_labels = tf.argmax(tf.nn.softmax(logits), axis=-1)
@@ -122,12 +123,13 @@ def model_fn(features, labels, mode, params):
 	# --------------------------------------------------------------------------
 	# Eval metrics
 	# --------------------------------------------------------------------------
-	
+
 	if mode == tf.estimator.ModeKeys.EVAL:
 
 		eval_metric_ops = {
 			"accuracy": tf.metrics.accuracy(labels=labels, predictions=predicted_labels),
 		}
+
 	
 		try:
 			with tf.gfile.GFile(args["question_types_path"]) as file:
@@ -153,6 +155,7 @@ def model_fn(features, labels, mode, params):
 		except tf.errors.NotFoundError:
 			pass
 
+
 		eval_hooks = [FloydHubMetricHook(eval_metric_ops)]
 
 
@@ -171,4 +174,3 @@ def model_fn(features, labels, mode, params):
 		evaluation_hooks=eval_hooks,
 		prediction_hooks=None
 	)
-

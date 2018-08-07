@@ -60,6 +60,15 @@ class Worker(object):
 		pass
 
 
+	def pre_params_get(self):
+		'''Hook for doing setup before params can be read'''
+		pass
+
+	def post_params_set(self):
+		'''Hook for doing post-processing on new params'''
+		pass
+
+
 
 	# --------------------------------------------------------------------------
 	# Parameter methods
@@ -67,12 +76,13 @@ class Worker(object):
 
 	@property
 	def params(self):
+		self.pre_params_get()
 		return self._params
 	
 	@params.setter
 	def params(self, params):
 		self._params = params
-		# self.experiment.log_multiple_params(vars(self.friendly_params))
+		self.post_params_set()
 
 	# Experimental, plan to roll this out everywhere to replace params
 	@property

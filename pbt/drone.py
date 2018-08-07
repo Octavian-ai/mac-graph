@@ -1,5 +1,4 @@
-
-from google.cloud import pubsub_v1
+\
 import traceback
 import pickle
 import time
@@ -13,7 +12,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Hack for single-threaded
-from .google_pubsub_thread import Policy
 from .specs import *
 from .queue import QueueFactory
 

@@ -8,6 +8,12 @@ logger = logging.getLogger(__name__)
 from .param import GeneticParam
 
 class MergedParams(object):
+	'''
+		Overlay static parameter dictionary with a dictionary of 'dynamic' genetic parameters
+
+		This lets the parameters being optimized override those in the static base
+	'''
+
 	def __init__(self, fixed, dynamic):
 		self.fixed = fixed
 		self.dynamic = dynamic
@@ -32,13 +38,13 @@ class MergedParams(object):
 			else:
 				raise ex
 
-	def __setitem(self, key, value):
+	def __setitem__(self, key, value):
 		if instanceof(value, GeneticParam):
 			self.dynamic[key] = value
 		else:
 			self.fixed[key] = value
 
-	@property	
+	@property
 	def __dict__(self):
 		r = {}
 
@@ -76,6 +82,3 @@ class ParamSpec(dict):
 		return ParamSet({
 			k: v() for k, v in self.items()
 		})
-
-
-

@@ -4,7 +4,6 @@ import time
 import pickle
 import math
 import uuid
-from google.cloud import pubsub_v1
 import traceback
 import random
 import yaml
@@ -20,11 +19,12 @@ from util import FileWritey, FileReadie
 
 class Supervisor(object):
 
-	# --------------------------------------------------------------------------
-	# Initialisation and basic lifespan steps
-	# --------------------------------------------------------------------------
-
 	def __init__(self, args, param_spec, score, name_fn=None, reverse=False, gen_baseline_params=None):
+		'''
+		Args:
+			- `reverse` True means a lower worker score is better (e.g. loss), False means higher is better (e.g. accuracy)
+
+		'''
 		self.args = args
 		self.param_spec = param_spec
 		self.score = score
