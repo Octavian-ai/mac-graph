@@ -68,9 +68,15 @@ class Supervisor(object):
 
 		self.time_last_save = time.time()
 
-		self.plot_progress.load()
-		self.plot_best_score.load()
+		try:
+			self.plot_progress.load()
+		except Exception:
+			pass
 
+		try:
+			self.plot_best_score.load()
+		except Exception:
+			pass
 
 	def save(self):
 		logger.debug("Saving workers to " + self.file_path)
@@ -340,7 +346,10 @@ class Supervisor(object):
 		if key not in self.plot_measures:
 			self.plot_measures[key] = Ploty(self.args, title="Metric "+key, x='Time', y=key)
 			if self.args.load:
-				self.plot_measures[key].load()
+				try:
+					self.plot_measures[key].load()
+				except Exception:
+					pass
 
 
 	def print_worker_results(self, worker):
