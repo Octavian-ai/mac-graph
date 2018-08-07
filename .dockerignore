@@ -1,0 +1,5 @@
+
+output
+kubernetes
+*.DS_Store
+.git
