@@ -38,7 +38,7 @@ class MergedParams(object):
 		else:
 			self.fixed[key] = value
 
-	@property	
+	@property
 	def __dict__(self):
 		r = {}
 
@@ -76,6 +76,3 @@ class ParamSpec(dict):
 		return ParamSet({
 			k: v() for k, v in self.items()
 		})
-
-
-

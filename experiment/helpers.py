@@ -11,35 +11,38 @@ import logging
 logger = logging.getLogger(__name__)
 
 from .args import get_args
-from macgraph.model import model_fn 
+from macgraph.model import model_fn
 from macgraph.input import *
 
 from pbt import *
 
 def gen_param_spec(args):
-	return ParamSpec({
-		"heritage": Heritage,
-		"model_id": ModelId
-	})
-    
+    return ParamSpec({
+        "heritage": Heritage,
+        "model_id": ModelId,
+        "vocab_size":  VocabSize,
+		"embed_width": EmbedWidth,
+		"learning_rate": LearningRate
+    })
+
 def dummy(args):
     args = vars(args)
     args["modes"] = ["eval", "train", "predict"]
-    
+
     for i in [*args["modes"], "all"]:
     	args[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
-    
+
     args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
     args["types_path"] = os.path.join(args["input_dir"], "types.yaml")
-    
+
     return args
-   
+
 
 def gen_worker_init_params(args):
 	args = dummy(args)
 	p = {
-		"model_fn": model_fn, 
-		"train_input_fn": gen_input_fn(args, "train"), 
+		"model_fn": model_fn,
+		"train_input_fn": gen_input_fn(args, "train"),
 		"eval_input_fn":  gen_input_fn(args, "eval"),
 		"run_config": tf.estimator.RunConfig(save_checkpoints_steps=99999999999,save_checkpoints_secs=None)
 	}
@@ -66,9 +69,3 @@ def name_fn(worker):
 
 def get_supervisor(args):
     return Supervisor(args, gen_param_spec(args), score, name_fn, False, None)
-
-
-
-
-
-
