@@ -61,7 +61,7 @@ def graph_to_table(args, vocab, graph):
 	for edge in graph["edges"]:
 		s1 = node_to_vec(node_lookup[edge["station1"]], ['name'])
 		s2 = node_to_vec(node_lookup[edge["station2"]], ['name'])
-		e = edge_to_vec(edge)
+		e  = edge_to_vec(edge)
 
 		row = np.concatenate((s1, e, s2), -1)
 		row = pack(row, args["kb_edge_width"])

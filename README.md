@@ -6,6 +6,8 @@ The core codebase implements graph question answering (GQA), using [CLEVR-graph]
 
 ## Project status
 
+*Apologies that the training data isn't available - I've yet to find a quick solution to this, when I get the system working on more questions I'll publish a stable "all question" dataset with 1M items. For now, you can easily build you own data - ask David for help.*
+
 <table>
 	<thead>
 		<tr>
@@ -14,9 +16,23 @@ The core codebase implements graph question answering (GQA), using [CLEVR-graph]
 	</thead>
 	<tbody>
 		<tr>
-			<td>Basic PBT configuration</td>
+			<td>Basic MAC cell structure</td>
+			<td><strong>Complete</strong></td>
+			<td>Implemented as per paper, now diverging to achieve below objectives</td></tr>
+		<tr>
+			<td>Recall station (node) properties</td>
+			<td><strong>Complete</strong></td>
+			<td>99% accuracy after 10k training steps</td></tr>
+		<tr>
+			<td>Answer if stations adjacent</td>
+			<td><strong>Complete</strong></td>
+			<td>99% accuracy after 200k training steps</td>
+		</tr>
+		<tr>
+			<td>Count length of shortest path between nodes</td>
 			<td><strong>In progress</strong></td>
-			<td>All the custom code lies in the experiment folder</td></tr>
+			<td></td>
+    </tr>
 		<tr>
 			<td>Recall station (node) properties via PBT</td>
 			<td><strong>Not started</strong></td>
@@ -26,6 +42,8 @@ The core codebase implements graph question answering (GQA), using [CLEVR-graph]
 </table>
 
 <img src="https://media.giphy.com/media/S5JSwmQYHOGMo/giphy.gif"/>
+
+For more in-depth information about what works/doesn't work, check out the [experiment log](log.md).
 
 ## Running the code
 

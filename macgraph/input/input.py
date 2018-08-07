@@ -5,8 +5,9 @@ import tensorflow as tf
 import logging
 logger = logging.getLogger(__name__)
 
-from .text_util import EOS_ID
+from .text_util import EOS_ID, UNK_ID
 from .graph_util import *
+from .util import tf_startswith
 
 
 def input_fn(args, mode, question=None):
@@ -43,7 +44,9 @@ def input_fn(args, mode, question=None):
 
 		# Knowledge base
 		"kb_nodes": 		tf.reshape(i["kb_nodes"], [-1, args["kb_node_width"]]),
+		"kb_nodes_len":		i["kb_nodes_len"],
 		"kb_edges": 		tf.reshape(i["kb_edges"], [-1, args["kb_edge_width"]]),
+		"kb_edges_len":		i["kb_edges_len"],
 
 		# Prediction stats
 		"label":			i["label"], 
@@ -55,7 +58,11 @@ def input_fn(args, mode, question=None):
 	if args["limit"] is not None:
 		d = d.take(args["limit"])
 
-	d = d.shuffle(args["batch_size"]*10)
+	if args["type_string_prefix"] is not None:
+		d = d.filter(lambda features, labels: 
+			tf_startswith(features["type_string"], args["type_string_prefix"]))
+
+	d = d.shuffle(args["batch_size"]*1000)
 
 	zero64 = tf.cast(0, tf.int64) 
 
@@ -68,8 +75,12 @@ def input_fn(args, mode, question=None):
 			{
 				"src": 				tf.TensorShape([None]),
 				"src_len": 			tf.TensorShape([]), 
+
 				"kb_nodes": 		tf.TensorShape([None, args["kb_node_width"]]),
+				"kb_nodes_len": 	tf.TensorShape([]), 
 				"kb_edges": 		tf.TensorShape([None, args["kb_edge_width"]]),
+				"kb_edges_len": 	tf.TensorShape([]), 
+
 				"label": 			tf.TensorShape([]), 
 				"type_string": 		tf.TensorShape([None]),
 			},
@@ -83,8 +94,12 @@ def input_fn(args, mode, question=None):
 			{
 				"src": 				tf.cast(EOS_ID, tf.int64), 
 				"src_len": 			zero64, # unused
-				"kb_nodes": 		zero64, 
-				"kb_edges": 		zero64, 
+
+				"kb_nodes": 		tf.cast(UNK_ID, tf.int64), 
+				"kb_nodes_len": 	zero64, # unused
+				"kb_edges": 		tf.cast(UNK_ID, tf.int64), 
+				"kb_edges_len": 	zero64, # unused
+
 				"label":			zero64,
 				"type_string": 		tf.cast("", tf.string),
 			},
@@ -96,7 +111,7 @@ def input_fn(args, mode, question=None):
 	d = d.map(lambda features, labels: ({
 		**features, 
 		"d_batch_size": tf.shape(features["src"])[0], 
-		"d_seq_len":    tf.shape(features["src"])[1],
+		"d_src_len":    tf.shape(features["src"])[1],
 	}, labels))
 	
 	return d

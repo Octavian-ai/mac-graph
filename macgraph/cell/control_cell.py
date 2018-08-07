@@ -4,34 +4,62 @@ import tensorflow as tf
 from ..util import *
 from ..attention import *
 
-def control_cell(args, features, in_control_state, in_question_state, in_question_tokens):
+def control_cell(args, features, inputs, in_control_state, in_question_state, in_question_tokens):
 	"""
 	Build a control cell
 
 	Data in time-minor format
 
 	Arguments:
-		- in_control_state.shape   = [batch_size, bus_width]
-		- in_question_state.shape  = [batch_size, bus_width]
-		- in_question_tokens.shape = [batch_size, seq_len, bus_width]
+		- in_control_state.shape   = [batch_size, control_width]
+		- in_question_state.shape  = [batch_size, embed_width]
+		- in_question_tokens.shape = [batch_size, seq_len, embed_width]
 
 	"""
 	with tf.name_scope("control_cell"):
 
-		in_control_state = dynamic_assert_shape(in_control_state, 
-			[ features["d_batch_size"], args["bus_width"] ]
-		)
+		control_shape = [ features["d_batch_size"], args["control_width"] ]
+		in_control_state = dynamic_assert_shape(in_control_state, control_shape)
 		
-		# Skipping tf.dense(in_question_state, name="control_question_t"+iteration_step)
-		all_input = tf.concat([in_control_state, in_question_state], -1, name="all_input")
+		all_input = tf.concat([in_control_state, inputs], -1, name="all_input")
 
-		question_token_query = tf.layers.dense(all_input, args["bus_width"], activation=tf.nn.tanh)
-		question_token_query = tf.layers.dense(question_token_query, args["bus_width"], activation=tf.nn.tanh)
-		question_token_query = dynamic_assert_shape(question_token_query, 
-			[ features["d_batch_size"], args["bus_width"] ]
-		)
+		token_full_width = args["embed_width"]
 
-		control_out = attention(in_question_tokens, question_token_query)
+		attention_calls = []
+		queries = []
+
+		for i in range(args["control_heads"]):
+			question_token_query = tf.layers.dense(all_input, token_full_width)
+			question_token_query = tf.layers.dense(question_token_query, token_full_width)
+			question_token_query = dynamic_assert_shape(question_token_query, 
+				[ features["d_batch_size"], token_full_width ]
+			)
+			queries.append(question_token_query)
+
+			a = attention(
+				table=in_question_tokens, 
+				query=question_token_query, 
+				word_size=token_full_width, 
+				table_len=features["src_len"],
+				table_max_len=args["max_seq_len"],
+			)
+
+			attention_calls.append(a)
+
+		control_out  = [i[0] for i in attention_calls]
+		control_out  = tf.concat(control_out, -1)
+
+		tap_qw_attn = [i[1] for i in attention_calls]
+		tap_qw_attn = tf.concat(tap_qw_attn, -2)
+
+		tap_qw_query = tf.concat(queries, -1)
+
+
+		if control_out.shape[-1] != args["control_width"]:
+			control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
 		
-		return control_out
+		control_out = tf.nn.dropout(control_out, 1.0-args["control_dropout"])
+		control_out = dynamic_assert_shape(control_out, control_shape)
+
+		return control_out, tap_qw_attn, tap_qw_query
 
