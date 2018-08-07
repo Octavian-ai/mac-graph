@@ -22,15 +22,9 @@ def gen_param_spec(args):
     return ParamSpec({
         "heritage": Heritage,
         "model_id": ModelId,
-<<<<<<< Updated upstream
         "vocab_size":  IntParamOf(128, 4, 2048),
 		"embed_width": IntParamOf(64, 4, 2048),
 		"learning_rate": LRParam,
-=======
-        "vocab_size":  IntParam,
-		"embed_width": IntParam,
-		"learning_rate": LRParam
->>>>>>> Stashed changes
     })
 
 
