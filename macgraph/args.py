@@ -9,7 +9,37 @@ from .minception import mi_activation
 
 global_args = {}
 
-def get_args(extend=lambda parser:None):
+
+# Expand activation args to callables
+activation_options = {
+	"tanh": tf.tanh,
+	"relu": tf.nn.relu,
+	"sigmoid": tf.nn.sigmoid,
+	"mi": mi_activation,
+	"abs": lambda x: tf.nn.relu(x) + tf.nn.relu(-x),
+}
+
+def generate_args_derivatives(args):
+
+	r = {}
+
+	# Expand input dirs
+	for i in [*args["modes"], "all"]:
+		r[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
+
+	r["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
+	r["config_path"] = os.path.join(args["model_dir"], "config.yaml")
+	r["question_types_path"] = os.path.join(args["input_dir"], "types.yaml")
+	r["answer_classes_path"] = os.path.join(args["input_dir"], "answer_classes.yaml")
+
+	# Expand activation args to callables
+	act_args = [key for key, value in args.items() if key.endswith("_activation") and isinstance(value, str)]
+	for i in act_args:
+		r[i] = activation_options[args[i].lower()]
+
+	return r
+
+def get_args(extend=lambda parser:None, argv=None):
 
 	parser = argparse.ArgumentParser()
 	extend(parser)
@@ -101,38 +131,19 @@ def get_args(extend=lambda parser:None):
 	parser.add_argument('--enable-tf-debug', 			action='store_true',  dest="use_tf_debug")
 	parser.add_argument('--enable-comet', 				action='store_true',  dest="use_comet")
 
-
-
 	parser.add_argument('--max-decode-iterations', 		type=int, default=8)
 	
-
-	args = vars(parser.parse_args())
+	args = vars(parser.parse_args(argv))
 
 	args["modes"] = ["eval", "train", "predict"]
 
-	for i in [*args["modes"], "all"]:
-		args[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
-
-	args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
-	args["config_path"] = os.path.join(args["model_dir"], "config.yaml")
-
-	args["question_types_path"] = os.path.join(args["input_dir"], "types.yaml")
-	args["answer_classes_path"] = os.path.join(args["input_dir"], "answer_classes.yaml")
-
+	args.update(generate_args_derivatives(args))
+	
+	# Global singleton var for easy access deep in the codebase (e.g. utility functions)
+	# Note that this wont play well with PBT!! 
+	# TODO: Remove
 	global_args.clear()
 	global_args.update(args)
-
-
-	# Expand activation args to callables
-	act = {
-		"tanh": tf.tanh,
-		"relu": tf.nn.relu,
-		"sigmoid": tf.nn.sigmoid,
-		"mi": mi_activation
-	}
-
-	for i in ["output_activation", "read_activation"]:
-		args[i] = act[args[i].lower()]
 
 	return args
 

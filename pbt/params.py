@@ -8,6 +8,11 @@ logger = logging.getLogger(__name__)
 from .param import GeneticParam
 
 class MergedParams(object):
+	'''
+		Overlay static parameter dictionary with a dictionary of 'dynamic' genetic parameters
+
+		This lets the parameters being optimized override those in the static base
+	'''
 
 	def __init__(self, fixed, dynamic):
 		self.fixed = fixed

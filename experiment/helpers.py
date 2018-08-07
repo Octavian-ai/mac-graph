@@ -12,7 +12,9 @@ logger = logging.getLogger(__name__)
 
 from .args import get_args
 from macgraph.model import model_fn
-from macgraph.input import *
+from macgraph.input import gen_input_fn
+from macgraph import get_args as get_macgraph_args
+from macgraph import generate_args_derivatives
 
 from pbt import *
 
@@ -25,31 +27,31 @@ def gen_param_spec(args):
 		"learning_rate": LRParam,
     })
 
-def dummy(args):
-    args = vars(args)
-    args["modes"] = ["eval", "train", "predict"]
-
-    for i in [*args["modes"], "all"]:
-    	args[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
-
-    args["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
-    args["types_path"] = os.path.join(args["input_dir"], "types.yaml")
-
-    return args
 
 
 def gen_worker_init_params(args):
-	args = dummy(args)
-	p = {
+
+	p = {}
+
+	# Get the defaults for macgraph arguments 
+	# These will likely be overrided by ParamSpec items
+	# and can be overrided by command line args from PBT
+	p.update(get_macgraph_args(argv=[]))
+
+	# Add all command line args from PBT
+	p.update(vars(args))
+
+	p.update(generate_args_derivatives(p))
+	
+	# Key pieces for Estimator
+	p.update({
 		"model_fn": model_fn,
-		"train_input_fn": lambda args2: gen_input_fn(args2, "train"),
-		"eval_input_fn":  lambda args2: gen_input_fn(args2, "eval"),
+		"train_input_fn": lambda params: gen_input_fn(p, "train"),
+		"eval_input_fn":  lambda params: gen_input_fn(p, "eval"),
 		"run_config": tf.estimator.RunConfig(save_checkpoints_steps=99999999999, save_checkpoints_secs=None)
-	}
+	})
 
-	args.update(p)
-
-	return args
+	return p
 
 def get_drone(args):
     return Drone(args, EstimatorWorker, gen_worker_init_params(args))
