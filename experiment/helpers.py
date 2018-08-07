@@ -42,9 +42,9 @@ def gen_worker_init_params(args):
 	args = dummy(args)
 	p = {
 		"model_fn": model_fn,
-		"train_input_fn": gen_input_fn(args, "train"),
-		"eval_input_fn":  gen_input_fn(args, "eval"),
-		"run_config": tf.estimator.RunConfig(save_checkpoints_steps=99999999999,save_checkpoints_secs=None)
+		"train_input_fn": lambda args2: gen_input_fn(args2, "train"),
+		"eval_input_fn":  lambda args2: gen_input_fn(args2, "eval"),
+		"run_config": tf.estimator.RunConfig(save_checkpoints_steps=99999999999, save_checkpoints_secs=None)
 	}
 
 	args.update(p)
@@ -57,8 +57,7 @@ def get_drone(args):
 
 def score(worker):
 	try:
-		# return (worker.results["loss"] + 1) / worker.results["total_elements"]
-		return worker.results["correct_elements"] - worker.results["loss"]/10
+		return worker.results["loss"]
 	except Exception:
 		return None
 
@@ -67,4 +66,4 @@ def name_fn(worker):
 
 
 def get_supervisor(args):
-    return Supervisor(args, gen_param_spec(args), score, name_fn, False, None)
+    return Supervisor(args, gen_param_spec(args), score, name_fn, True)

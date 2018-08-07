@@ -9,9 +9,14 @@ def get_args(args=None):
 	parser.add_argument('--run',					type=str,  default=os.getenv("RUN", "default"), help="Prefix used for file storage and messaging")
 	parser.add_argument('--log-level',  			type=str, default='INFO')
 
-	parser.add_argument('--output-dir', 			type=str, default="./output")
+	parser.add_argument('--output-dir', 			type=str, default="./output/cluster/")
 	parser.add_argument('--input-dir',  			type=str, default="./input_data/processed")
-	parser.add_argument('--model-dir',  		    type=str, default="./output/model")
+	parser.add_argument('--model-dir',  		    type=str, default="./output/cluster/model")
+
+	parser.add_argument('--queue-type',				type=str,  default="rabbitmq", choices=["rabbitmq","google"])
+	parser.add_argument('--amqp-url',				type=str,  default=os.getenv("AMQP_URL", 'amqp://guest:guest@localhost'))
+
+	
 
 	# For storing to Google Cloud
 	parser.add_argument('--bucket',					type=str,  default=None)
@@ -51,8 +56,4 @@ def get_args(args=None):
 	parser.add_argument('--master-works', 			action='store_true',help="Master will also act as drone")
 	parser.add_argument('--run-baseline', 			action='store_true',help="Run static baseline tests")
 	
-	
-	parser.add_argument('--queue-type',				type=str,  default="rabbitmq", choices=["rabbitmq","google"])
-	parser.add_argument('--amqp-url',				type=str,  default=os.getenv("AMQP_URL", 'amqp://guest:guest@172.17.0.2:5672/ashwath'))
-
 	return parser.parse_args(args)

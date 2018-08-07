@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 from .param import GeneticParam
 
 class MergedParams(object):
+
 	def __init__(self, fixed, dynamic):
 		self.fixed = fixed
 		self.dynamic = dynamic
@@ -32,7 +33,7 @@ class MergedParams(object):
 			else:
 				raise ex
 
-	def __setitem(self, key, value):
+	def __setitem__(self, key, value):
 		if instanceof(value, GeneticParam):
 			self.dynamic[key] = value
 		else:
