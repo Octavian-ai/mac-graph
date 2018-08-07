@@ -16,12 +16,22 @@ class HeartbeatHook(tf.train.SessionRunHook):
 		self.heatbeat = heatbeat
 		self.should_continue = should_continue
 
-	def after_run(run_context, run_values):
+	def after_run(self, run_context, run_values):
 		self.heatbeat()
 		try:
 			self.should_continue()
 		except StopIteration:
 			run_context.request_stop()
+
+
+
+class HeatbeatSaverListener(tf.train.CheckpointSaverListener):
+
+	def __init__(self, heartbeat):
+		self.heartbeat = heartbeat
+
+	def after_save(self, session, global_step_value):
+		self.heartbeat()
 
 
 def resize_and_load(var, val, sess):
@@ -166,7 +176,9 @@ class EstimatorWorker(Worker):
 		self.estimator.train(
 			self.init_params["train_input_fn"](self.friendly_params), 
 			steps=steps,
-			hooks=[HeartbeatHook(heartbeat, should_continue)])
+			hooks=[HeartbeatHook(heartbeat, should_continue)],
+			saving_listeners=[HeatbeatSaverListener(heartbeat)],
+		)
 
 		# TODO: put heartbeat and should_continue into a hook
 		heartbeat()
