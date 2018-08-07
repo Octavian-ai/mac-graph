@@ -47,10 +47,27 @@ For more in-depth information about what works/doesn't work, check out the [expe
 
 ## Running the code
 
-### Prerequisites
+See [RUNNING.md](RUNNING.md) for how to both run the network and also use a cluster to optimize its hyper-parameters.
+
+The short summary of how to train locally:
+```
+$ pipenv install
+$ pipenv shell
+(mac-graph-sjOzWQ6Y) $ python -m macgraph.train
+```
 
 ## AOB
 
 ### Acknowledgments
 
 Thanks to Drew Hudson and Christopher Manning for publishing their work, [Compositional Attention Networks for Machine Reasoning](https://arxiv.org/abs/1803.03067) upon which this is based. Thanks also to DeepMind for publishing their Differentiable Neural Computer results in Nature with a demonstration of that architecture solving graph problems, it is a reassurance that this endeavor is not ill-founded.
+
+### A limerick
+
+Since you're here.
+
+> There once was an old man of Esser,<br/>
+> Whose knowledge grew lesser and lesser,<br/>
+> It at last grew so small<br/>
+> He knew nothing at all<br/>
+> And now he's a college professor.

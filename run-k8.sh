@@ -1,6 +1,7 @@
 #!/bin/sh
 
 pipenv run python -m experiment.k8 "$@" \
-	--gcs-dir k8 \
+	--gcs-dir k8/mac-graph \
 	--bucket octavian-training \
-	--model-dir gs://octavian-training/k8/checkpoint
+	--model-dir gs://octavian-training/k8/mac-graph/checkpoint
+	
