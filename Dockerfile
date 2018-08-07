@@ -6,9 +6,9 @@ RUN pip install pipenv
 WORKDIR /source
 
 # Only do costly pipenv install when needed
-COPY source/Pipfile .
+COPY Pipfile .
 RUN pipenv install --verbose --skip-lock
 
-COPY source .
+COPY . .
 
 CMD "./run-k8.sh"
