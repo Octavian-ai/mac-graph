@@ -4,7 +4,6 @@ import time
 import pickle
 import math
 import uuid
-from google.cloud import pubsub_v1
 import traceback
 import random
 import yaml

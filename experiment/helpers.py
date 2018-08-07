@@ -20,9 +20,9 @@ def gen_param_spec(args):
     return ParamSpec({
         "heritage": Heritage,
         "model_id": ModelId,
-        "vocab_size":  VocabSize,
-		"embed_width": EmbedWidth,
-		"learning_rate": LearningRate
+        "vocab_size":  IntParamOf(128, 4, 2048),
+		"embed_width": IntParamOf(64, 4, 2048),
+		"learning_rate": LRParam,
     })
 
 def dummy(args):
@@ -48,7 +48,6 @@ def gen_worker_init_params(args):
 	}
 
 	args.update(p)
-	print("gen_worker_init_params args", args)
 
 	return args
 

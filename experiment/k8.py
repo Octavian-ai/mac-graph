@@ -10,7 +10,6 @@ import requests
 import json
 import platform
 import time
-import pika
 import threading
 import traceback
 

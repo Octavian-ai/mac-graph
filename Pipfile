@@ -17,6 +17,9 @@ pyyaml = "*"
 tqdm = "*"
 tableprint = "*"
 comet-ml = "*"
+petname = "*"
+pika = "*"
+coloredlogs = "*"
 
 
 [requires]
