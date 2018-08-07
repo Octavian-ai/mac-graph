@@ -6,12 +6,7 @@ import tensorflow as tf
 import logging
 logger = logging.getLogger(__name__)
 
-try:
-  from google.cloud import storage
-  import google.cloud.exceptions
-except ImportError as e:
-  logger.warn("Could not import google.cloud, will not save to bucket")
-  pass
+# Now that I know tf.gfile is a thing, none of this is needed
 
 
 class FileThingy(object):
@@ -33,7 +28,6 @@ class FileThingy(object):
     return os.path.join(self.args.gcs_dir, self.args.run, self.filename)
   
 
-# TODO: See if TF GFile can replace this
 def path_exists(path):
   return tf.gfile.Exists(path)
   
@@ -43,28 +37,14 @@ class FileReadie(FileThingy):
 
   def __init__(self, args, filename, binary=False):
     super().__init__(args, filename)
-    self.trad_file = None
-    self.binary = binary
-
-  def copy_from_bucket(self):
-    if 'google.cloud' in sys.modules and self.args.bucket is not None and self.args.gcs_dir is not None:
-      client = storage.Client()
-      bucket = client.get_bucket(self.args.bucket)
-      blob = bucket.blob(self.gcs_path)
-      os.makedirs(self.file_dir, exist_ok=True)
-      with open(self.file_path, "wb" if self.binary else "w") as dest_file:
-        try:
-          blob.download_to_file(dest_file)
-        except google.cloud.exceptions.NotFound:
-          raise FileNotFoundError()
+    self.open_str = "rb" if binary else "r"
 
   def __enter__(self):
-    self.copy_from_bucket()
-    self.trad_file = open(self.file_path, "rb" if self.binary else "r" )
-    return self.trad_file
+    self.file = tf.gfile.GFile(self.file_path, self.open_str)
+    return self.file
 
   def __exit__(self, type, value, traceback):
-    self.trad_file.close()
+    self.file.close()
 
     
 
@@ -74,24 +54,20 @@ class FileWritey(FileThingy):
 
   def __init__(self, args, filename, binary=False):
     super().__init__(args, filename)
-    self.trad_file = None
     self.open_str = "wb" if binary else "w" 
 
-  def copy_to_bucket(self):
-    if 'google.cloud' in sys.modules and self.args.bucket is not None and self.args.gcs_dir is not None:
-      client = storage.Client()
-      bucket = client.get_bucket(self.args.bucket)
-      blob = bucket.blob(self.gcs_path)
-      blob.upload_from_filename(filename=self.file_path)
+  def __enter__(self): 
+    try:
+      os.makedirs(self.file_dir, exist_ok=True)
+    except Exception:
+      pass
 
-  def __enter__(self):
-    os.makedirs(self.file_dir, exist_ok=True)
-    self.trad_file = open(self.file_path, self.open_str)
-    return self.trad_file
+    self.file = tf.gfile.GFile(self.file_path, self.open_str)
+
+    return self.file
 
   def __exit__(self, type, value, traceback):
-    self.trad_file.close()
-    self.copy_to_bucket()
+    self.file.close()
 
     
 

@@ -1,5 +1,4 @@
 
-
 import tensorflow as tf
 import csv
 import sys
@@ -24,16 +23,6 @@ try:
 except ImportError as e:
   logger.warn("Could not import matplotlib, no graphs will be generated; " + str(e))
   pass
-
-
-try:
-  from google.colab import auth
-  from googleapiclient.discovery import build
-  from googleapiclient.http import MediaFileUpload
-except ImportError as e:
-  logger.debug("Could not import googleapiclient, will not save to google drive; " + str(e))
-  pass
-
 
 
 class Ploty(object):
@@ -213,30 +202,6 @@ class Ploty(object):
     logger.info("Saved CSV: " + self.csv_file_path)
     
   
-  def copy_to_drive(self, snapshot=False):   
-    auth.authenticate_user()
-    drive_service = build('drive', 'v3')
-    
-    if snapshot:
-      name = self.title + "_latest"
-    else:
-      name = self.title +'_' + str(datetime.now())
-      
-    def do_copy(source_name, dest_name, mime):
-      file_metadata = {
-        'name': dest_name,
-        'mimeType': mime
-      }
-      media = MediaFileUpload(self.args.output_dir + source_name, 
-                              mimetype=file_metadata['mimeType'],
-                              resumable=True)
-      
-      created = drive_service.files().create(body=file_metadata,
-                                             media_body=media,
-                                             fields='id').execute()
-      
-    do_copy(self.title+'.csv', name + '.csv', 'text/csv')
-    do_copy(self.title+'.png', name + '.png', 'image/png')
 
 
   

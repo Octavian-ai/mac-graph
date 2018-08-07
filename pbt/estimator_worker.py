@@ -9,7 +9,20 @@ from .worker import Worker
 from .param import *
 from .params import *
 
-"""### Train the model"""
+
+class HeartbeatHook(tf.train.SessionRunHook):
+
+	def __init__(self, heatbeat, should_continue):
+		self.heatbeat = heatbeat
+		self.should_continue = should_continue
+
+	def after_run(run_context, run_values):
+		self.heatbeat()
+		try:
+			self.should_continue()
+		except StopIteration:
+			run_context.request_stop()
+
 
 def resize_and_load(var, val, sess):
 	o_shape = var.get_shape().as_list()
@@ -150,7 +163,10 @@ class EstimatorWorker(Worker):
 		if self.estimator is None:
 			self.setup_estimator()
 
-		self.estimator.train(self.init_params["train_input_fn"](self.friendly_params), steps=steps)
+		self.estimator.train(
+			self.init_params["train_input_fn"](self.friendly_params), 
+			steps=steps,
+			hooks=[HeartbeatHook(heartbeat, should_continue)])
 
 		# TODO: put heartbeat and should_continue into a hook
 		heartbeat()

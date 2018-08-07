@@ -7,6 +7,8 @@ import uuid
 import traceback
 import random
 import yaml
+import tensorflow as tf
+
 import logging
 logger = logging.getLogger(__name__)
 
