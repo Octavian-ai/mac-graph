@@ -11,4 +11,5 @@ pipenv run python -m experiment.k8 "$@" \
 	--bucket $BUCKET \
 	--model-dir gs://$BUCKET/$OUTPUT_DIR/checkpoint \
 	--output-dir gs://$BUCKET/$OUTPUT_DIR \
+	--log-format json \
 	

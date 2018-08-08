@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "acee021af76373c9aaada13a435de2221df287f8e7785ed1e4c435fad2efdac7"
+            "sha256": "07b4a40976c73b8e7331aabb1411e0b9c12c765e6260173d5e4562782b5a0e3a"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -390,6 +390,13 @@
             ],
             "version": "==2.7.3"
         },
+        "python-json-logger": {
+            "hashes": [
+                "sha256:a292e22c5e03105a05a746ade6209d43db1c4c763b91c75c8486e81d10904d85",
+                "sha256:e3636824d35ba6a15fc39f573588cba63cf46322a5dc86fb2f280229077e9fbe"
+            ],
+            "version": "==0.1.9"
+        },
         "pytz": {
             "hashes": [
                 "sha256:a061aa0a9e06881eb8b3b2b43f05b9439d6583c206d0a6c340ff72a7b6669053",
@@ -511,7 +518,6 @@
                 "sha256:80044e51ec5bbf6c894ba0bc48d26a8c20a9ba629f4ca19ea26ecfcf87685f5f",
                 "sha256:0a2e54558a0628f2145d2fc822137e322412115173e8a2ddbe1c9024338ae83c"
             ],
-            "markers": "python_version < '3'",
             "version": "==0.31.1"
         },
         "wurlitzer": {

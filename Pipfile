@@ -21,6 +21,7 @@ petname = "*"
 pika = "*"
 coloredlogs = "*"
 matplotlib = "*"
+python-json-logger = "*"
 
 
 [requires]

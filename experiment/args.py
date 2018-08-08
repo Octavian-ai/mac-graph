@@ -7,7 +7,9 @@ def get_args(args=None):
 	parser = argparse.ArgumentParser()
 
 	parser.add_argument('--run',					type=str,  default=os.getenv("RUN", "default"), help="Prefix used for file storage and messaging")
+	
 	parser.add_argument('--log-level',  			type=str, default='INFO')
+	parser.add_argument('--log-format',				type=str, default="colored", choices=["colored", "json"])
 
 	parser.add_argument('--output-dir', 			type=str, default="./output/cluster/")
 	parser.add_argument('--model-dir',  		    type=str, default="./output/cluster/model")
