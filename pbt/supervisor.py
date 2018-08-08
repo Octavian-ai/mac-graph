@@ -164,7 +164,14 @@ class Supervisor(object):
 			if len(stack) < self.args.n_workers / 2:
 				logger.warn("Removing worker, however only {}/{} have scores so removal choice may be poor".format(len(stack), self.args.n_workers))
 			
-			del self.workers[stack[0].id]	
+			if len(stack) > 0:
+				del self.workers[stack[0].id]	
+			else:
+				# Crapshoot fallback
+				del self.workers[random.choice(self.workers.keys())]
+
+		else:
+			logger.warn("Asked to remove worker from empty supervisor")
 
 
 
