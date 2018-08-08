@@ -9,6 +9,9 @@ from .worker import Worker
 from .param import *
 from .params import *
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class HeartbeatHook(tf.train.SessionRunHook):
 
@@ -96,37 +99,22 @@ class EstimatorWorker(Worker):
 	def __init__(self, init_params, hyperparam_spec):
 		self.estimator = None
 		self.trained = False
-		self.use_warm_start = True
+		
 
-		if self.use_warm_start:
+		if init_params["use_warm_start"]:
 			assert "model_id" in hyperparam_spec, "Warm start requires model_id hyperparam"
-		else:
-			assert "vars" in hyperparam_spec, "Cold start requires vars hyperparam"
-
+		
 		super().__init__(init_params, hyperparam_spec)
 
 
 	def setup_estimator(self):
-	
-		if self.use_warm_start:
-			try:
-				model_dir = os.path.join(self.init_params["model_dir"], self._params["model_id"].value["cur"])
-		
-				if self._params["model_id"].value["warm_start_from"] is not None:
-					warm_start = os.path.join(
-						self.init_params["model_dir"], 
-						self._params["model_id"].value["warm_start_from"])
-				else:
-					warm_start = None
-				
 
-			except Exception as e:
-				traceback.print_exc()
-				model_dir = self.init_params["model_dir"] + str(uuid.uuid4())
-				warm_start = None
+		if self.init_params["use_warm_start"] and self.warm_start_dir is not None:
+			model_dir = self.model_dir
+			warm_start = self.warm_start_dir
 
 		else:
-			model_dir = self.init_params["model_dir"] + str(uuid.uuid4())
+			model_dir  = os.path.join(self.init_params["model_dir"], self.init_params["run"], str(uuid.uuid4()))
 			warm_start = None
 
 		self.estimator = tf.estimator.Estimator(
@@ -144,15 +132,16 @@ class EstimatorWorker(Worker):
 			self.setup_estimator()
 
 		# We need to warm up the estimator
-		if not self.use_warm_start and not self.trained:
-			self.do_step(1)
+		if not self.init_params["use_warm_start"] and not self.trained:
+			self.do_step(1, lambda:None, lambda:None)
 
 
 	def extract_vars(self):
-		self.ensure_warm()
-		var_names = self.estimator.get_variable_names()
-		vals = {k:self.estimator.get_variable_value(k) for k in var_names}
-		self._params["vars"] = VariableParam(vals)
+		if "vars" in self._params:
+			self.ensure_warm()
+			var_names = self.estimator.get_variable_names()
+			vals = {k:self.estimator.get_variable_value(k) for k in var_names}
+			self._params["vars"] = VariableParam(vals)
 		
 
 
@@ -161,7 +150,7 @@ class EstimatorWorker(Worker):
 	# --------------------------------------------------------------------------
 
 	def pre_params_get(self):
-		if not self.use_warm_start:
+		if not self.init_params["use_warm_start"]:
 			self.extract_vars()  
 
 	def post_params_set(self):
@@ -199,8 +188,9 @@ class EstimatorWorker(Worker):
 			"_params":          self.params,
 			"results":          self.results,
 			"id":               self.id,
-			"current_count":    self.current_count,
-			"total_count":      self.total_count,
+			"total_steps":    	self.total_steps,
+			"recent_steps":     self.recent_steps,
+			"time_started":		self.time_started,
 		}
 
 	def __setstate__(self, state):
@@ -208,8 +198,8 @@ class EstimatorWorker(Worker):
 		self.time_started 	= 0
 		self.performance 	= (0,0)
 		
-		self.total_count    = state.get("total_count", 0)
-		self.current_count  = state.get("current_count", 0)
+		self.total_steps    = state.get("total_steps", 0)
+		self.recent_steps  	= state.get("recent_steps", 0)
 
 		self.results        = state.get("results", {})
 		self._params        = state.get("_params", {})

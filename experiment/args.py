@@ -43,17 +43,15 @@ def get_args(args=None):
 	parser.add_argument('--sexual-top-candidates',  type=int,   default=4, help="How many of the top candidates to randomly choose from")
 
 
-
 	parser.add_argument('--profile',				action='store_true')
 	parser.add_argument('--single-threaded',		action='store_true')
 	parser.add_argument('--log-tf',					action='store_true')
 	parser.add_argument('--floyd-metrics',			action='store_true')
 	parser.add_argument('--breed-sexual',			action='store_true')
 
-
-
 	parser.add_argument('--disable-save',			action='store_false',dest="save")
 	parser.add_argument('--disable-load',			action='store_false',dest="load")
+	parser.add_argument('--enable-warm-start',		action='store_true',dest="use_warm_start",help="You can only wam start if the variables are the same shape and set")
 	parser.add_argument('--master-works', 			action='store_true',help="Master will also act as drone")
 	parser.add_argument('--run-baseline', 			action='store_true',help="Run static baseline tests")
 	

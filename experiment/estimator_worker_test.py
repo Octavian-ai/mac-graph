@@ -17,6 +17,7 @@ class EstimatorWorkerTestCase(WorkerTestCase):
 		init_params = gen_worker_init_params(args)
 		param_spec = gen_param_spec(args)
 		params = param_spec.realize()
+		print(params)
 
 		return EstimatorWorker(init_params, params)
 

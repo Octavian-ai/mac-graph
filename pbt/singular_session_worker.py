@@ -142,8 +142,9 @@ class SingularSessionWorker(Worker):
 			"_params":          self.params,
 			"results":          self.results,
 			"id":               self.id,
-			"current_count":    self.current_count,
-			"total_count":      self.total_count,
+			"total_steps":    	self.total_steps,
+			"recent_steps":     self.recent_steps,
+			"time_started":		self.time_started,
 		}
 
 	def __setstate__(self, state):
@@ -151,11 +152,10 @@ class SingularSessionWorker(Worker):
 		self.time_started 	= 0
 		self.performance 	= (0,0)
 		
-		self.total_count    = state.get("total_count", 0)
-		self.current_count  = state.get("current_count", 0)
+		self.total_steps    = state.get("total_steps", 0)
+		self.recent_steps  	= state.get("recent_steps", 0)
 
 		self.results        = state.get("results", {})
 		self._params        = state.get("_params", {})
-
 		
 

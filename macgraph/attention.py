@@ -59,7 +59,7 @@ def attention(table, query, word_size=None, table_len=None, table_max_len=None):
 		# Validate inputs
 		# --------------------------------------------------------------------------
 
-		assert len(table.shape) == 3, "table should be shape [batch, len, width]"
+		assert len(db.shape) == 3, "table should be shape [batch, len, width]"
 
 		batch_size = tf.shape(db)[0]
 		seq_len = tf.shape(db)[1]
@@ -67,7 +67,7 @@ def attention(table, query, word_size=None, table_len=None, table_max_len=None):
 		if word_size is None:
 			word_size = tf.shape(db)[2]
 
-		db_shape = tf.shape(table)
+		db_shape = tf.shape(db)
 		q_shape = [batch_size, word_size]
 		scores_shape = [batch_size, seq_len, 1]
 

@@ -29,12 +29,14 @@ def gen_param_spec(args):
 		"heritage": Heritage,
 		"model_id": ModelId,
 
+		"vocab_size": RandIntParamOf(110,512),
 		"max_decode_iterations": IntParamOf(4, 1, 32),
 		"learning_rate": LRParam,
 	}
 
-	for i in ["vocab_size", "embed_width", "memory_width", "control_width"]:
-		p[i] = RandIntParamOf(4, 2048)
+	for i in ["embed_width", "memory_width", "control_width"]:
+		p[i] = RandIntParamOf(4, 32) # make this 2048
+
 
 	for i in ["memory_transform_layers", "output_layers", "input_layers", "control_heads"]:
 		p[i] = RandIntParamOf(1, 8)

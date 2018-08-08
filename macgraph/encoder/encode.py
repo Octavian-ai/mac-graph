@@ -1,12 +1,13 @@
 
 
 import tensorflow as tf
+import math
 
 from ..util import *
 
-def basic_cell(args, i, unit_mul):
+def basic_cell(args, i, width):
 
-	c = tf.contrib.rnn.LSTMCell(int(args['embed_width']*unit_mul))
+	c = tf.contrib.rnn.LSTMCell(width)
 	c = tf.contrib.rnn.DropoutWrapper(c, args['input_dropout'])
 
 	if i > 1:
@@ -14,10 +15,10 @@ def basic_cell(args, i, unit_mul):
 
 	return c
 
-def cell_stack(args, layer_mul=1, unit_mul=1):
+def cell_stack(args, width, layer_mul=1):
 	cells = []
 	for i in range(int(args["input_layers"]*layer_mul)):
-		cells.append(basic_cell(args, i, unit_mul))
+		cells.append(basic_cell(args, i, width))
 
 	cell = tf.contrib.rnn.MultiRNNCell(cells)
 	return cell
@@ -66,8 +67,8 @@ def encode_input(args, features, vocab_embedding):
 		# --------------------------------------------------------------------------
 		
 		# 1/2 multiplier so that when we concat the layers together we get control_width
-		fw_cell = cell_stack(args, unit_mul=0.5)
-		bw_cell = cell_stack(args, unit_mul=0.5)
+		fw_cell = cell_stack(args, width=math.floor(args['embed_width']/2))
+		bw_cell = cell_stack(args, width=math.ceil(args['embed_width']/2))
 		
 		(fw_output, bw_output), (fw_states, bw_states) = tf.nn.bidirectional_dynamic_rnn(
 			fw_cell,

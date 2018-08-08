@@ -103,6 +103,7 @@ class Drone(object):
 		else:
 			worker = self.SubjectClass(self.init_params, run_spec.params)
 			worker.id = run_spec.worker_id
+			self.logger.debug("{} init with params {}".format(worker.id, run_spec.params))
 			self.worker_cache[run_spec.worker_id] = worker
 
 		worker.update_from_run_spec(run_spec)
