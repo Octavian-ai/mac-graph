@@ -23,7 +23,7 @@ def get_args(args=None):
 	parser.add_argument('--project',				type=str,  default=os.getenv("GOOGLE_CLOUD_PROJECT", "octavian-181621"))
 
 	parser.add_argument('--epochs', 				type=int,  default=1000)
-	parser.add_argument('--micro-step', 			type=int,  default=os.getenv("MICRO_STEP", 1000))
+	parser.add_argument('--micro-step', 			type=int,  default=os.getenv("MICRO_STEP", 10000))
 	parser.add_argument('--macro-step', 			type=int,  default=os.getenv("MACRO_STEP", 10))
 
 	parser.add_argument('--n-workers', 				type=int,  default=os.getenv("N_WORKERS", 15))

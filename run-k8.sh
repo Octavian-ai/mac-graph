@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Google stackdriver already gives us time and hostname
-export COLOREDLOGS_LOG_FORMAT='{"severity":%(levelname)s, "textPayload":"%(name)s %(message)s"}'
+export COLOREDLOGS_LOG_FORMAT='%(levelname)s %(name)s %(message)s'
 
 BUCKET=octavian-training2
 OUTPUT_DIR=cluster/mac-graph

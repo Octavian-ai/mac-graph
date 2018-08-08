@@ -19,13 +19,24 @@ from macgraph import generate_args_derivatives
 from pbt import *
 
 def gen_param_spec(args):
-    return ParamSpec({
-        "heritage": Heritage,
-        "model_id": ModelId,
-        "vocab_size":  IntParamOf(128, 4, 2048),
-		"embed_width": IntParamOf(64, 4, 2048),
+
+	mga = get_macgraph_args(argv=[])
+
+	p = {
+		"heritage": Heritage,
+		"model_id": ModelId,
+
+		"max_decode_iterations": IntParamOf(4, 1, 32),
 		"learning_rate": LRParam,
-    })
+	}
+
+	for i in ["vocab_size", "embed_width", "memory_width", "control_width"]:
+		p[i] = RandIntParamOf(4, 2048)
+
+	for i in ["memory_transform_layers", "output_layers", "input_layers", "control_heads"]:
+		p[i] = RandIntParamOf(1, 8)
+
+	return ParamSpec(p)
 
 
 
@@ -54,7 +65,7 @@ def gen_worker_init_params(args):
 	return p
 
 def get_drone(args):
-    return Drone(args, EstimatorWorker, gen_worker_init_params(args))
+	return Drone(args, EstimatorWorker, gen_worker_init_params(args))
 
 
 def score(worker):
@@ -68,4 +79,4 @@ def name_fn(worker):
 
 
 def get_supervisor(args):
-    return Supervisor(args, gen_param_spec(args), score, name_fn, True)
+	return Supervisor(args, gen_param_spec(args), score, name_fn, True)
