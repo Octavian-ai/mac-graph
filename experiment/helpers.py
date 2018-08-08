@@ -89,6 +89,7 @@ def install_logging(args):
 		for i in ["__main__", "pbt", "experiment", "macgraph", "util", "tensorflow"]]
 
 	for i in loggers:
+		i.handlers = []
 		if args.log_format == 'colored':
 			coloredlogs.install(logger=i, level=args.log_level)
 		elif args.log_format == 'json':

@@ -74,7 +74,7 @@ class ParamSet(dict):
 			return choice.mutate(heat)
 
 		return type(self)({
-			k: cross(v, other[k], heat) for k, v in self.items()
+			k: cross(v, other[k]) for k, v in self.items()
 		})
 
 class ParamSpec(dict):

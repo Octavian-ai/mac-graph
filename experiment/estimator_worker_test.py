@@ -20,6 +20,10 @@ class EstimatorWorkerTestCase(WorkerTestCase):
 
 		return EstimatorWorker(init_params, params)
 
+	def load_worker(self, file_path):
+		init_params = gen_worker_init_params(args)
+		return EstimatorWorker.load(file_path, init_params)
+
 
 
 if __name__ == '__main__':

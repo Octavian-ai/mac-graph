@@ -20,7 +20,8 @@ class WorkerTestCase(unittest.TestCase):
 	# --------------------------------------------------------------------------
 
 	def vend_worker(self):
-		return MockWorker()
+		params = mock_param_spec().realize()
+		return MockWorker({}, params)
 
 	def load_worker(self, file_path):
 		return MockWorker.load(file_path, {})
@@ -130,8 +131,15 @@ class WorkerTestCase(unittest.TestCase):
 			workerA.eval()
 			workerB.eval()
 
+			logger.debug("Breeding workers")
 			workerA.params = workerA.params.breed(workerB.params, 1.0)
 
 		# Didn't crash = success
+
+
+if __name__ == '__main__':
+	logging.basicConfig()
+	unittest.main(module='pbt',defaultTest="WorkerTestCase")
+
 
 

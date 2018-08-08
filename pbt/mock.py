@@ -5,11 +5,13 @@ from .param import *
 from .params import *
 
 
-def mock_hyperparam_spec():
+def mock_param_spec():
 	return ParamSpec({
 		"micro_step": FixedParamOf(1),
 		"macro_step": FixedParamOf(1),
-		"state": FixedParamOf(0)
+		"state": FixedParamOf(0),
+		"foo": RandIntParamOf(0,10),
+		"bar": MulParamOf(2.0),
 	})
 
 class MockArgs(object):
@@ -34,17 +36,10 @@ class MockArgs(object):
 class MockWorker(Worker):
 	"""For use in tests"""
 
-	def __init__(self, init_params={}, hyperparam_spec=None):
-
-		if hyperparam_spec is None:
-			hyperparam_spec = mock_hyperparam_spec()
-
-		super().__init__(init_params, hyperparam_spec)
-
 	def do_eval(self):
 		return {
 			"accuracy": self.friendly_params["state"]
 		}
 
-	def do_step(self, steps):
+	def do_step(self, steps, heatbeat, should_continue):
 		self._params["state"].v += 1

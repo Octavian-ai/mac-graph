@@ -127,7 +127,7 @@ class Worker(object):
 		self.total_steps += steps
 
 		time_taken = time.time() - started
-		tf.logging.info("train_op/second: {}".format(float(steps)/float(time_taken)))
+		logger.info("train_op/second: {}".format(float(steps)/float(time_taken)))
 
 
 	def eval(self):
