@@ -1,7 +1,5 @@
 
-import logging, coloredlogs
-from util.stackdriver import install as install_stackdriver
-
+import logging
 import requests
 import json
 import platform
@@ -11,17 +9,6 @@ import traceback
 
 from .helpers import *
 from .args import get_args
-
-def install_logging(args):
-	loggers = [logging.getLogger(__name__)]
-	for i in ["pbt", "experiment", "macgraph", "util"]:
-		loggers.append(logging.getLogger(i))
-
-	for i in loggers:
-		if args.log_format == 'colored':
-			coloredlogs.install(logger=i, level=args.log_level)
-		elif args.log_format == 'json':
-			install_stackdriver(logger=i, level=args.log_level)
 
 def i_am_supervisor(args):
 

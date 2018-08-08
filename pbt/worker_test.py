@@ -70,7 +70,7 @@ class WorkerTestCase(unittest.TestCase):
 			pass
 
 		worker1 = self.vend_worker()
-		worker1.step(self.steps)
+		worker1.step(self.steps, lambda:None, lambda:None)
 		worker1.eval()
 		worker1.save(file_path)
 		worker2 = self.load_worker(file_path)
@@ -86,13 +86,13 @@ class WorkerTestCase(unittest.TestCase):
 
 	def test_param_copy(self):
 		worker1 = self.vend_worker()
-		worker1.step(self.steps)
+		worker1.step(self.steps, lambda:None, lambda:None)
 		worker1.eval()
 
 		logger.info("-------------- NOW TRANSFER PARAMS 1 --------------")
 
 		worker2 = self.vend_worker()
-		worker2.params = worker1.explore(0.0)
+		worker2.params = worker1.params.mutate(0.0)
 		worker2.eval()
 
 		self.assertDictEqual(worker1.results, worker2.results, "Results should be equal after param explore copy")
@@ -110,10 +110,25 @@ class WorkerTestCase(unittest.TestCase):
 
 		worker = self.vend_worker()
 
-		for i in range(10):
-			worker.step(self.steps)
+		for i in range(3):
+			worker.step(self.steps, lambda:None, lambda:None)
 			worker.eval()
-			worker.params = worker.explore(1.0)
+			worker.params = worker.params.mutate(1.0)
+
+		# Didn't crash = success
+
+	def test_breed(self):
+
+		workerA = self.vend_worker()
+		workerB = self.vend_worker()
+
+		for i in range(3):
+			workerA.step(self.steps, lambda:None, lambda:None)
+			workerB.step(self.steps, lambda:None, lambda:None)
+			workerA.eval()
+			workerB.eval()
+
+			workerA.params = workerA.params.breed(workerB.params, 1.0)
 
 		# Didn't crash = success
 

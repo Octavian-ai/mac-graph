@@ -161,7 +161,7 @@ class Supervisor(object):
 	def remove_worker(self):
 		if len(self.workers) > 0:
 			stack = self.get_sorted_workers()
-			if len(stack) < self.n_workers / 2:
+			if len(stack) < self.args.n_workers / 2:
 				raise ValueError("Cannot remove_worker as not enough workers have scores yet")
 			else:
 				del self.workers[stack[0].id]	

@@ -204,7 +204,10 @@ class EstimatorWorker(Worker):
 		}
 
 	def __setstate__(self, state):
-		self.id             = state.get("id", uuid.uuid1())
+		self.id             = state.get("id", uuid.uuid4())
+		self.time_started 	= 0
+		self.performance 	= (0,0)
+		
 		self.total_count    = state.get("total_count", 0)
 		self.current_count  = state.get("current_count", 0)
 

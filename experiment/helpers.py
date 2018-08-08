@@ -7,6 +7,9 @@ import os
 import tensorflow as tf
 import numpy as np
 
+import coloredlogs
+from util.stackdriver import install as install_stackdriver
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -80,3 +83,15 @@ def name_fn(worker):
 
 def get_supervisor(args):
 	return Supervisor(args, gen_param_spec(args), score, name_fn, True)
+
+def install_logging(args):
+	loggers = [logging.getLogger(i) 
+		for i in ["__main__", "pbt", "experiment", "macgraph", "util", "tensorflow"]]
+
+	for i in loggers:
+		if args.log_format == 'colored':
+			coloredlogs.install(logger=i, level=args.log_level)
+		elif args.log_format == 'json':
+			install_stackdriver(logger=i, level=args.log_level)
+
+
