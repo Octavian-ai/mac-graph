@@ -30,12 +30,13 @@ def gen_param_spec(args):
 		"model_id": ModelId,
 
 		"vocab_size": RandIntParamOf(110,512),
+		"embed_width": RandIntParamOf(4,128),
 		"max_decode_iterations": IntParamOf(4, 1, 32),
 		"learning_rate": LRParam,
 	}
 
-	for i in ["embed_width", "memory_width", "control_width"]:
-		p[i] = RandIntParamOf(4, 32) # make this 2048
+	for i in ["memory_width", "control_width"]:
+		p[i] = RandIntParamOf(4, 512) # make this 2048
 
 
 	for i in ["memory_transform_layers", "output_layers", "input_layers", "control_heads"]:

@@ -40,8 +40,8 @@ class WorkerTestCase(unittest.TestCase):
 	def assertDictAlmostEqual(self, first, second, threshold=0.01, msg=None):
 		for key, val in first.items():
 			delta = abs(float(val) - float(second[key]))
-			pct = delta / (float(val) + 0.00000001)
-			self.assertTrue(pct < threshold, key + ": " + "value {} was different by {} > {}. ".format(second,delta, threshold) + msg)
+			
+			self.assertTrue(delta < threshold, key + ": " + "value {} was different by {} > {}. ".format(second[key], delta, threshold) + msg)
 			# self.assertAlmostEqual(val, second[key], places, key + ": " + msg)
 
 
@@ -85,7 +85,7 @@ class WorkerTestCase(unittest.TestCase):
 		self.assertDictAlmostEqual(worker1.results, worker2.results, 0.1, msg="Evaluation after loading and eval should be unchanged")
 		self.assertDictEqual(worker1.params, worker2.params)
 
-	@unittest.skip("Just care about sex")
+	# @unittest.skip("Just care about sex")
 	def test_param_copy(self):
 		worker1 = self.vend_worker()
 		worker1.step(self.steps, lambda:None, lambda:None)
@@ -108,7 +108,7 @@ class WorkerTestCase(unittest.TestCase):
 		self.assertDictEqual(worker1.results, worker3.results, "Results should be equal after param copy")
 
 
-	@unittest.skip("Just care about sex")
+	# @unittest.skip("Just care about sex")
 	def test_mutate(self):
 
 		worker = self.vend_worker()
@@ -120,7 +120,7 @@ class WorkerTestCase(unittest.TestCase):
 
 		# Didn't crash = success
 
-	@unittest.skip("Just care about sex")
+	# @unittest.skip("Just care about sex")
 	def test_breed(self):
 
 		workerA = self.vend_worker()
@@ -131,8 +131,6 @@ class WorkerTestCase(unittest.TestCase):
 			workerB.step(self.steps, lambda:None, lambda:None)
 			workerA.eval()
 			workerB.eval()
-
-			logger.debug("Breeding workers")
 			workerA.params = workerA.params.breed(workerB.params, 1.0)
 
 		# Didn't crash = success
