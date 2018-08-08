@@ -7,9 +7,7 @@ import platform
 import uuid
 import random
 import petname
-
 import logging
-logger = logging.getLogger(__name__)
 
 # Hack for single-threaded
 from .specs import *
@@ -27,7 +25,7 @@ class Drone(object):
 		self.run_max = {}
 		self.drone_id = petname.Generate(3, '-') #uuid.uuid1()
 
-		self.logger = logging.getLogger(__name__ + "." + self.drone_id)
+		self.logger = logging.getLogger(__name__) #.getChild(self.drone_id)
 
 		self.performance = []
 		self.steps_per_sec = 0
@@ -55,7 +53,9 @@ class Drone(object):
 		self.queue_result.send(result_spec)
 
 	def _send_heartbeat(self, worker, run_spec, tiebreaker):
-		if time.time() - self.time_last_heartbeat > self.args.job_timeout / 6:
+		if time.time() - self.time_last_heartbeat > self.args.job_timeout / 10:
+			self.logger.debug("{}.send_heartbeat()".format(worker.id))
+			print("send_heartbeat")
 			spec = HeartbeatSpec(
 				self.args.run, 
 				platform.node(),

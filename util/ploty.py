@@ -138,7 +138,7 @@ class Ploty(object):
         
     with FileWritey(self.args, self.png_filename, True) as file:
       plt.savefig(file, bbox_extra_artists=artists, bbox_inches='tight')
-      logger.info("Saved image: " + self.png_file_path)
+      # logger.info("Saved image: " + self.png_file_path)
     
     if not self.terminal:
 	    plt.show()
@@ -199,7 +199,7 @@ class Ploty(object):
           ]
           writer.writerow(row)
 
-    logger.info("Saved CSV: " + self.csv_file_path)
+    # logger.info("Saved CSV: " + self.csv_file_path)
     
   
 

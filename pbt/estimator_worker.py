@@ -26,6 +26,9 @@ class HeartbeatHook(tf.train.SessionRunHook):
 		except StopIteration:
 			run_context.request_stop()
 
+	def end(self, session):
+		self.heatbeat()
+
 
 
 class HeatbeatSaverListener(tf.train.CheckpointSaverListener):

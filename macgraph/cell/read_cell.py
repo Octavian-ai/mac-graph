@@ -137,7 +137,14 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 
 		if args["use_data_stack"]:
 			# Attentional read
-			read, attn, table = read_from_table(args, features, in_signal, noun, in_data_stack, args["data_stack_width"])
+			read, attn, table = read_from_table(args, 
+				features, in_signal, 
+				noun="data_stack", 
+				table=in_data_stack, 
+				width=args["data_stack_width"],
+				table_len=args["data_stack_len"],
+				table_max_len=args["data_stack_len"])
+
 			reads.append(read)
 			# Head read
 			reads.append(in_data_stack[:,0,:])
