@@ -76,6 +76,13 @@ def FixedParamOf(v):
 
 
 
+class BoolParam(InitableParam):
+	def mutate(self, heat=1.0):
+		return type(self)(random.random()*heat > 0.8)
+
+def RandBool():
+	return lambda: BoolParam(random.random()<0.5)
+
 
 
 class MulParam(InitableParam):

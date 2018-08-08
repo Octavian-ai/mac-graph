@@ -25,6 +25,7 @@ def gen_param_spec(args):
 
 	mga = get_macgraph_args(argv=[])
 
+
 	p = {
 		"heritage": Heritage,
 		"model_id": ModelId,
@@ -35,12 +36,29 @@ def gen_param_spec(args):
 		"learning_rate": LRParam,
 	}
 
+
 	for i in ["memory_width", "control_width"]:
 		p[i] = RandIntParamOf(4, 512) # make this 2048
 
 
+	for i in [
+		'use_kb_node'
+		, 'use_kb_edge'
+		, 'use_data_stack'
+		, 'use_attn_score_dense'
+		, 'use_position_encoding'
+		, "use_control_cell"
+		, "use_memory_cell"
+		, "use_dynamic_decode"
+		, "use_question_state"
+		, "use_read_abs"
+		, "use_lr_decay"]:
+		p[i] = RandBool()
+
+
 	for i in ["memory_transform_layers", "output_layers", "input_layers", "control_heads"]:
 		p[i] = RandIntParamOf(1, 8)
+
 
 	return ParamSpec(p)
 

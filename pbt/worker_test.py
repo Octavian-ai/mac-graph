@@ -62,7 +62,7 @@ class WorkerTestCase(unittest.TestCase):
 	# Tests
 	# ==========================================================================
 	
-	# @unittest.skip("Just care about sex")
+	@unittest.skip("Just care about sex")
 	def test_save_load(self):
 		file_path = os.path.join(output_dir, "save_load.pkl")
 
@@ -85,7 +85,7 @@ class WorkerTestCase(unittest.TestCase):
 		self.assertDictAlmostEqual(worker1.results, worker2.results, 0.1, msg="Evaluation after loading and eval should be unchanged")
 		self.assertDictEqual(worker1.params, worker2.params)
 
-	# @unittest.skip("Just care about sex")
+	@unittest.skip("Just care about sex")
 	def test_param_copy(self):
 		worker1 = self.vend_worker()
 		worker1.step(self.steps, lambda:None, lambda:None)
@@ -108,7 +108,7 @@ class WorkerTestCase(unittest.TestCase):
 		self.assertDictEqual(worker1.results, worker3.results, "Results should be equal after param copy")
 
 
-	# @unittest.skip("Just care about sex")
+	@unittest.skip("Just care about sex")
 	def test_mutate(self):
 
 		worker = self.vend_worker()
