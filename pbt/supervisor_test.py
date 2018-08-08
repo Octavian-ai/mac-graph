@@ -17,47 +17,32 @@ from .mock import *
 class SupervisorTestCase(unittest.TestCase):
 
 	def vend_supervisor(self):
+
+		def score_fn(worker):
+			try:
+				return worker.results["accuracy"]
+			except Exception:
+				return None
+
 		s = Supervisor(
 			MockArgs(),
-			MockWorker,
-			{},
 			mock_hyperparam_spec(),
-			lambda worker: worker.results["accuracy"],
-			n_workers = 10,
+			score_fn,
 		)
 
 		return s
 
-	def test_run(self):
+	def test_scale_workers(self):
 		s = self.vend_supervisor()
-		s.run(1)
-
-
-	def test_load_save(self):
-		s = self.vend_supervisor()
-		self.assertEqual(len(s), 0)
-		s.run(1)
-		self.assertEqual(len(s), 10)
-		s.save()
-		self.assertEqual(s.best_worker.results, {"accuracy":1})
-
-		p = self.vend_supervisor()
-		self.assertEqual(len(p), 0)
-		p.load()
-		self.assertEqual(len(p), 10)
-		self.assertEqual(s.best_worker.results, p.best_worker.results)
-		p.run(1)
-		self.assertEqual(len(p), 10)
-		p.save()
-		self.assertEqual(len(p), 10)
-		self.assertNotEqual(s.best_worker.results, p.best_worker.results)
-		
+		s.scale_workers()
+		s.args.n_workers = 3
+		s.scale_workers()
+		s.args.n_workers = 10
+		s.scale_workers()
 
 
 
 if __name__ == '__main__':	
-	# tf.logging.set_verbosity('INFO')
-	# logger.setLevel('INFO')
 	unittest.main()
 
 
