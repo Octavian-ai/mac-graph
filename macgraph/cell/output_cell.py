@@ -4,7 +4,7 @@ import tensorflow as tf
 from ..minception import *
 
 
-def output_cell(args, features, in_question_state, in_memory_state, in_read):
+def output_cell(args, features, in_question_state, in_memory_state, in_read, in_control_state):
 
 	with tf.name_scope("output_cell"):
 
@@ -23,9 +23,11 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read):
 		# v = tf.layers.dense(v, args["answer_classes"], activation=args["output_activation"])
 		# v = tf.layers.dense(v, args["answer_classes"])
 
+		mi_control = in_control_state if args["use_control_cell"] else None
+
 		for i in range(args["output_layers"]):
 			v = tf.layers.dense(v, args["answer_classes"])
-			v = args["output_activation"](v)
+			v = mi_activation(v, control=mi_control)
 
 		# Don't do softmax here because the loss fn will apply it
 

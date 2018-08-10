@@ -163,7 +163,9 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 
 		# Add residual
 		out_data += read_data
-		out_data = mi_activation(out_data)
+	
+		mi_control = in_control_state if args["use_control_cell"] else None
+		out_data = mi_activation(out_data, control=mi_control)
 
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 

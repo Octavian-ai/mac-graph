@@ -14,7 +14,7 @@ on the bilevel optimization, so let's see how it goes!!
 '''
 
 
-def mi_activation(tensor, tap=False):
+def mi_activation(tensor, tap=False, control=None):
 	with tf.name_scope("mi_activation"):
 		activations = [
 			tf.nn.relu, 
@@ -24,7 +24,11 @@ def mi_activation(tensor, tap=False):
 			tf.identity, 
 		]
 
-		choice = tf.get_variable("activation_choice", [len(activations)])
+		if control is None:
+			choice = tf.get_variable("activation_choice", [len(activations)])
+		else:
+			choice = tf.layers.dense(control, len(activations))
+			
 		choice = tf.nn.softmax(choice)
 		choice = tf.check_numerics(choice, "activation_choice")
 
