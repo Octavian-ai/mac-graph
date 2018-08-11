@@ -156,17 +156,15 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
 		
+		mi_control = in_control_state if args["use_control_cell"] else None
+
 		# This may or may not decrease accuracy as it's an extra dense layer and mixed activation
 		out_data = tf.layers.dense(read_data, read_data.shape[-1], 
-			name="read_data_out", 
-			activation=args["read_activation"])
-
-		# Add residual
-		out_data += read_data
-	
-		mi_control = in_control_state if args["use_control_cell"] else None
+			name="read_data_out")
 		out_data = mi_activation(out_data, control=mi_control)
 
+		out_data += read_data # Add residual
+		out_data = mi_activation(out_data, control=mi_control)
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 
 		return out_data, tap_attns, tap_table
