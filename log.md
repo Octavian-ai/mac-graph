@@ -146,6 +146,7 @@ The successful station property model does no better than random guessing. I'm e
 	- softmax args are more than 0 despite subtracting max
 
 - `e901d46`: Working as per `d503000`
+	- `4c31b1b` same
 
 
 

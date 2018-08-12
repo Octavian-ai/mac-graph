@@ -10,7 +10,6 @@ python -m macgraph.train \
 	--max-decode-iterations 1 \
 	--input-layers 1 \
 	--disable-memory-cell \
-	--read-indicator-rows 1 \
 	--disable-control-cell \
 	--disable-dynamic-decode \
 	--disable-question-state \
