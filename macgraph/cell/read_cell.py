@@ -175,9 +175,8 @@ def read_cell(args, features, vocab_embedding,
 		# 	out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
 
 		# Copied from working commit
-		delta = read_data #- tf.layers.dense(in_signal, read_data.shape[-1])
-		t_abs = tf.nn.relu(delta) + tf.nn.relu(-delta)
-		out_data = t_abs
+		out_data = out_data + tf.layers.dense(in_signal, read_data.shape[-1]) # residual / read comparison
+		out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
 	
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 
