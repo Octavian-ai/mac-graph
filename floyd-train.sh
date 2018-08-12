@@ -47,7 +47,7 @@ floyd run \
 		--disable-control-cell \
 		--disable-dynamic-decode \
 		--disable-question-state \
-		--read-activation mi \
+		--read-activation abs \
 		--read-from-question \
 		--read-dropout 0.0 \
 		--output-layers 1 \
@@ -56,5 +56,6 @@ floyd run \
 		--output-activation mi \
 		--learning-rate 0.001 \
 		--max-gradient-norm 4.0 \
-		--read-layers 1
+		--read-layers 1 \
+		--disable-summary \
 	"

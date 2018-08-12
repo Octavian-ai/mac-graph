@@ -128,7 +128,7 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	
 	tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))
 
-	taps = ["question_word_attn", "question_word_query", "KB_attn", "control_state", "memory_state", "read_mi"]
+	taps = ["question_word_attn", "question_word_query", "KB_attn", "control_state", "memory_state"]
 
 	if args["use_dynamic_decode"]:
 		r = dynamic_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
@@ -137,11 +137,10 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 
 	final_output, out_taps = r
 
-	print(out_taps["read_mi"])
-
-	for k, v in out_taps.items():
-		if v is not None:
-			tf.summary.image(k, expand_if_needed(v))
+	if args["use_summary"]:
+		for k, v in out_taps.items():
+			if v is not None:
+				tf.summary.image(k, expand_if_needed(v))
 
 	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["answer_classes"]])
 	return final_output

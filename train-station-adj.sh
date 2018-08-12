@@ -22,4 +22,5 @@ python -m macgraph.train \
 	--output-activation mi \
 	--learning-rate 0.001 \
 	--max-gradient-norm 4.0 \
-	--read-layers 1
+	--read-layers 1 \
+	--read-indicator-rows 1 \

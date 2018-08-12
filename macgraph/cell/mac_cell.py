@@ -55,7 +55,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				tap_question_query = tf.fill([self.features["d_src_len"]], 0.0)
 
 		
-			read, tap_read_attn, tap_read_table, tap_read_mi = read_cell(
+			read, tap_read_attn, tap_read_table = read_cell(
 				self.args, self.features, self.vocab_embedding,
 				in_memory_state, out_control_state, in_data_stack, 
 				self.question_tokens, self.question_state)
@@ -82,8 +82,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				tap_question_attn, tap_question_query,
 				tap_read_attn,
 				out_control_state,
-				out_memory_state,
-				tap_read_mi)
+				out_memory_state)
 
 			return out_data, out_state
 
@@ -116,7 +115,6 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			read_attn_width, # tap_read_attn
 			self.args["control_width"], # tap_control_state
 			self.args["memory_width"], # tap_control_state
-			MI_ACTIVATIONS,
 		)
 
 

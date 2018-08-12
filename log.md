@@ -145,10 +145,12 @@ The successful station property model does no better than random guessing. I'm e
 	- currently exeriences nan loss at times from softmax
 	- softmax args are more than 0 despite subtracting max
 
-- `e901d46`: Working as per `d503000`
+- `e901d46`: Initial training same trajectory as `d503000`
 	- `4c31b1b`, `fec44c7` same
+	- May plateau out later, unsure
 
 - `dabccfe`: Switched from absu to mi_act and tanked at 66% accuracy
+- `e5585e1`: 100k, 93%
 
 
 
