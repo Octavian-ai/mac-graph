@@ -110,7 +110,9 @@ def get_args(extend=lambda parser:None, argv=None):
 
 	parser.add_argument('--memory-width',	           	type=int, default=64,	help="The width of memory state")
 	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
-	parser.add_argument('--memory-forget-activation',	type=str, default="sigmoid", choices=ACTIVATION_FNS.keys())
+	parser.add_argument('--memory-forget-activation',	type=str, default="sigmoid", 	choices=ACTIVATION_FNS.keys())
+	parser.add_argument('--memory-activation',			type=str, default="tanh", 		choices=ACTIVATION_FNS.keys())
+
 
 	parser.add_argument('--output-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--output-layers',				type=int, default=2)

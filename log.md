@@ -151,7 +151,7 @@ The successful station property model does no better than random guessing. I'm e
 
 - `dabccfe`: Switched from absu to mi_act and tanked at 66% accuracy
 - `e5585e1`: 100k, 93%, seems to be starting to plateau
-- `63d1002`: Add read indi row, faster increase of accuracy 95% @ 120k
+- `63d1002`: Add read indi row, faster increase of accuracy 95% @ 120k, 96% @400k
 
 
 

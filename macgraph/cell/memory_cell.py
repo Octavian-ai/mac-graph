@@ -2,6 +2,7 @@
 import tensorflow as tf
 
 from ..util import *
+from ..args import ACTIVATION_FNS
 
 def memory_cell(args, features, in_memory_state, in_data_read, in_control_state):
 
@@ -15,9 +16,12 @@ def memory_cell(args, features, in_memory_state, in_data_read, in_control_state)
 			in_data_read
 		], -1)
 
-		new_memory_state = deeep(in_all, args["memory_width"], args["memory_transform_layers"])
-
 		forget_act = ACTIVATION_FNS[args["memory_forget_activation"]]
+		act = ACTIVATION_FNS[args["memory_activation"]]
+
+		new_memory_state = in_all
+		for i in range(args["memory_transform_layers"]):
+			new_memory_state = tf.layers.dense(new_memory_state, args["memory_width"], activation=act)
 
 		# We can run this network without a control cell
 		if in_control_state is not None:
