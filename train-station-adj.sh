@@ -13,7 +13,7 @@ python -m macgraph.train \
 	--disable-control-cell \
 	--disable-dynamic-decode \
 	--disable-question-state \
-	--read-activation mi \
+	--read-activation abs \
 	--read-from-question \
 	--read-dropout 0.0 \
 	--output-layers 1 \
