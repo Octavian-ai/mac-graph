@@ -16,7 +16,8 @@ on the bilevel optimization, so let's see how it goes!!
 MI_ACTIVATIONS = 5
 
 
-def mi_activation(tensor, control=None, tap=False):
+
+def mi_activation(tensor, tap=False):
 	with tf.name_scope("mi_activation"):
 		activations = [
 			tf.nn.relu, 
@@ -28,7 +29,35 @@ def mi_activation(tensor, control=None, tap=False):
 
 		axis = 1
 		
-		if choice is None:
+		choice = tf.get_variable("mi_choice", [len(activations)])
+		choice = tf.nn.softmax(choice)
+		choice = tf.check_numerics(choice, "activation_choice")
+
+		t = [activations[i](tensor) * choice[i]
+			for i in range(len(activations))]
+
+		t = sum(t)
+		t = dynamic_assert_shape(t, tf.shape(tensor))
+
+		if tap:
+			return t, choice
+		else:
+			return t
+
+
+def mi_activation_control(tensor, control=None, tap=False):
+	with tf.name_scope("mi_activation"):
+		activations = [
+			tf.nn.relu, 
+			lambda x: tf.nn.relu(-x), # Combining this with previous gives PRelu
+			tf.tanh, 
+			tf.nn.sigmoid, 
+			tf.identity, 
+		]
+
+		axis = 1
+		
+		if control is None:
 			v = tf.get_variable("mi_choice", [1, len(activations)])
 			choice = tf.tile(v, [tf.shape(tensor)[0], 1])
 		else:
