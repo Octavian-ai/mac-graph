@@ -67,8 +67,8 @@ def encode_input(args, features, vocab_embedding):
 		# --------------------------------------------------------------------------
 		
 		# 1/2 multiplier so that when we concat the layers together we get control_width
-		fw_cell = cell_stack(args, width=math.floor(args['embed_width']/2))
-		bw_cell = cell_stack(args, width=math.ceil(args['embed_width']/2))
+		fw_cell = cell_stack(args, width=math.floor(args['input_width']/2))
+		bw_cell = cell_stack(args, width=math.ceil(args['input_width']/2))
 		
 		(fw_output, bw_output), (fw_states, bw_states) = tf.nn.bidirectional_dynamic_rnn(
 			fw_cell,
@@ -81,13 +81,13 @@ def encode_input(args, features, vocab_embedding):
 		
 		question_tokens = tf.concat( (fw_output, bw_output), axis=-1)
 		question_tokens = dynamic_assert_shape(question_tokens, 
-			[ features["d_batch_size"], features["d_src_len"], args["embed_width"] ]
+			[ features["d_batch_size"], features["d_src_len"], args["input_width"] ]
 		)
 
 		# Top layer, output layer
 		question_state = tf.concat( (fw_states[-1].c, bw_states[-1].c), axis=-1)
 		question_state = dynamic_assert_shape(question_state,
-			[ features["d_batch_size"], args["embed_width"] ]
+			[ features["d_batch_size"], args["input_width"] ]
 		)
 
 		return (question_tokens, question_state)

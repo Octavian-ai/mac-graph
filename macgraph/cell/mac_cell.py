@@ -57,7 +57,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			read, tap_read_attn, tap_read_table = read_cell(
 				self.args, self.features, self.vocab_embedding,
 				in_memory_state, out_control_state, in_data_stack, 
-				self.question_tokens)
+				self.question_tokens, self.question_state)
 		
 			
 			if self.args["use_memory_cell"]:

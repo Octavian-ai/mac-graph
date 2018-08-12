@@ -91,7 +91,8 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 
 
 
-def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state, in_data_stack, in_question_tokens):
+def read_cell(args, features, vocab_embedding, 
+	in_memory_state, in_control_state, in_data_stack, in_question_tokens, in_question_state):
 	"""
 	A read cell
 
@@ -115,7 +116,12 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		if in_control_state is not None and args["use_control_cell"]:
 			in_signal.append(in_control_state)
 
+		if args["read_from_question"]:
+			in_signal.append(in_question_state)
+
 		in_signal = tf.concat(in_signal, -1)
+
+		print(in_signal.shape)
 
 		reads = []
 		tap_attns = []
@@ -156,15 +162,19 @@ def read_cell(args, features, vocab_embedding, in_memory_state, in_control_state
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
 		
-		mi_control = in_control_state if args["use_control_cell"] else None
+		out_data = read_data
+
+		# mi_control = in_control_state if args["use_control_cell"] else tf.tile(tf.expand_dims(tf.get_variable("mi_choice", [MI_ACTIVATIONS]),0), [features["d_batch_size"],1])
 
 		# This may or may not decrease accuracy as it's an extra dense layer and mixed activation
-		out_data = tf.layers.dense(read_data, read_data.shape[-1], 
-			name="read_data_out")
-		out_data = mi_activation(out_data, control=mi_control)
+		# out_data = tf.layers.dense(read_data, read_data.shape[-1], 
+		# 	name="read_data_out")
+		# out_data = mi_activation(out_data, control=mi_control)
 
-		out_data += read_data # Add residual
-		out_data = mi_activation(out_data, control=mi_control)
+		# out_data += read_data # Add residual
+		# out_data = mi_activation(out_data, control=mi_control)
+
+		out_data = args["read_activation"](out_data)
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 
 		return out_data, tap_attns, tap_table

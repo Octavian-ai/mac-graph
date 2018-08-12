@@ -13,6 +13,8 @@ on the bilevel optimization, so let's see how it goes!!
 
 '''
 
+MI_ACTIVATIONS = 5
+
 
 def mi_activation(tensor, control, tap=False):
 	with tf.name_scope("mi_activation"):

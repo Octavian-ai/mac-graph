@@ -22,9 +22,10 @@ activation_options = {
 def generate_args_derivatives(args):
 
 	r = {}
+	r["modes"] = ["eval", "train", "predict"]
 
 	# Expand input dirs
-	for i in [*args["modes"], "all"]:
+	for i in [*r["modes"], "all"]:
 		r[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
 
 	r["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
@@ -36,6 +37,8 @@ def generate_args_derivatives(args):
 	act_args = [key for key, value in args.items() if key.endswith("_activation") and isinstance(value, str)]
 	for i in act_args:
 		r[i] = activation_options[args[i].lower()]
+
+	r["input_width"] = args["embed_width"] * 2
 
 	return r
 
@@ -100,6 +103,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--read-indicator-cols',        type=int, default=0,    help="Number of extra trainable rows")
 	parser.add_argument('--read-dropout',         		type=float, default=0.2,    help="Dropout on read heads")
 	parser.add_argument('--read-activation',			type=str, default="mi")
+	parser.add_argument('--read-from-question',			action='store_true')
 
 	parser.add_argument('--data-stack-width',         	type=int, default=64,   help="Width of stack entry")
 	parser.add_argument('--data-stack-len',         	type=int, default=20,   help="Length of stack")
@@ -135,7 +139,6 @@ def get_args(extend=lambda parser:None, argv=None):
 	
 	args = vars(parser.parse_args(argv))
 
-	args["modes"] = ["eval", "train", "predict"]
 
 	args.update(generate_args_derivatives(args))
 	
