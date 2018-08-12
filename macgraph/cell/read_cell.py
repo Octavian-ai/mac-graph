@@ -179,6 +179,8 @@ def read_cell(args, features, vocab_embedding,
 			out_data = out_data + tf.layers.dense(in_signal, read_data.shape[-1]) # residual / read comparison
 			# out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
 			out_data, tap_mi = mi_activation(out_data, tap=True)
+
+		tap_mi = tf.reshape(tap_mi, [1, 1, 5, 1])
 	
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 

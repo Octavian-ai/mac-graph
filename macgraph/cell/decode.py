@@ -137,6 +137,8 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 
 	final_output, out_taps = r
 
+	print(out_taps["read_mi"])
+
 	for k, v in out_taps.items():
 		if v is not None:
 			tf.summary.image(k, expand_if_needed(v))
