@@ -2,6 +2,7 @@ import unittest
 
 import tensorflow as tf
 import numpy as np
+import math
 
 from .attention import *
 
@@ -21,11 +22,11 @@ class TestAttention(unittest.TestCase):
         r = softmax_with_masking(logits, mask, axis)
         r = np.array(r)
 
-        d = exp(1) + exp(0)
+        d = math.exp(1) + math.exp(0)
 
         expected = np.array([
             [1,0,0],
-            [exp(0)/d, exp(1)/d,0],
+            [math.exp(0)/d, math.exp(1)/d,0],
             [0.5, 0.5, 0],
         ])
 
