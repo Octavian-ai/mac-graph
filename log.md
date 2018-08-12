@@ -28,6 +28,10 @@ This is the first (easy) question I've got working. Here's a log of known workin
 
 - `e901f89`: 82% after an hour on Floyd
 
+- `86804e6`: 
+	- Trying to resurrect old results, got 80% @ 10k then plateau
+	- Does well on all questions except HasRail, HasDisabledAccess
+
 
 ### Station Adjacency
 

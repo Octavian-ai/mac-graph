@@ -10,14 +10,8 @@ from .graph_util import *
 from .util import tf_startswith
 
 
-def input_fn(args, mode, question=None):
-
-	# --------------------------------------------------------------------------
-	# Read TFRecords
-	# --------------------------------------------------------------------------
-
-	d = tf.data.TFRecordDataset([args[f"{mode}_input_path"]])
-	d = d.map(lambda i: tf.parse_single_example(
+def parse_single_example(i):
+	return tf.parse_single_example(
 		i,
 		features = {
 			'src': 				tf.FixedLenSequenceFeature([],tf.int64, allow_missing=True),
@@ -31,13 +25,9 @@ def input_fn(args, mode, question=None):
 			'label': 			tf.FixedLenFeature([], tf.int64),
 			'type_string':		tf.FixedLenSequenceFeature([], tf.string, allow_missing=True),
 		})
-	)
 
-	# --------------------------------------------------------------------------
-	# Layout input data
-	# --------------------------------------------------------------------------
-
-	d = d.map(lambda i: ({
+def reshape_example(i, args):
+	return ({
 		# Text input
 		"src": 				i["src"],
 		"src_len": 			i["src_len"],
@@ -52,7 +42,22 @@ def input_fn(args, mode, question=None):
 		"label":			i["label"], 
 		"type_string":		i["type_string"],
 		
-	}, i["label"]))
+	}, i["label"])
+
+def input_fn(args, mode, question=None):
+
+	# --------------------------------------------------------------------------
+	# Read TFRecords
+	# --------------------------------------------------------------------------
+
+	d = tf.data.TFRecordDataset([args[f"{mode}_input_path"]])
+	d = d.map(parse_single_example)
+
+	# --------------------------------------------------------------------------
+	# Layout input data
+	# --------------------------------------------------------------------------
+
+	d = d.map(lambda i: reshape_example(args,i))
 
 
 	if args["limit"] is not None:
