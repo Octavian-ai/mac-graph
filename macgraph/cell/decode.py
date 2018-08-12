@@ -104,6 +104,7 @@ def static_decode(args, features, inputs, question_state, question_tokens, taps,
 						return None
 
 				tap = tf.concat(tap, axis=-1)
+				print(idx, tap)
 				if len(tap.shape) == 3:
 					tap = tf.transpose(tap, [0,2,1])
 				return tap

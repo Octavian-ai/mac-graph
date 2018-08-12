@@ -24,3 +24,4 @@ python -m macgraph.train \
 	--learning-rate 0.001 \
 	--max-gradient-norm 4 \
 	--disable-dynamic-decode \
+	$@

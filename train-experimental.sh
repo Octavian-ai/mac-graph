@@ -3,18 +3,25 @@
 COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
 python -m macgraph.train \
-	--input-dir input_data/processed/sa_small_100k_balanced \
-	--model-dir output/model/sa/$COMMIT \
 	--log-level DEBUG \
-	--max-decode-iterations 1 \
-	--input-layers 1 \
-	--read-activation abs \
-	--read-dropout 0.0 \
+	--model-dir output/model/sp/$COMMIT \
+	--input-dir input_data/processed/stationProp_tiny_50k_12th \
+	--disable-kb-edge \
+	--kb-edge-width 7 \
+	--input-layers 3 \
+	--answer-classes 512 \
+	--vocab-size 512 \
+	--memory-transform-layers 1 \
+	--max-decode-iterations 8 \
+	--output-activation tanh \
 	--output-layers 1 \
-	--answer-classes 8 \
-	--input-width 64 \
-	--output-activation mi \
-	--learning-rate 0.001 \
-	--max-gradient-norm 4.0 \
+	--read-activation tanh \
 	--read-layers 1 \
-	--read-indicator-rows 1 \
+	--memory-forget-activation tanh \
+	--control-dropout 0.05 \
+	--read-dropout 0.05 \
+	--input-width 64 \
+	--learning-rate 0.001 \
+	--max-gradient-norm 4 \
+	--disable-dynamic-decode \
+	$@

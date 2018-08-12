@@ -81,8 +81,9 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			out_data  = (output, 
 				tap_question_attn, tap_question_query,
 				tap_read_attn,
-				out_control_state,
-				out_memory_state)
+				tf.expand_dims(out_control_state, 1),
+				tf.expand_dims(out_memory_state, 1),
+				)
 
 			return out_data, out_state
 

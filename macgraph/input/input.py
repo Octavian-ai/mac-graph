@@ -26,7 +26,7 @@ def parse_single_example(i):
 			'type_string':		tf.FixedLenSequenceFeature([], tf.string, allow_missing=True),
 		})
 
-def reshape_example(i, args):
+def reshape_example(args, i):
 	return ({
 		# Text input
 		"src": 				i["src"],
