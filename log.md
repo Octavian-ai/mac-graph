@@ -145,6 +145,8 @@ The successful station property model does no better than random guessing. I'm e
 	- currently exeriences nan loss at times from softmax
 	- softmax args are more than 0 despite subtracting max
 
+- `e901d46`: Working as per `d503000`
+
 
 
 ## Notes on training infrastructure
