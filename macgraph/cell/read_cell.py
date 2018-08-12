@@ -5,6 +5,7 @@ from ..util import *
 from ..attention import *
 from ..input import UNK_ID
 from ..minception import *
+from ..args import ACTIVATION_FNS
 
 # TODO: Make indicator row data be special token
 
@@ -117,11 +118,10 @@ def read_cell(args, features, vocab_embedding,
 			in_signal.append(in_control_state)
 
 		if args["read_from_question"]:
-			in_signal.append(in_question_state)
+			in_signal.append(in_question_tokens[:,2])
+			in_signal.append(in_question_tokens[:,6])
 
 		in_signal = tf.concat(in_signal, -1)
-
-		print(in_signal.shape)
 
 		reads = []
 		tap_attns = []
@@ -174,7 +174,7 @@ def read_cell(args, features, vocab_embedding,
 		# out_data += read_data # Add residual
 		# out_data = mi_activation(out_data, control=mi_control)
 
-		out_data = args["read_activation"](out_data)
+		out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 
 		return out_data, tap_attns, tap_table

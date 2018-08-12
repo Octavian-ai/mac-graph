@@ -11,7 +11,7 @@ global_args = {}
 
 
 # Expand activation args to callables
-activation_options = {
+ACTIVATION_FNS = {
 	"tanh": tf.tanh,
 	"relu": tf.nn.relu,
 	"sigmoid": tf.nn.sigmoid,
@@ -32,11 +32,6 @@ def generate_args_derivatives(args):
 	r["config_path"] = os.path.join(args["model_dir"], "config.yaml")
 	r["question_types_path"] = os.path.join(args["input_dir"], "types.yaml")
 	r["answer_classes_path"] = os.path.join(args["input_dir"], "answer_classes.yaml")
-
-	# Expand activation args to callables
-	act_args = [key for key, value in args.items() if key.endswith("_activation") and isinstance(value, str)]
-	for i in act_args:
-		r[i] = activation_options[args[i].lower()]
 
 	r["input_width"] = args["embed_width"] * 2
 
@@ -102,7 +97,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--read-indicator-rows',        type=int, default=0,    help="Number of extra trainable rows")
 	parser.add_argument('--read-indicator-cols',        type=int, default=0,    help="Number of extra trainable rows")
 	parser.add_argument('--read-dropout',         		type=float, default=0.2,    help="Dropout on read heads")
-	parser.add_argument('--read-activation',			type=str, default="mi")
+	parser.add_argument('--read-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--read-from-question',			action='store_true')
 
 	parser.add_argument('--data-stack-width',         	type=int, default=64,   help="Width of stack entry")
@@ -115,7 +110,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--memory-width',	           	type=int, default=64,	help="The width of memory state")
 	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
 
-	parser.add_argument('--output-activation',			type=str, default="mi")
+	parser.add_argument('--output-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--output-layers',				type=int, default=2)
 
 	
