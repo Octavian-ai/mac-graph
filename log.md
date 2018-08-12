@@ -146,7 +146,9 @@ The successful station property model does no better than random guessing. I'm e
 	- softmax args are more than 0 despite subtracting max
 
 - `e901d46`: Working as per `d503000`
-	- `4c31b1b` same
+	- `4c31b1b`, `fec44c7` same
+
+- `dabccfe`: Switched from absu to mi_act and tanked at 66% accuracy
 
 
 

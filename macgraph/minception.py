@@ -20,7 +20,7 @@ def mi_activation(tensor, tap=False):
 	with tf.name_scope("mi_activation"):
 		activations = [
 			tf.nn.relu, 
-			lambda x: tf.nn.relu(-x), # Combining this with previous gives PRelu
+			lambda x: tf.nn.relu(x) + tf.nn.relu(-x), # Abslu... yeah..
 			tf.tanh, 
 			tf.nn.sigmoid, 
 			tf.identity, 
