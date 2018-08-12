@@ -20,4 +20,6 @@ python -m macgraph.train \
 	--output-layers 1 \
 	--answer-classes 8 \
 	--input-width 64 \
-	--output-activation tanh \
+	--output-activation mi \
+	--learning-rate 0.001 \
+	--max-gradient-norm 4.0 \
