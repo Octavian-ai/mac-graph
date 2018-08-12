@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RUNTIME=$(expr 60 \* 60 \* 1)
+RUNTIME=$(expr 60 \* 60 \* 4)
 COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
 
@@ -31,7 +31,7 @@ COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 # 	"
 
 floyd run \
-	--message "$COMMIT station adjacency" \
+	--message "$COMMIT station adjacency - verify max accuracy" \
 	--cpu \
 	--env tensorflow-1.8 \
 	--data davidmack/datasets/mac-graph-station-adjacent:/input \
@@ -40,6 +40,7 @@ floyd run \
 		--input-dir /input \
 		--output-dir /output \
 		--model-dir /output/model \
+		--disable-summary \
 		--disable-kb-node \
 		--max-decode-iterations 1 \
 		--input-layers 1 \
@@ -57,5 +58,5 @@ floyd run \
 		--learning-rate 0.001 \
 		--max-gradient-norm 4.0 \
 		--read-layers 1 \
-		--disable-summary \
+		--read-indicator-rows 1 \
 	"

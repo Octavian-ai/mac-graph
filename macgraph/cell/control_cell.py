@@ -23,23 +23,23 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 		
 		all_input = tf.concat([in_control_state, inputs], -1, name="all_input")
 
-		token_full_width = args["embed_width"]
+		question_token_width = args["input_width"]
 
 		attention_calls = []
 		queries = []
 
 		for i in range(args["control_heads"]):
-			question_token_query = tf.layers.dense(all_input, token_full_width)
-			question_token_query = tf.layers.dense(question_token_query, token_full_width)
+			question_token_query = tf.layers.dense(all_input, question_token_width)
+			question_token_query = tf.layers.dense(question_token_query, question_token_width)
 			question_token_query = dynamic_assert_shape(question_token_query, 
-				[ features["d_batch_size"], token_full_width ]
+				[ features["d_batch_size"], question_token_width ]
 			)
 			queries.append(question_token_query)
 
 			a = attention(
 				table=in_question_tokens, 
 				query=question_token_query, 
-				word_size=token_full_width, 
+				word_size=question_token_width, 
 				table_len=features["src_len"],
 				table_max_len=args["max_seq_len"],
 			)
