@@ -18,10 +18,7 @@ python -m macgraph.train \
 	--read-activation tanh \
 	--read-layers 1 \
 	--memory-forget-activation tanh \
-	--control-dropout 0.05 \
-	--read-dropout 0.05 \
+	--control-dropout 0.0 \
+	--read-dropout 0.0 \
 	--input-width 64 \
-	--learning-rate 0.001 \
-	--max-gradient-norm 4 \
-	--disable-dynamic-decode \
 	$@
