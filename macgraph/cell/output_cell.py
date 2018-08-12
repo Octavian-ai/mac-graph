@@ -24,7 +24,7 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read, in_
 		# v = tf.layers.dense(v, args["answer_classes"], activation=args["output_activation"])
 		# v = tf.layers.dense(v, args["answer_classes"])
 
-		mi_control = in_control_state if args["use_control_cell"] else tf.tile(tf.expand_dims(tf.get_variable("mi_choice", [MI_ACTIVATIONS]),0), [features["d_batch_size"],1])
+		mi_control = in_control_state if args["use_control_cell"] else None
 
 		for i in range(args["output_layers"]):
 			v = tf.layers.dense(v, args["answer_classes"])

@@ -33,8 +33,6 @@ def generate_args_derivatives(args):
 	r["question_types_path"] = os.path.join(args["input_dir"], "types.yaml")
 	r["answer_classes_path"] = os.path.join(args["input_dir"], "answer_classes.yaml")
 
-	r["input_width"] = args["embed_width"] * 2
-
 	return r
 
 def get_args(extend=lambda parser:None, argv=None):
@@ -86,6 +84,8 @@ def get_args(extend=lambda parser:None, argv=None):
 	
 	parser.add_argument('--input-layers',	   			type=int, default=3,    help="How many input layers are in the english encoding LSTM stack")
 	parser.add_argument('--input-dropout',              type=float, default=0.2)
+	parser.add_argument('--input-width',             	type=int, default=128)
+
 	parser.add_argument('--embed-width',	       		type=int, default=64,   help="The width of token embeddings")
 	
 	parser.add_argument('--kb-node-width',         		type=int, default=7,    help="Width of node entry into graph table aka the knowledge base")
@@ -94,6 +94,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--kb-edge-max-len',         	type=int, default=40,    help="Width of edge entry into graph table aka the knowledge base")
 	
 	parser.add_argument('--read-heads',         		type=int, default=1,    help="Number of read heads for each knowledge base table")
+	parser.add_argument('--read-layers',         		type=int, default=0,    help="Number of read transformation layers")
 	parser.add_argument('--read-indicator-rows',        type=int, default=0,    help="Number of extra trainable rows")
 	parser.add_argument('--read-indicator-cols',        type=int, default=0,    help="Number of extra trainable rows")
 	parser.add_argument('--read-dropout',         		type=float, default=0.2,    help="Dropout on read heads")

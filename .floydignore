@@ -2,6 +2,7 @@
 # Directories and files to ignore when uploading code to floyd
 ./input_data/
 ./output/
+./output_test/
 
 
 __pycache__

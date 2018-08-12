@@ -18,3 +18,6 @@ python -m macgraph.train \
 	--read-from-question \
 	--read-dropout 0.0 \
 	--output-layers 1 \
+	--answer-classes 8 \
+	--input-width 64 \
+	--output-activation tanh \
