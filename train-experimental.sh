@@ -7,7 +7,6 @@ python -m macgraph.train \
 	--model-dir output/model/sp/$COMMIT \
 	--input-dir input_data/processed/sp_small_100k \
 	--disable-kb-edge \
-	--kb-edge-width 7 \
 	--input-layers 3 \
 	--answer-classes 512 \
 	--vocab-size 512 \
@@ -21,7 +20,7 @@ python -m macgraph.train \
 	--control-dropout 0.0 \
 	--read-dropout 0.0 \
 	--input-width 64 \
-	--learning-rate 0.002 \
-	--max-gradient-norm 30 \
+	--learning-rate 0.001 \
+	--max-gradient-norm 4 \
 	--disable-dynamic-decode \
 	$@
