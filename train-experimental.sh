@@ -11,7 +11,7 @@ python -m macgraph.train \
 	--answer-classes 110 \
 	--vocab-size 110 \
 	--memory-transform-layers 1 \
-	--max-decode-iterations 1 \
+	--max-decode-iterations 2 \
 	--output-activation mi \
 	--output-layers 1 \
 	--read-activation abs \
@@ -20,5 +20,4 @@ python -m macgraph.train \
 	--control-dropout 0.0 \
 	--read-dropout 0.0 \
 	--disable-memory-cell \
-	--disable-control-cell \
 	$@
