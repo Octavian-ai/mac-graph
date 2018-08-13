@@ -19,5 +19,4 @@ python -m macgraph.train \
 	--memory-forget-activation mi \
 	--control-dropout 0.0 \
 	--read-dropout 0.0 \
-	--disable-memory-cell \
 	$@
