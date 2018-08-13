@@ -27,7 +27,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, taps
 
 		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
 		d_cell_initial = d_cell.zero_state(dtype=tf.float32, batch_size=features["d_batch_size"])
-
+		
 		# --------------------------------------------------------------------------
 		# Decoding handlers
 		# --------------------------------------------------------------------------
@@ -83,7 +83,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, taps
 
 
 def static_decode(args, features, inputs, question_state, question_tokens, taps, labels, vocab_embedding):
-	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE) as decoder_scope:
+	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE):
 
 		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
 		d_cell_initial = d_cell.zero_state(dtype=tf.float32, batch_size=features["d_batch_size"])
@@ -91,7 +91,8 @@ def static_decode(args, features, inputs, question_state, question_tokens, taps,
 		# Hard-coded unroll of the reasoning network for simplicity
 		states = [(None, d_cell_initial)]
 		for i in range(args["max_decode_iterations"]):
-			states.append(d_cell(inputs[i], states[-1][1]))
+			with tf.variable_scope("decoder_cell", reuse=tf.AUTO_REUSE):
+				states.append(d_cell(inputs[i], states[-1][1]))
 
 		# print(states)
 		final_output = states[-1][0][0]
@@ -104,7 +105,6 @@ def static_decode(args, features, inputs, question_state, question_tokens, taps,
 						return None
 
 				tap = tf.concat(tap, axis=-1)
-				print(idx, tap)
 				if len(tap.shape) == 3:
 					tap = tf.transpose(tap, [0,2,1])
 				return tap

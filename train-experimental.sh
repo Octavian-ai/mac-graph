@@ -16,8 +16,10 @@ python -m macgraph.train \
 	--output-layers 1 \
 	--read-activation mi \
 	--read-layers 1 \
-	--memory-forget-activation sigmoid \
+	--memory-forget-activation mi \
 	--control-dropout 0.001 \
 	--read-dropout 0.001 \
 	--input-width 64 \
+	--embed-width 32 \
+	--disable-memory-cell \
 	$@
