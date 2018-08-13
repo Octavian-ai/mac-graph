@@ -32,6 +32,8 @@ This is the first (easy) question I've got working. Here's a log of known workin
 	- Trying to resurrect old results, got 80% @ 10k then plateau
 	- Does well on all questions except HasRail, HasDisabledAccess
 
+- `b894c56`: 98% @ 200k training steps (e.g. slow, but gets there)
+
 
 ### Station Adjacency
 

@@ -22,5 +22,5 @@ python -m macgraph.train \
 	--read-dropout 0.0 \
 	--input-width 64 \
 	--learning-rate 0.001 \
-	--max-gradient-norm 4 \
+	--max-gradient-norm 2 \
 	$@
