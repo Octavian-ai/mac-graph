@@ -14,12 +14,11 @@ python -m macgraph.train \
 	--max-decode-iterations 1 \
 	--output-activation mi \
 	--output-layers 1 \
-	--read-activation mi \
+	--read-activation abs \
 	--read-layers 1 \
 	--memory-forget-activation mi \
-	--control-dropout 0.001 \
-	--read-dropout 0.001 \
-	--input-width 64 \
-	--embed-width 32 \
+	--control-dropout 0.0 \
+	--read-dropout 0.0 \
 	--disable-memory-cell \
+	--disable-control-cell \
 	$@
