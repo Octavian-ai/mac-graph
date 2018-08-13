@@ -17,19 +17,20 @@ if __name__ == "__main__":
 
 	# Info about the experiment, for the record
 	for i in tf.python_io.tf_record_iterator(args["train_input_path"]):
-		r = parse_single_example(i)
-		r,label = reshape_example(args, r)
 
-		r["src"] = vocab.ids_to_english(np.array(r["src"]))
-		r["label"] = vocab.inverse_lookup(int(r["label"]))
-		r["kb_nodes"] = [vocab.ids_to_english(np.array(i)) for i in r["kb_nodes"] if np.array(i).size > 0]
+		if args["limit"] is None or count < args["limit"]:
+			r = parse_single_example(i)
+			r,label = reshape_example(args, r)
 
-		print(r["src"] + " = " + r["label"])
-		for j in r["kb_nodes"]:
-			print("NODE: " + j)
-		print()
+			r["src"] = vocab.ids_to_english(np.array(r["src"]))
+			r["label"] = vocab.inverse_lookup(int(r["label"]))
+			r["kb_nodes"] = [vocab.ids_to_english(np.array(i)) for i in r["kb_nodes"] if np.array(i).size > 0]
+
+			print(r["src"] + " = " + r["label"])
+			for j in r["kb_nodes"]:
+				print("NODE: " + j)
+			print()
 
 		count += 1
 
-		if args["limit"] is not None and count > args["limit"]:
-			break
+	print(f"Total records: {count}")

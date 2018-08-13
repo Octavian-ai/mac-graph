@@ -68,7 +68,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--warm-start-dir',				type=str, default=None, help="Load model initial weights from previous checkpoints")
 	
 	parser.add_argument('--batch-size',            		type=int, default=32,   help="Number of items in a full batch")
-	parser.add_argument('--max-steps',             		type=int, default=None)
+	parser.add_argument('--max-steps',             		type=int, default=None, help="In thousands")
 		
 	parser.add_argument('--max-gradient-norm',     		type=float, default=30.0)
 	parser.add_argument('--learning-rate',         		type=float, default=2.4E-3)
