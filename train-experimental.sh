@@ -8,8 +8,8 @@ python -m macgraph.train \
 	--input-dir input_data/processed/sp_small_100k \
 	--disable-kb-edge \
 	--input-layers 3 \
-	--answer-classes 512 \
-	--vocab-size 512 \
+	--answer-classes 103 \
+	--vocab-size 103 \
 	--memory-transform-layers 1 \
 	--max-decode-iterations 8 \
 	--output-activation tanh \
@@ -20,7 +20,4 @@ python -m macgraph.train \
 	--control-dropout 0.0 \
 	--read-dropout 0.0 \
 	--input-width 64 \
-	--learning-rate 0.001 \
-	--max-gradient-norm 4 \
-	--disable-dynamic-decode \
 	$@
