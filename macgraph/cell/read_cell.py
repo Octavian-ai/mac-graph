@@ -121,6 +121,9 @@ def read_cell(args, features, vocab_embedding,
 			in_signal.append(in_question_tokens[:,2])
 			in_signal.append(in_question_tokens[:,6])
 
+		if args["use_read_question_state"] or len(input_signal)==0:
+			input_signal.append(in_question_state)
+
 		in_signal = tf.concat(in_signal, -1)
 
 		reads = []
