@@ -147,8 +147,8 @@ def read_cell(args, features, vocab_embedding,
 						# 	word_size=args["embed_width"], 
 						# 	name=i+"_extract",
 						# )
-						read = read * tf.expand_dims(word_query, 1)
-						read = tf.reduce_sum(read, axis=2)
+						read = read_words * tf.expand_dims(word_query, -1)
+						read = tf.reduce_sum(read, axis=1)
 
 
 					reads.append(read)
