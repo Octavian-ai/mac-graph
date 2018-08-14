@@ -100,7 +100,7 @@ def vector_to_barcode(tensor):
 
 
 
-def add_location_encoding_1d(tensor, seq_axis=1, word_axis=2, dtype=tf.float32): 
+def add_positional_encoding_1d(tensor, seq_axis=1, word_axis=2, dtype=tf.float32): 
 	'''
 	The function is based on https://github.com/stanfordnlp/mac-network
 
@@ -110,7 +110,8 @@ def add_location_encoding_1d(tensor, seq_axis=1, word_axis=2, dtype=tf.float32):
 
 	Currently hard-coded for one setup of seq_axis and word_axis
 	'''   
-	locationBias = 1.5
+
+	assert len(tensor.shape) == 3, "Expecting tensor of shape [batch, seq, word]"
 
 	in_tensor_shape = tf.shape(tensor)
 
