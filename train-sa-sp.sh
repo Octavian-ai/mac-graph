@@ -3,9 +3,9 @@
 COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
 python -m macgraph.train \
-	--input-dir input_data/processed/sa_small_100k_balanced \
-	--model-dir output/model/sa/$COMMIT \
 	--log-level DEBUG \
+	--model-dir output/model/sa_sp/$COMMIT \
+	--input-dir input_data/processed/sa_sp_small_100k \
 	--input-layers 3 \
 	--answer-classes 512 \
 	--vocab-size 512 \
