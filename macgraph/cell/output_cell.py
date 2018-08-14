@@ -16,8 +16,7 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read, in_
 
 		if args["use_memory_cell"]:
 			in_all.append(in_memory_state)
-		
-		if len(in_all) == 0:
+		else:
 			in_all.append(in_read)
 
 		v = tf.concat(in_all, -1)

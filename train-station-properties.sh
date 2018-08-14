@@ -24,5 +24,4 @@ python -m macgraph.train \
 	--max-gradient-norm 4 \
 	--disable-dynamic-decode \
 	--enable-read-question-state \
-	--disable-memory-cell \
 	$@
