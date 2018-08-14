@@ -37,6 +37,8 @@ This is the first (easy) question I've got working. Here's a log of known workin
 - `1240a73`: 93% @ 50k steps, running on expanded "small" 100k dataset
 	- added node-token attention to the retrieved row, helped a lot
 
+- `9d298d7`: 92% @ 36k - extracting row token by position seems helpful
+
 
 ### Station Adjacency
 

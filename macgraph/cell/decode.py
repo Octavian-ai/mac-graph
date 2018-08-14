@@ -97,20 +97,20 @@ def static_decode(args, features, inputs, question_state, question_tokens, taps,
 		# print(states)
 		final_output = states[-1][0][0]
 
-		def get_tap(idx):
+		def get_tap(idx, key):
 			with tf.name_scope(f"get_tap_{idx}"):
 				tap = [i[0][idx] for i in states if i[0] is not None]
 				for i in tap:
 					if i is None:
 						return None
 
-				tap = tf.concat(tap, axis=-1)
-				if len(tap.shape) == 3:
-					tap = tf.transpose(tap, [0,2,1])
+				tap = tf.convert_to_tensor(tap)
+				tap = tf.transpose(tap, [1,0,2])
+				
 				return tap
 
 		out_taps = {
-			key: get_tap(idx+1)
+			key: get_tap(idx+1, key)
 			for idx, key in enumerate(taps)
 		}
 		
@@ -129,7 +129,8 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	
 	tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))
 
-	taps = ["question_word_attn", "question_word_query", "KB_attn", "control_state", "memory_state"]
+	taps = ["question_word_attn", "KB_attn", "kb_node_word_attn",
+		"control_state", "memory_state"]
 
 	if args["use_dynamic_decode"]:
 		r = dynamic_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)

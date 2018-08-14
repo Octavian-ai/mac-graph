@@ -149,6 +149,7 @@ def read_cell(args, features, vocab_embedding,
 						# )
 						read = read_words * tf.expand_dims(word_query, -1)
 						read = tf.reduce_sum(read, axis=1)
+						tap_word_query = word_query
 
 
 					reads.append(read)
@@ -196,7 +197,7 @@ def read_cell(args, features, vocab_embedding,
 	
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 
-		return out_data, tap_attns, tap_table #, tap_mi
+		return out_data, tap_attns, tap_table, tap_word_query
 
 
 
