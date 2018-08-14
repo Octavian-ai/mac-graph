@@ -167,16 +167,22 @@ def read_cell(args, features, vocab_embedding,
 			# Head read
 			reads.append(in_data_stack[:,0,:])
 
+		reads.append(in_signal)
+
 		read_data = tf.concat(reads, -1)
 
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
 		
-		out_data = tf.concat([read_data, in_signal], axis=-1)
+		out_data = read_data
+		width = out_data.shape[-1]
 
 		for i in range(args["read_layers"]):
-			out_data = tf.layers.dense(out_data, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
+			m1 = out_data
+			out_data = tf.layers.dense(out_data, width)
+			out_data += m1 # residual
+			out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
 			
 			if args["read_dropout"] > 0:
 				out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
