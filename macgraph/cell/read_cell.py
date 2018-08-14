@@ -130,6 +130,8 @@ def read_cell(args, features, vocab_embedding,
 		tap_attns = []
 		tap_table = None
 
+		taps = {}
+
 		for i in ["kb_node", "kb_edge"]:
 			if args[f"use_{i}"]:
 				for j in range(args["read_heads"]):
@@ -143,21 +145,15 @@ def read_cell(args, features, vocab_embedding,
 
 					if args[f"use_{i}_extract"]:
 						read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
-						# read_heads = add_positional_encoding_1d(read_words)
 						word_query = tf.layers.dense(in_signal, args[i+"_width"])
 						word_query = tf.nn.softmax(word_query, axis=1)
-						# read, _ = attention(read_words, word_query,
-						# 	word_size=args["embed_width"], 
-						# 	name=i+"_extract",
-						# )
 						read = read_words * tf.expand_dims(word_query, -1)
 						read = tf.reduce_sum(read, axis=1)
-						tap_word_query = word_query
+						taps[i+"_word_query"] = word_query
 
 
 					reads.append(read)
-					tap_attns.append(attn)
-					tap_table = table
+					taps[i+"_attn"] = attn
 
 		if args["use_data_stack"]:
 			# Attentional read
@@ -172,7 +168,6 @@ def read_cell(args, features, vocab_embedding,
 			reads.append(in_data_stack[:,0,:])
 
 		read_data = tf.concat(reads, -1)
-		tap_attns = tf.concat(tap_attns, axis=1)
 
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
@@ -193,14 +188,19 @@ def read_cell(args, features, vocab_embedding,
 		for i in range(args["read_layers"]):
 			# Copied from working commit
 			out_data = out_data + tf.layers.dense(in_signal, read_data.shape[-1]) # residual / read comparison
-			out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
+			out_data_act = tf.stack([
+				tf.tanh(out_data),
+				tf.nn.relu(out_data) + tf.nn.relu(-out_data)
+			])
+			out_data = tf.reduce_max(out_data_act, axis=0)
+			# out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
 			# out_data, tap_mi = mi_activation(out_data, tap=True)
 
 		# tap_mi = tf.reshape(tap_mi, [1, 1, 5, 1])
 	
 		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 
-		return out_data, tap_attns, tap_table, tap_word_query
+		return out_data, taps
 
 
 

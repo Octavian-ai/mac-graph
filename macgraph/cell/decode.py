@@ -129,7 +129,7 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	
 	tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))
 
-	taps = ["question_word_attn", "KB_attn", "kb_node_word_attn",
+	taps = ["question_word_attn", "kb_node_attn", "kb_edge_attn", "kb_node_word_attn",
 		"control_state", "memory_state"]
 
 	if args["use_dynamic_decode"]:
