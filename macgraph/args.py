@@ -120,6 +120,8 @@ def get_args(extend=lambda parser:None, argv=None):
 	
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
+	parser.add_argument('--disable-kb-node-extract', 	action='store_false', dest='use_kb_node_extract')
+	parser.add_argument('--disable-kb-edge-extract', 	action='store_false', dest='use_kb_edge_extract')
 	parser.add_argument('--disable-summary', 			action='store_false', dest='use_summary')
 	parser.add_argument('--enable-data-stack', 			action='store_true',  dest='use_data_stack')
 	parser.add_argument('--enable-attn-score-dense', 	action='store_true',  dest='use_attn_score_dense')

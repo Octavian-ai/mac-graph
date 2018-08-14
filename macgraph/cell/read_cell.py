@@ -137,6 +137,17 @@ def read_cell(args, features, vocab_embedding,
 						in_signal, 
 						noun=i
 					)
+
+					if args[f"use_{i}_extract"]:
+						read = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
+						query = tf.layers.dense(in_signal, args["embed_width"])
+						read, _ = attention(table, query,
+							word_size=width, 
+							table_len=args[i+"_width"],
+							table_max_len=args[i+"_width"],
+						)
+
+
 					reads.append(read)
 					tap_attns.append(attn)
 					tap_table = table
