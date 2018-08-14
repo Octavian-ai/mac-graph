@@ -140,12 +140,15 @@ def read_cell(args, features, vocab_embedding,
 
 					if args[f"use_{i}_extract"]:
 						read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
-						read_heads = add_positional_encoding_1d(read_words)
-						word_query = tf.layers.dense(in_signal, args["embed_width"])
-						read, _ = attention(read_words, word_query,
-							word_size=args["embed_width"], 
-							name=i+"_extract",
-						)
+						# read_heads = add_positional_encoding_1d(read_words)
+						word_query = tf.layers.dense(in_signal, args[i+"_width"])
+						word_query = tf.nn.softmax(word_query, axis=1)
+						# read, _ = attention(read_words, word_query,
+						# 	word_size=args["embed_width"], 
+						# 	name=i+"_extract",
+						# )
+						read = read * tf.expand_dims(word_query, 1)
+						read = tf.reduce_sum(read, axis=2)
 
 
 					reads.append(read)
