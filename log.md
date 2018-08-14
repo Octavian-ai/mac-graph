@@ -38,6 +38,7 @@ This is the first (easy) question I've got working. Here's a log of known workin
 	- added node-token attention to the retrieved row, helped a lot
 
 - `9d298d7`: 92% @ 36k - extracting row token by position seems helpful
+- `53f5e0f`: 93% @ 40k - fastest (wall) to reach accuracy (reduced cell iterations)
 
 
 ### Station Adjacency

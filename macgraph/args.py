@@ -126,7 +126,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-data-stack', 			action='store_true',  dest='use_data_stack')
 	parser.add_argument('--enable-attn-score-dense', 	action='store_true',  dest='use_attn_score_dense')
 	parser.add_argument('--enable-position-encoding', 	action='store_true',  dest='use_position_encoding')
-	parser.add_argument('--enable-read-input-state', 	action='store_true',  dest='use_read_input_state')
+	parser.add_argument('--enable-read-question-state', action='store_true',  dest='use_read_question_state')
 	parser.add_argument('--disable-control-cell', 		action='store_false', dest="use_control_cell")
 	parser.add_argument('--disable-memory-cell', 		action='store_false', dest="use_memory_cell")
 	parser.add_argument('--disable-dynamic-decode', 	action='store_false', dest="use_dynamic_decode")
