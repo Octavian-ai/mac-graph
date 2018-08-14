@@ -9,14 +9,14 @@ python -m macgraph.train \
 	--input-layers 3 \
 	--answer-classes 512 \
 	--vocab-size 512 \
+	--read-activation relu \
+	--read-layers 2 \
+	--read-dropout 0.0 \
 	--memory-transform-layers 1 \
+	--memory-forget-activation tanh \
 	--output-activation tanh \
 	--output-layers 1 \
-	--read-activation tanh \
-	--read-layers 1 \
-	--memory-forget-activation tanh \
 	--control-dropout 0.0 \
-	--read-dropout 0.0 \
 	--input-width 64 \
 	--learning-rate 0.001 \
 	--max-gradient-norm 4 \

@@ -173,32 +173,12 @@ def read_cell(args, features, vocab_embedding,
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
 		
-		out_data = read_data
-
-		# mi_control = in_control_state if args["use_control_cell"] else tf.tile(tf.expand_dims(tf.get_variable("mi_choice", [MI_ACTIVATIONS]),0), [features["d_batch_size"],1])
-
-		# for i in range(args["read_layers"]):
-		# 	out_data = tf.layers.dense(read_data, read_data.shape[-1], 
-		# 		name="read_data_out")
-		# 	out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
-
-		# if args["read_layers"] == 0:
-		# 	out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
+		out_data = tf.concat([read_data, in_signal], axis=-1)
 
 		for i in range(args["read_layers"]):
-			# Copied from working commit
-			out_data = out_data + tf.layers.dense(in_signal, read_data.shape[-1]) # residual / read comparison
-			out_data_act = tf.stack([
-				tf.tanh(out_data),
-				tf.nn.relu(out_data) + tf.nn.relu(-out_data)
-			])
-			out_data = tf.reduce_max(out_data_act, axis=0)
-			# out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
-			# out_data, tap_mi = mi_activation(out_data, tap=True)
-
-		# tap_mi = tf.reshape(tap_mi, [1, 1, 5, 1])
-	
-		out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
+			out_data = tf.layers.dense(out_data, activation=ACTIVATION_FNS[args["read_activation"]])
+			if args["read_dropout"] > 0:
+				out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 
 		return out_data, taps
 

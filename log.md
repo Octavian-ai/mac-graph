@@ -167,6 +167,14 @@ The successful station property model does no better than random guessing. I'm e
 - `63d1002`: Add read indi row, faster increase of accuracy 95% @ 120k, 96% @400k
 
 
+### Combined station adjacency and properties
+
+- `d5f2dd3` 97.5% @ 140k steps 
+	- word-attention system really helped
+	- tried max-pooling tanh and abs as the read activation function
+	- still struggling with True/False answers, StationAdjacent 73% @ 140k, StationPropertyArchitecture 93%
+
+
 
 ## Notes on training infrastructure
 
