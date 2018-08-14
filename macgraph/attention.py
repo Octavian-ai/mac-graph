@@ -38,7 +38,7 @@ def softmax_with_masking(logits, mask, axis):
 			return l / (d + EPSILON)
 
 
-def attention(table, query, word_size=None, table_len=None, table_max_len=None):
+def attention(table, query, word_size=None, table_len=None, table_max_len=None, name="attention"):
 	"""
 	Apply attention
 
@@ -50,7 +50,7 @@ def attention(table, query, word_size=None, table_len=None, table_max_len=None):
 
 	"""
 	
-	with tf.name_scope("attention"):
+	with tf.name_scope(name):
 
 		q = query
 		db = table
@@ -71,7 +71,7 @@ def attention(table, query, word_size=None, table_len=None, table_max_len=None):
 		q_shape = [batch_size, word_size]
 		scores_shape = [batch_size, seq_len, 1]
 
-		q = dynamic_assert_shape(q, q_shape)
+		q = dynamic_assert_shape(q, q_shape, "query")
 
 		# --------------------------------------------------------------------------
 		# Run model
@@ -82,17 +82,17 @@ def attention(table, query, word_size=None, table_len=None, table_max_len=None):
 		if table_len is not None:
 			scores_mask = tf.sequence_mask(table_len, seq_len)
 			scores_mask = tf.expand_dims(scores_mask, -1) # I like to tightly assert my shapes
-			scores_mask = dynamic_assert_shape(scores_mask, scores_shape)
+			scores_mask = dynamic_assert_shape(scores_mask, scores_shape, "scores_mask")
 			scores = softmax_with_masking(scores, mask=scores_mask, axis=1)
 		else:
 			scores = tf.nn.softmax(scores + EPSILON, axis=1)
 
-		scores = dynamic_assert_shape(scores, scores_shape)
+		scores = dynamic_assert_shape(scores, scores_shape, "scores")
 		
 		weighted_db = db * scores
 
 		output = tf.reduce_sum(weighted_db, 1)
-		output = dynamic_assert_shape(output, q_shape)
+		output = dynamic_assert_shape(output, q_shape, "output")
 		output = tf.check_numerics(output, "attention_output")
 
 		return output, scores

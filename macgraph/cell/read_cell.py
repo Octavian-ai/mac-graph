@@ -9,7 +9,7 @@ from ..args import ACTIVATION_FNS
 
 # TODO: Make indicator row data be special token
 
-def read_from_table(args, features, in_signal, noun, table, width, table_len, table_max_len):
+def read_from_table(args, features, in_signal, noun, table, width, table_len=None, table_max_len=None):
 
 	if args["read_indicator_cols"] > 0:
 		ind_col = tf.get_variable(f"{noun}_indicator_col", [1, 1, args["read_indicator_cols"]])
@@ -139,12 +139,11 @@ def read_cell(args, features, vocab_embedding,
 					)
 
 					if args[f"use_{i}_extract"]:
-						read = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
-						query = tf.layers.dense(in_signal, args["embed_width"])
-						read, _ = attention(table, query,
-							word_size=width, 
-							table_len=args[i+"_width"],
-							table_max_len=args[i+"_width"],
+						read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
+						word_query = tf.layers.dense(in_signal, args["embed_width"])
+						read, _ = attention(read_words, word_query,
+							word_size=args["embed_width"], 
+							name=i+"_extract",
 						)
 
 
@@ -158,9 +157,7 @@ def read_cell(args, features, vocab_embedding,
 				features, in_signal, 
 				noun="data_stack", 
 				table=in_data_stack, 
-				width=args["data_stack_width"],
-				table_len=args["data_stack_len"],
-				table_max_len=args["data_stack_len"])
+				width=args["data_stack_width"])
 
 			reads.append(read)
 			# Head read
