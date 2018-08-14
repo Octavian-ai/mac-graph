@@ -11,7 +11,6 @@ python -m macgraph.train \
 	--answer-classes 512 \
 	--vocab-size 512 \
 	--memory-transform-layers 1 \
-	--max-decode-iterations 2 \
 	--output-activation tanh \
 	--output-layers 1 \
 	--read-activation tanh \
@@ -24,4 +23,6 @@ python -m macgraph.train \
 	--max-gradient-norm 4 \
 	--disable-dynamic-decode \
 	--enable-read-question-state \
+	--disable-memory-cell \
+	--max-decode-iterations 1 \
 	$@
