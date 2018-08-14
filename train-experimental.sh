@@ -17,6 +17,7 @@ python -m macgraph.train \
 	--output-activation tanh \
 	--output-layers 1 \
 	--control-dropout 0.0 \
+	--control-heads 2 \
 	--input-width 64 \
 	--learning-rate 0.001 \
 	--max-gradient-norm 4 \
