@@ -9,7 +9,7 @@ python -m macgraph.train \
 	--input-layers 3 \
 	--answer-classes 512 \
 	--vocab-size 512 \
-	--read-activation relu \
+	--read-activation tanh \
 	--read-layers 2 \
 	--read-dropout 0.0 \
 	--memory-transform-layers 1 \

@@ -176,7 +176,8 @@ def read_cell(args, features, vocab_embedding,
 		out_data = tf.concat([read_data, in_signal], axis=-1)
 
 		for i in range(args["read_layers"]):
-			out_data = tf.layers.dense(out_data, activation=ACTIVATION_FNS[args["read_activation"]])
+			out_data = tf.layers.dense(out_data, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
+			
 			if args["read_dropout"] > 0:
 				out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 

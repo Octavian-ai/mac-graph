@@ -93,6 +93,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--kb-edge-width',         		type=int, default=3,    help="Width of edge entry into graph table aka the knowledge base")
 	parser.add_argument('--kb-edge-max-len',         	type=int, default=40,   help="Maximum number of edges in kb")
 	
+	parser.add_argument('--read-width',         		type=int, default=128,  help="Width of the read state output")
 	parser.add_argument('--read-heads',         		type=int, default=1,    help="Number of read heads for each knowledge base table")
 	parser.add_argument('--read-layers',         		type=int, default=1,    help="Number of read transformation layers")
 	parser.add_argument('--read-indicator-rows',        type=int, default=0,    help="Number of extra trainable rows")
