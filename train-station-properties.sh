@@ -5,14 +5,13 @@ COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 python -m macgraph.train \
 	--log-level DEBUG \
 	--model-dir output/model/sp/$COMMIT \
-	--input-dir input_data/processed/stationProp_tiny_50k_12th \
+	--input-dir input_data/processed/sp_small_100k \
 	--disable-kb-edge \
-	--kb-edge-width 7 \
 	--input-layers 3 \
 	--answer-classes 512 \
 	--vocab-size 512 \
 	--memory-transform-layers 1 \
-	--max-decode-iterations 8 \
+	--max-decode-iterations 2 \
 	--output-activation tanh \
 	--output-layers 1 \
 	--read-activation tanh \
@@ -24,4 +23,6 @@ python -m macgraph.train \
 	--learning-rate 0.001 \
 	--max-gradient-norm 4 \
 	--disable-dynamic-decode \
+	--enable-read-question-state \
+	--disable-memory-cell \
 	$@
