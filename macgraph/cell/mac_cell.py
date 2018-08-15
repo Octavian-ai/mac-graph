@@ -46,13 +46,16 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 			in_control_state, in_memory_state, in_data_stack = in_state
 
+			empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)
+			empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
+
 			if self.args["use_control_cell"]:
 				out_control_state, tap_question_attn, tap_question_query = control_cell(self.args, self.features, 
 					inputs, in_control_state, self.question_state, self.question_tokens)
 			else:
 				out_control_state = in_control_state
-				tap_question_attn  = tf.fill([self.features["d_src_len"]], 0.0)
-				tap_question_query = tf.fill([self.features["d_src_len"]], 0.0)
+				tap_question_attn  = empty_attn
+				tap_question_query = empty_query
 
 
 			# tap_attns, tap_table, tap_word_query
@@ -82,9 +85,9 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			out_state = (out_control_state, out_memory_state, out_data_stack)
 			out_data  = (output, 
 				tf.squeeze(tap_question_attn, 2), 
-				tf.squeeze(read_taps["kb_node_attn"], 2),
-				tf.squeeze(read_taps["kb_edge_attn"], 2),
-				read_taps["kb_node_word_query"],
+				tf.squeeze(read_taps.get("kb_node_attn", empty_attn), 2),
+				tf.squeeze(read_taps.get("kb_edge_attn", empty_attn), 2),
+				read_taps.get("kb_node_word_query", empty_query),
 				out_control_state,
 				out_memory_state,
 				)
