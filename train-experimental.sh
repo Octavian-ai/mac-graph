@@ -8,9 +8,10 @@ python -m macgraph.train \
 	--disable-summary \
 	--disable-dynamic-decode \
 	--disable-memory-cell \
+	--disable-control-cell \
 	--disable-question-state \
 	--enable-read-question-state \
-	--control-dropout 0.2 \
+	--control-dropout 0 \
 	--input-layers 3 \
 	--input-width 64 \
 	--learning-rate 0.001 \
@@ -20,7 +21,7 @@ python -m macgraph.train \
 	--output-classes 512 \
 	--output-layers 1 \
 	--read-activation abs \
-	--read-dropout 0.2 \
+	--read-dropout 0 \
 	--read-from-question \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
