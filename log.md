@@ -177,6 +177,13 @@ The successful station property model does no better than random guessing. I'm e
 	- tried max-pooling tanh and abs as the read activation function
 	- still struggling with True/False answers, StationAdjacent 73% @ 140k, StationPropertyArchitecture 93%
 
+- `bb3ff8e` 97% @ 20k steps
+	- struggling on True/False
+	- adjacency 78%
+	- disabled access 50%
+	- has rail 60%
+
+
 
 
 ## Notes on training infrastructure

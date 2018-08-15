@@ -3,9 +3,8 @@
 COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
 python -m macgraph.train \
-	--input-dir input_data/processed/sa_small_100k_balanced \
-	--model-dir output/model/sa/$COMMIT \
-	--disable-summary \
+	--model-dir output/model/sp/$COMMIT \
+	--input-dir input_data/processed/sp_small_100k \
 	--disable-dynamic-decode \
 	--disable-memory-cell \
 	--disable-question-state \
@@ -25,4 +24,3 @@ python -m macgraph.train \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
 	--vocab-size 512 \
-	$@
