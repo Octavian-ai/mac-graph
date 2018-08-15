@@ -8,7 +8,6 @@ python -m macgraph.train \
 	--log-level DEBUG \
 	--disable-control-cell \
 	--disable-dynamic-decode \
-	--disable-kb-node \
 	--disable-memory-cell \
 	--disable-question-state \
 	--enable-read-question-state \
