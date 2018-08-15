@@ -7,10 +7,10 @@ python -m macgraph.train \
 	--model-dir output/model/sa/$COMMIT \
 	--log-level DEBUG \
 	--input-layers 3 \
-	--answer-classes 8 \
-	--vocab-size 128 \
-	--read-activation tanh \
-	--read-layers 2 \
+	--answer-classes 512 \
+	--vocab-size 512 \
+	--read-activation abs \
+	--read-layers 1 \
 	--read-dropout 0.0 \
 	--memory-transform-layers 1 \
 	--memory-forget-activation tanh \
