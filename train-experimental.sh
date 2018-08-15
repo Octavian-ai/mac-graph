@@ -6,24 +6,25 @@ python -m macgraph.train \
 	--input-dir input_data/processed/sa_small_100k_balanced \
 	--model-dir output/model/sa/$COMMIT \
 	--log-level DEBUG \
-	--input-layers 3 \
 	--learning-rate 1E-7 \
-	--answer-classes 8 \
-	--vocab-size 128 \
+	--vocab-size 512 \
+	--input-layers 3 \
+	--input-width 64 \
 	--read-activation abs \
 	--read-layers 1 \
 	--read-dropout 0.0 \
+	--disable-memory-cell \
 	--memory-transform-layers 1 \
 	--memory-forget-activation tanh \
+	--control-dropout 0.0 \
+	--control-heads 2 \
+	--control-width 256 \
 	--output-activation tanh \
 	--output-layers 1 \
-	--control-dropout 0.0 \
-	--control-heads 1 \
-	--input-width 64 \
+	--output-classes 512 \
 	--learning-rate 0.001 \
 	--max-gradient-norm 4 \
 	--disable-dynamic-decode \
 	--enable-read-question-state \
-	--disable-memory-cell \
 	--max-decode-iterations 1 \
 	$@
