@@ -47,7 +47,7 @@ COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 # 	"
 
 floyd run \
-	--message "$COMMIT station adjacency - try to converge with best known station properties" \
+	--message "$COMMIT station adjacency - converged config" \
 	--cpu \
 	--env tensorflow-1.8 \
 	--data davidmack/datasets/mac-graph-station-adjacent:/input \
@@ -57,23 +57,23 @@ floyd run \
 		--output-dir /output \
 		--model-dir /output/model \
 		--disable-summary \
-		--disable-control-cell \
-		--disable-dynamic-decode \
-		--disable-memory-cell \
-		--disable-question-state \
-		--enable-read-question-state \
-		--input-layers 3 \
-		--input-width 64 \
-		--learning-rate 0.001 \
-		--max-decode-iterations 1 \
-		--max-gradient-norm 4.0 \
-		--output-activation mi \
-		--output-classes 512 \
-		--output-layers 1 \
-		--read-activation abs \
-		--read-dropout 0.0 \
-		--read-from-question \
-		--read-indicator-rows 1 \
-		--read-layers 1 \
-		--vocab-size 512 \
+	--disable-dynamic-decode \
+	--disable-memory-cell \
+	--disable-question-state \
+	--enable-read-question-state \
+	--control-dropout 0.0 \
+	--input-layers 3 \
+	--input-width 64 \
+	--learning-rate 0.001 \
+	--max-decode-iterations 1 \
+	--max-gradient-norm 4.0 \
+	--output-activation mi \
+	--output-classes 512 \
+	--output-layers 1 \
+	--read-activation mi \
+	--read-dropout 0.0 \
+	--read-from-question \
+	--read-indicator-rows 1 \
+	--read-layers 1 \
+	--vocab-size 512 \
 	"

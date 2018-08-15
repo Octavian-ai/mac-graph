@@ -5,6 +5,7 @@ COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 python -m macgraph.train \
 	--input-dir input_data/processed/sa_small_100k_balanced \
 	--model-dir output/model/sa/$COMMIT \
+	--disable-summary \
 	--disable-dynamic-decode \
 	--disable-memory-cell \
 	--disable-question-state \
@@ -18,7 +19,7 @@ python -m macgraph.train \
 	--output-activation mi \
 	--output-classes 512 \
 	--output-layers 1 \
-	--read-activation mi \
+	--read-activation abs \
 	--read-dropout 0.0 \
 	--read-from-question \
 	--read-indicator-rows 1 \
