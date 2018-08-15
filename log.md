@@ -166,6 +166,7 @@ The successful station property model does no better than random guessing. I'm e
 - `e5585e1`: 100k, 93%, seems to be starting to plateau
 - `63d1002`: Add read indi row, faster increase of accuracy 95% @ 120k, 96% @400k
 - `e1bdfe9`: 97.6% @ 114k (train-station-dependency.sh)
+- `4b57eed` 90% @ 15k (train-experimental.sh) by accident
 
 
 ### Combined station adjacency and properties

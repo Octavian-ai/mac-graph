@@ -8,7 +8,6 @@ python -m macgraph.train \
 	--disable-summary \
 	--disable-dynamic-decode \
 	--disable-memory-cell \
-	--disable-control-cell \
 	--disable-question-state \
 	--enable-read-question-state \
 	--control-dropout 0 \
