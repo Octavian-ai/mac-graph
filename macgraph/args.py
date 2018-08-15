@@ -31,7 +31,7 @@ def generate_args_derivatives(args):
 	r["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
 	r["config_path"] = os.path.join(args["model_dir"], "config.yaml")
 	r["question_types_path"] = os.path.join(args["input_dir"], "types.yaml")
-	r["output_classes_path"] = os.path.join(args["input_dir"], "output_classes.yaml")
+	r["output_classes_path"] = os.path.join(args["input_dir"], "answer_classes.yaml")
 
 	return r
 

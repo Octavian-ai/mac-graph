@@ -6,21 +6,21 @@ python -m macgraph.train \
 	--input-dir input_data/processed/sa_small_100k_balanced \
 	--model-dir output/model/sa/$COMMIT \
 	--log-level DEBUG \
-	--disable-kb-node \
-	--max-decode-iterations 1 \
-	--input-layers 1 \
-	--disable-memory-cell \
 	--disable-control-cell \
 	--disable-dynamic-decode \
+	--disable-kb-node \
+	--disable-memory-cell \
 	--disable-question-state \
-	--read-activation abs \
-	--read-from-question \
-	--read-dropout 0.0 \
-	--output-layers 1 \
-	--output-classes 8 \
+	--input-layers 1 \
 	--input-width 64 \
-	--output-activation mi \
 	--learning-rate 0.001 \
+	--max-decode-iterations 1 \
 	--max-gradient-norm 4.0 \
-	--read-layers 1 \
+	--output-activation mi \
+	--output-classes 8 \
+	--output-layers 1 \
+	--read-activation abs \
+	--read-dropout 0.0 \
+	--read-from-question \
 	--read-indicator-rows 1 \
+	--read-layers 1 \

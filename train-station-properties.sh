@@ -6,23 +6,21 @@ python -m macgraph.train \
 	--log-level DEBUG \
 	--model-dir output/model/sp/$COMMIT \
 	--input-dir input_data/processed/sp_small_100k \
+	--output-classes 512 \
+	--control-dropout 0.0 \
+	--disable-dynamic-decode \
 	--disable-kb-edge \
+	--disable-memory-cell \
+	--enable-read-question-state \
 	--input-layers 3 \
-	--answer-classes 512 \
-	--vocab-size 512 \
-	--memory-transform-layers 1 \
+	--input-width 64 \
+	--learning-rate 0.001 \
+	--max-decode-iterations 1 \
+	--max-gradient-norm 4 \
 	--output-activation tanh \
 	--output-layers 1 \
 	--read-activation tanh \
-	--read-layers 1 \
-	--memory-forget-activation tanh \
-	--control-dropout 0.0 \
 	--read-dropout 0.0 \
-	--input-width 64 \
-	--learning-rate 0.001 \
-	--max-gradient-norm 4 \
-	--disable-dynamic-decode \
-	--enable-read-question-state \
-	--disable-memory-cell \
-	--max-decode-iterations 1 \
+	--read-layers 1 \
+	--vocab-size 512 \
 	$@
