@@ -176,12 +176,12 @@ def read_cell(args, features, vocab_embedding,
 		# --------------------------------------------------------------------------
 		
 		out_data = read_data
-		width = out_data.shape[-1]
+		# width = out_data.shape[-1]
 
 		for i in range(args["read_layers"]):
-			m1 = out_data
-			out_data = tf.layers.dense(out_data, width)
-			out_data += m1 # residual
+			# m1 = out_data
+			out_data = tf.layers.dense(out_data, args["read_width"])
+			# out_data += m1 # residual
 			out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
 			
 			if args["read_dropout"] > 0:

@@ -9,13 +9,13 @@ python -m macgraph.train \
 	--input-layers 3 \
 	--answer-classes 512 \
 	--vocab-size 512 \
-	--read-activation abs \
-	--read-layers 1 \
+	--read-activation tanh \
+	--read-layers 2 \
 	--read-dropout 0.0 \
 	--memory-transform-layers 1 \
 	--memory-forget-activation tanh \
 	--output-activation tanh \
-	--output-layers 2 \
+	--output-layers 1 \
 	--control-dropout 0.0 \
 	--control-heads 1 \
 	--input-width 64 \
