@@ -7,9 +7,9 @@ python -m macgraph.train \
 	--model-dir output/model/sa/$COMMIT \
 	--log-level DEBUG \
 	--input-layers 3 \
-	--learning-rate 1E-5 \
-	--answer-classes 512 \
-	--vocab-size 512 \
+	--learning-rate 1E-7 \
+	--answer-classes 8 \
+	--vocab-size 128 \
 	--read-activation abs \
 	--read-layers 1 \
 	--read-dropout 0.0 \
