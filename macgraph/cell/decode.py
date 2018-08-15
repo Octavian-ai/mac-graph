@@ -127,8 +127,7 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	if args["use_position_encoding"]:
 		question_tokens = add_location_encoding_1d(question_tokens)
 	
-	tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))
-
+	
 	taps = ["question_word_attn", "kb_node_attn", "kb_edge_attn", "kb_node_word_attn",
 		"control_state", "memory_state"]
 
@@ -140,6 +139,8 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	final_output, out_taps = r
 
 	if args["use_summary"]:
+		tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))
+
 		for k, v in out_taps.items():
 			if v is not None:
 				tf.summary.image(k, expand_if_needed(v))
