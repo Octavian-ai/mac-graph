@@ -144,7 +144,7 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 			if v is not None:
 				tf.summary.image(k, expand_if_needed(v))
 
-	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["answer_classes"]])
+	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["output_classes"]])
 	return final_output
 
 

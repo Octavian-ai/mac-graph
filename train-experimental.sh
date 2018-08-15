@@ -13,12 +13,11 @@ python -m macgraph.train \
 	--read-activation abs \
 	--read-layers 1 \
 	--read-dropout 0.0 \
+	--read-from-question \
 	--disable-memory-cell \
 	--memory-transform-layers 1 \
 	--memory-forget-activation tanh \
 	--control-dropout 0.0 \
-	--control-heads 2 \
-	--control-width 256 \
 	--output-activation tanh \
 	--output-layers 1 \
 	--output-classes 512 \

@@ -14,7 +14,7 @@ def predict(args):
 
 	vocab   = Vocab.load(args)
 	stats = Counter()
-	answer_classes = Counter()
+	output_classes = Counter()
 	predicted_classes = Counter()
 	first_station_incorrect = Counter()
 	second_station_incorrect = Counter()
@@ -26,7 +26,7 @@ def predict(args):
 
 		type_string = vocab.prediction_value_to_string(p["type_string"])
 		answer_string = vocab.prediction_value_to_string(p["actual_label"])
-		answer_classes[answer_string] += 1
+		output_classes[answer_string] += 1
 		predicted_classes[vocab.prediction_value_to_string(p["predicted_label"])] += 1
 
 		# Are 16 and 22 adjacent?
@@ -63,7 +63,7 @@ def predict(args):
 		print(f"{k}: {v}")
 
 	print(f"\nAnswer classes:")
-	for k, v in answer_classes.most_common():
+	for k, v in output_classes.most_common():
 		print(f"{k}: {v}")
 
 	# print(f"\nstation_incorrect:")

@@ -28,8 +28,8 @@ def generate_record(args, vocab, doc):
 	if label == UNK_ID:
 		raise ValueError(f"We're only including questions that have in-vocab answers ({doc['answer']})")
 
-	if label >= args["answer_classes"]:
-		raise ValueError(f"Label {label} greater than answer classes {args['answer_classes']}")
+	if label >= args["output_classes"]:
+		raise ValueError(f"Label {label} greater than answer classes {args['output_classes']}")
 
 	nodes, edges = graph_to_table(args, vocab, doc["graph"])
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
 
 	question_types = Counter()
-	answer_classes = Counter()
+	output_classes = Counter()
 
 	logger.info("Generate TFRecords")
 	with Partitioner(args) as p:
@@ -90,7 +90,7 @@ if __name__ == "__main__":
 					record = generate_record(args, vocab, doc)
 					p.write(record)
 					question_types[doc["question"]["type_string"]] += 1
-					answer_classes[doc["answer"]] += 1
+					output_classes[doc["answer"]] += 1
 					balancer.record_batch_item(doc, record)
 					balancer.oversample_every(args["balance_batch"])
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 					pass
 
 
-			with tf.gfile.GFile(args["answer_classes_path"], "w") as file:
+			with tf.gfile.GFile(args["output_classes_path"], "w") as file:
 				yaml.dump(dict(balancer.total_classes), file)
 
 		logger.info(f"Wrote {p.written} TFRecords")
