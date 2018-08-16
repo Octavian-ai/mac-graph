@@ -40,6 +40,7 @@ This is the first (easy) question I've got working. Here's a log of known workin
 - `9d298d7`: 92% @ 36k - extracting row token by position seems helpful
 - `53f5e0f`: 93% @ 40k - fastest (wall) to reach accuracy (reduced cell iterations)
 - `572d98e`: 99% @ 150k - woop. Disabled memory, down to single step
+- `31fd026`: 100% @ 6k steps - added residual to first layer of input biLSTM and made that wider
 
 
 ### Station Adjacency

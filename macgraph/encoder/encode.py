@@ -11,6 +11,7 @@ def basic_cell(args, i, width):
 	c = tf.contrib.rnn.DropoutWrapper(c, args['input_dropout'])
 
 	if args["use_input_residual"]:
+		assert i > 0 or args["embed_width"] == args["input_width"], "Cannot use residual on base layer as inputs and outputs are of different width"
 		c = tf.contrib.rnn.ResidualWrapper(c)
 
 	return c

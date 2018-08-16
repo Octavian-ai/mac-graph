@@ -3,17 +3,16 @@
 COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
 python -m macgraph.train \
-	--log-level DEBUG \
 	--model-dir output/model/sa_sp/$COMMIT \
 	--input-dir input_data/processed/sa_sp_small_100k \
-	--disable-summary \
+	--control-dropout 0 \
 	--disable-dynamic-decode \
 	--disable-memory-cell \
 	--disable-question-state \
+	--disable-summary \
 	--enable-read-question-state \
-	--control-dropout 0 \
-	--input-layers 1 \
-	--input-width 64 \
+	--input-layers 2 \
+	--input-width 128 \
 	--learning-rate 0.001 \
 	--max-decode-iterations 1 \
 	--max-gradient-norm 4.0 \
