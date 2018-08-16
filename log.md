@@ -184,6 +184,11 @@ The successful station property model does no better than random guessing. I'm e
 	- disabled access 50%
 	- has rail 60%
 
+- `e6540b7` 88% @ 17k
+	- 78% on station adjacency
+	- 99% on all station property questions
+	- I believe I need to give the network a way to choose read transform based on control state
+
 
 
 

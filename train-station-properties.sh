@@ -5,12 +5,12 @@ COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 python -m macgraph.train \
 	--model-dir output/model/sp/$COMMIT \
 	--input-dir input_data/processed/sp_small_100k \
-	--disable-summary \
+	--control-dropout 0 \
 	--disable-dynamic-decode \
 	--disable-memory-cell \
 	--disable-question-state \
+	--disable-summary \
 	--enable-read-question-state \
-	--control-dropout 0 \
 	--input-layers 2 \
 	--input-width 128 \
 	--learning-rate 0.001 \
