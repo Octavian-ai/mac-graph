@@ -186,8 +186,8 @@ def read_cell(args, features, vocab_embedding,
 			if args["read_dropout"] > 0:
 				out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 
-		read_fn_switch = tf.layers.dense(in_signal, args["read_width"], tf.sigmoid)
-		out_data = out_data * read_fn_switch
+		# read_fn_switch = tf.layers.dense(in_signal, args["read_width"], tf.sigmoid)
+		# out_data = out_data * read_fn_switch
 
 		return out_data, taps
 
