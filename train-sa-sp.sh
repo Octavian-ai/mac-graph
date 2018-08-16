@@ -11,7 +11,7 @@ python -m macgraph.train \
 	--disable-question-state \
 	--disable-summary \
 	--enable-read-question-state \
-	--input-layers 2 \
+	--input-layers 3 \
 	--input-width 128 \
 	--learning-rate 0.001 \
 	--max-decode-iterations 1 \
@@ -21,7 +21,7 @@ python -m macgraph.train \
 	--output-layers 1 \
 	--read-activation tanh \
 	--read-dropout 0 \
-	--read-heads 2 \
+	--read-heads 1 \
 	--read-from-question \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
