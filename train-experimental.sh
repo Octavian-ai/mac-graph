@@ -10,7 +10,7 @@ python -m macgraph.train \
 	--disable-question-state \
 	--enable-read-question-state \
 	--control-dropout 0 \
-	--input-layers 1 \
+	--input-layers 2 \
 	--input-width 64 \
 	--learning-rate 0.001 \
 	--max-decode-iterations 1 \

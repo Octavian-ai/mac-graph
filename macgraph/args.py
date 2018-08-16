@@ -81,9 +81,10 @@ def get_args(extend=lambda parser:None, argv=None):
 	
 	parser.add_argument('--max-seq-len',	  	 		type=int, default=20,   help="Maximum length of question token list")
 	
-	parser.add_argument('--input-layers',	   			type=int, default=3,    help="How many input layers are in the english encoding LSTM stack")
+	parser.add_argument('--input-layers',	   			type=int, 	default=3,    help="How many input layers are in the english encoding LSTM stack")
 	parser.add_argument('--input-dropout',              type=float, default=0.2)
-	parser.add_argument('--input-width',             	type=int, default=128)
+	parser.add_argument('--input-width',             	type=int, 	default=128)
+	parser.add_argument('--disable-input-residual', 	action='store_false', dest='use_input_residual')
 
 	parser.add_argument('--embed-width',	       		type=int, default=64,   help="The width of token embeddings")
 	

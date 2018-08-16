@@ -10,7 +10,7 @@ def basic_cell(args, i, width):
 	c = tf.contrib.rnn.LSTMCell(width)
 	c = tf.contrib.rnn.DropoutWrapper(c, args['input_dropout'])
 
-	if i > 1:
+	if args["use_input_residual"]:
 		c = tf.contrib.rnn.ResidualWrapper(c)
 
 	return c
