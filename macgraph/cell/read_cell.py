@@ -133,9 +133,11 @@ def read_cell(args, features, vocab_embedding,
 		taps = {}
 		read_word_width = 0
 
-		for i in ["kb_node", "kb_edge"]:
-			if args[f"use_{i}"]:
-				for j in range(args["read_heads"]):
+		read_datas = []
+
+		for j in range(args["read_heads"]):
+			for i in ["kb_node", "kb_edge"]:
+				if args[f"use_{i}"]:
 					read, attn, table = read_from_table_with_embedding(
 						args, 
 						features, 
@@ -148,28 +150,30 @@ def read_cell(args, features, vocab_embedding,
 					reads.append(read)
 					taps[i+"_attn"] = attn
 
-		if args["use_data_stack"]:
-			# Attentional read
-			read, attn, table = read_from_table(args, 
-				features, in_signal, 
-				noun="data_stack", 
-				table=in_data_stack, 
-				width=args["data_stack_width"] * args["embed_width"])
+			if args["use_data_stack"]:
+				# Attentional read
+				read, attn, table = read_from_table(args, 
+					features, in_signal, 
+					noun="data_stack", 
+					table=in_data_stack, 
+					width=args["data_stack_width"] * args["embed_width"])
 
-			read_word_width += args["data_stack_width"]
-			reads.append(read)
-			reads.append(in_data_stack[:,0,:]) # Head read
+				read_word_width += args["data_stack_width"]
+				reads.append(read)
+				reads.append(in_data_stack[:,0,:]) # Head read
 
 
-		read_data = tf.concat(reads, -1)
+			read_data = tf.concat(reads, -1)
 
-		if args[f"use_read_extract"]:
-			read_words = tf.reshape(read_data, [features["d_batch_size"], read_word_width, args["embed_width"]])
-			word_query = tf.layers.dense(in_signal, read_word_width)
-			word_query = tf.nn.softmax(word_query, axis=1)
-			read_data = read_words * tf.expand_dims(word_query, -1)
-			read_data = tf.reduce_sum(read_data, axis=1)
-			taps["read_word_query"] = word_query
+			if args[f"use_read_extract"]:
+				read_words = tf.reshape(read_data, [features["d_batch_size"], read_word_width, args["embed_width"]])
+				word_query = tf.layers.dense(in_signal, read_word_width)
+				word_query = tf.nn.softmax(word_query, axis=1)
+				read_data = read_words * tf.expand_dims(word_query, -1)
+				read_data = tf.reduce_sum(read_data, axis=1)
+				taps["read_word_query"] = word_query
+
+			read_datas.append(read_data)
 		
 		
 
@@ -177,7 +181,7 @@ def read_cell(args, features, vocab_embedding,
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
 		
-		out_data = tf.concat([read_data, in_signal], -1)
+		out_data = tf.concat([*read_datas, in_signal], -1)
 		
 		for i in range(args["read_layers"]):
 			out_data = tf.layers.dense(out_data, args["read_width"])

@@ -21,6 +21,7 @@ python -m macgraph.train \
 	--output-layers 1 \
 	--read-activation tanh \
 	--read-dropout 0 \
+	--read-heads 2 \
 	--read-from-question \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
