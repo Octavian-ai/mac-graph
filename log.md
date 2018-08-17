@@ -189,7 +189,9 @@ The successful station property model does no better than random guessing. I'm e
 	- 99% on all station property questions
 	- I believe I need to give the network a way to choose read transform based on control state
 
-
+- `230ab8a` 97% @ 17k
+	- 88% on station adjacency
+	- 99% on all station property questions
 
 
 ## Notes on training infrastructure
