@@ -8,7 +8,6 @@ python -m macgraph.train \
 	--disable-control-cell \
 	--disable-dynamic-decode \
 	--disable-kb-node \
-	--disable-kb-edge \
 	--disable-memory-cell \
 	--disable-question-state \
 	--input-layers 1 \
@@ -19,7 +18,7 @@ python -m macgraph.train \
 	--output-activation mi \
 	--output-classes 512 \
 	--output-layers 1 \
-	--read-activation tanh \
+	--read-activation abs \
 	--read-dropout 0.0 \
 	--read-from-question \
 	--read-indicator-rows 1 \
