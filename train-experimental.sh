@@ -19,7 +19,7 @@ python -m macgraph.train \
 	--output-classes 512 \
 	--output-layers 1 \
 	--read-activation abs \
-	--read-dropout 0.0 \
+	--read-dropout 0.1 \
 	--read-from-question \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
