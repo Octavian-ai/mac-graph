@@ -170,17 +170,18 @@ def read_cell(args, features, vocab_embedding,
 				reads.append(in_data_stack[:,0,:]) # Head read
 
 
-			read_data = tf.concat(reads, -1)
+			if len(reads) > 0:
+				read_data = tf.concat(reads, -1)
 
-			if args[f"use_read_extract"]:
-				read_words = tf.reshape(read_data, [features["d_batch_size"], read_word_width, args["embed_width"]])
-				word_query = tf.layers.dense(in_signal, read_word_width)
-				word_query = tf.nn.softmax(word_query, axis=1)
-				read_data = read_words * tf.expand_dims(word_query, -1)
-				read_data = tf.reduce_sum(read_data, axis=1)
-				taps["read_word_query"] = word_query
+				if args[f"use_read_extract"]:
+					read_words = tf.reshape(read_data, [features["d_batch_size"], read_word_width, args["embed_width"]])
+					word_query = tf.layers.dense(in_signal, read_word_width)
+					word_query = tf.nn.softmax(word_query, axis=1)
+					read_data = read_words * tf.expand_dims(word_query, -1)
+					read_data = tf.reduce_sum(read_data, axis=1)
+					taps["read_word_query"] = word_query
 
-			read_datas.append(read_data)
+				read_datas.append(read_data)
 
 		
 
@@ -190,10 +191,11 @@ def read_cell(args, features, vocab_embedding,
 			query = tf.layers.dense(in_signal, full_width)
 			query = dynamic_assert_shape(query, [features["d_batch_size"], full_width])
 			delta = table - tf.expand_dims(query, 1)
-			norm = tf.norm(delta, axis=2)
-			best_match = tf.reduce_min(norm, axis=1)
-			read_datas.append(best_match)
-		
+			norms = tf.norm(delta, axis=2)
+			# best_match = tf.reduce_min(norm, axis=1, keepdims=True)
+			score = tf.reduce_prod(norms, axis=1, keepdims=True)
+			score = dynamic_assert_shape(score, [features["d_batch_size", 1]])
+			read_datas.append(score)
 		
 
 		# --------------------------------------------------------------------------
