@@ -194,7 +194,7 @@ def read_cell(args, features, vocab_embedding,
 			norms = tf.norm(delta, axis=2)
 			# best_match = tf.reduce_min(norm, axis=1, keepdims=True)
 			score = tf.reduce_prod(norms, axis=1, keepdims=True)
-			score = dynamic_assert_shape(score, [features["d_batch_size", 1]])
+			score = dynamic_assert_shape(score, [features["d_batch_size"], 1])
 			read_datas.append(score)
 		
 
