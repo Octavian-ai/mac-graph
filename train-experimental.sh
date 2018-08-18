@@ -18,8 +18,8 @@ python -m macgraph.train \
 	--output-activation mi \
 	--output-classes 8 \
 	--output-layers 1 \
-	--read-activation abs \
-	--read-dropout 0.1 \
+	--read-activation tanh \
+	--read-dropout 0.2 \
 	--read-from-question \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
