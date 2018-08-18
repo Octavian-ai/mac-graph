@@ -30,6 +30,49 @@ def read_from_table(args, features, in_signal, noun, table, width, table_len=Non
 	return output, score, table
 
 
+def get_table_with_embedding(args, features, vocab_embedding, noun):
+	
+	# --------------------------------------------------------------------------
+	# Constants and validations
+	# --------------------------------------------------------------------------
+
+	table = features[f"{noun}s"]
+	table_len = features[f"{noun}s_len"]
+
+	width = args[f"{noun}_width"]
+	full_width = width * args["embed_width"]
+
+	d_len = tf.shape(table)[1]
+	assert table.shape[-1] == width
+
+
+	# --------------------------------------------------------------------------
+	# Extend table if desired
+	# --------------------------------------------------------------------------
+
+	if args["read_indicator_rows"] > 0:
+		# Add a trainable row to the table
+		ind_row_shape = [features["d_batch_size"], args["read_indicator_rows"], width]
+		ind_row = tf.fill(ind_row_shape, tf.cast(UNK_ID, table.dtype))
+		table = tf.concat([table, ind_row], axis=1)
+		table_len += args["read_indicator_rows"]
+		d_len += args["read_indicator_rows"]
+
+	# --------------------------------------------------------------------------
+	# Embed graph tokens
+	# --------------------------------------------------------------------------
+	
+	emb_kb = tf.nn.embedding_lookup(vocab_embedding, table)
+	emb_kb = dynamic_assert_shape(emb_kb, 
+		[features["d_batch_size"], d_len, width, args["embed_width"]])
+
+	emb_kb = tf.reshape(emb_kb, [-1, d_len, full_width])
+	emb_kb = dynamic_assert_shape(emb_kb, 
+		[features["d_batch_size"], d_len, full_width])
+
+	return emb_kb, full_width, table_len
+
+
 def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun):
 	"""Perform attention based read from table
 
@@ -40,43 +83,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 
 	with tf.name_scope(f"read_from_{noun}"):
 
-		# --------------------------------------------------------------------------
-		# Constants and validations
-		# --------------------------------------------------------------------------
-
-		table = features[f"{noun}s"]
-		table_len = features[f"{noun}s_len"]
-
-		width = args[f"{noun}_width"]
-		full_width = width * args["embed_width"]
-
-		d_len = tf.shape(table)[1]
-		assert table.shape[-1] == width
-
-
-		# --------------------------------------------------------------------------
-		# Extend table if desired
-		# --------------------------------------------------------------------------
-
-		if args["read_indicator_rows"] > 0:
-			# Add a trainable row to the table
-			ind_row_shape = [features["d_batch_size"], args["read_indicator_rows"], width]
-			ind_row = tf.fill(ind_row_shape, tf.cast(UNK_ID, table.dtype))
-			table = tf.concat([table, ind_row], axis=1)
-			table_len += args["read_indicator_rows"]
-			d_len += args["read_indicator_rows"]
-
-		# --------------------------------------------------------------------------
-		# Embed graph tokens
-		# --------------------------------------------------------------------------
-		
-		emb_kb = tf.nn.embedding_lookup(vocab_embedding, table)
-		emb_kb = dynamic_assert_shape(emb_kb, 
-			[features["d_batch_size"], d_len, width, args["embed_width"]])
-
-		emb_kb = tf.reshape(emb_kb, [-1, d_len, full_width])
-		emb_kb = dynamic_assert_shape(emb_kb, 
-			[features["d_batch_size"], d_len, full_width])
+		table, full_width, table_len = get_table_with_embedding(args, features, vocab_embedding, noun)
 
 		# --------------------------------------------------------------------------
 		# Read
@@ -85,7 +92,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 		return read_from_table(args, features, 
 			in_signal, 
 			noun,
-			emb_kb, 
+			table, 
 			width=full_width, 
 			table_len=table_len, 
 			table_max_len=args[f"{noun}_max_len"])
@@ -174,6 +181,18 @@ def read_cell(args, features, vocab_embedding,
 				taps["read_word_query"] = word_query
 
 			read_datas.append(read_data)
+
+		
+
+		# Experimental edge existence signal
+		with tf.name_scope("kb_edge_existence"):
+			table, full_width, table_len = get_table_with_embedding(args, features, vocab_embedding, "kb_edge")
+			query = tf.layers.dense(in_signal, full_width)
+			query = dynamic_assert_shape(query, [features["d_batch_size"], full_width])
+			delta = table - tf.expand_dims(query, 1)
+			norm = tf.norm(delta, axis=2)
+			best_match = tf.reduce_min(norm, axis=1)
+			read_datas.append(best_match)
 		
 		
 
@@ -190,8 +209,6 @@ def read_cell(args, features, vocab_embedding,
 			if args["read_dropout"] > 0:
 				out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])
 
-		# read_fn_switch = tf.layers.dense(in_signal, args["read_width"], tf.sigmoid)
-		# out_data = out_data * read_fn_switch
 
 		return out_data, taps
 
