@@ -14,9 +14,9 @@ python -m macgraph.train \
 	--input-width 64 \
 	--learning-rate 0.001 \
 	--max-decode-iterations 1 \
-	--max-gradient-norm 4.0 \
+	--max-gradient-norm 0.4 \
 	--output-activation mi \
-	--output-classes 512 \
+	--output-classes 8 \
 	--output-layers 1 \
 	--read-activation abs \
 	--read-dropout 0.1 \
@@ -24,4 +24,4 @@ python -m macgraph.train \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
 	--disable-read-extract \
-	--vocab-size 512 \
+	--vocab-size 90 \
