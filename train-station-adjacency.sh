@@ -23,3 +23,4 @@ python -m macgraph.train \
 	--read-from-question \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
+	--disable-read-extract \
