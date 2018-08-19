@@ -28,7 +28,7 @@ def mi_activation(tensor, tap=False):
 
 		axis = 1
 		
-		choice = tf.get_variable("mi_choice", [len(activations)])
+		choice = tf.get_variable("darts_choice", [len(activations)])
 		choice = tf.nn.softmax(choice)
 		choice = tf.check_numerics(choice, "activation_choice")
 

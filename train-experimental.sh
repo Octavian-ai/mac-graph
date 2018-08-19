@@ -14,7 +14,7 @@ python -m macgraph.train \
 	--learning-rate 0.001 \
 	--max-decode-iterations 1 \
 	--max-gradient-norm 0.4 \
-	--output-activation mi \
+	--output-activation tanh \
 	--output-classes 110 \
 	--output-layers 1 \
 	--read-activation tanh_abs \

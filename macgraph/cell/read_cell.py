@@ -183,21 +183,6 @@ def read_cell(args, features, vocab_embedding,
 
 				read_datas.append(read_data)
 
-		
-
-		# Experimental edge existence signal
-		# with tf.name_scope("kb_edge_existence"):
-		# 	table, full_width, table_len = get_table_with_embedding(args, features, vocab_embedding, "kb_edge")
-		# 	query = tf.layers.dense(in_signal, full_width)
-		# 	query = dynamic_assert_shape(query, [features["d_batch_size"], full_width])
-		# 	delta = table - tf.expand_dims(query, 1)
-		# 	norms = tf.norm(delta, axis=2)
-		# 	# best_match = tf.reduce_min(norm, axis=1, keepdims=True)
-		# 	# score = tf.reduce_prod(norms, axis=1, keepdims=True)
-		# 	# score = dynamic_assert_shape(score, [features["d_batch_size"], 1])
-		# 	read_datas.append(norms)
-		
-
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
 		# --------------------------------------------------------------------------

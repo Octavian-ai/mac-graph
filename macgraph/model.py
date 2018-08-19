@@ -86,20 +86,23 @@ def model_fn(features, labels, mode, params):
 				global_step,
 				decay_steps=10000, 
 				decay_rate=0.9)
-		
-
-		var = tf.trainable_variables()
-		gradients = tf.gradients(loss, var)
-		norms = [tf.norm(i, 2) for i in gradients if i is not None]
 
 		if args["use_summary"]:
+			var = tf.trainable_variables()
+			gradients = tf.gradients(loss, var)
+			norms = [tf.norm(i, 2) for i in gradients if i is not None]
+
 			tf.summary.scalar("learning_rate", learning_rate, family="hyperparam")
 			tf.summary.scalar("current_step", global_step, family="hyperparam")
 			tf.summary.histogram("grad_norm", norms)
 			tf.summary.scalar("grad_norm", tf.reduce_max(norms), family="hyperparam")
 
+		var_all = tf.trainable_variables()
+		var_weights = [i for i in var_all if not i.name.startswith("darts_")]
+		var_arch = [i for i in var_all if i.name.startswith("darts_")]
+
 		optimizer = tf.train.AdamOptimizer(learning_rate)
-		train_op = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
+		train_op_weights, gradients = minimize_clipped(optimizer, loss, args["max_gradient_norm"], var_all)
 	
 
 	# --------------------------------------------------------------------------
