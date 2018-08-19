@@ -102,7 +102,7 @@ def model_fn(features, labels, mode, params):
 		var_arch = [i for i in var_all if i.name.startswith("darts_")]
 
 		optimizer = tf.train.AdamOptimizer(learning_rate)
-		train_op_weights, gradients = minimize_clipped(optimizer, loss, args["max_gradient_norm"], var_all)
+		train_op, gradients = minimize_clipped(optimizer, loss, args["max_gradient_norm"], var_all)
 	
 
 	# --------------------------------------------------------------------------
