@@ -9,6 +9,8 @@ from .minception import mi_activation
 
 global_args = {}
 
+def absu(x):
+	return tf.nn.relu(x) + tf.nn.relu(-x)
 
 # Expand activation args to callables
 ACTIVATION_FNS = {
@@ -16,7 +18,8 @@ ACTIVATION_FNS = {
 	"relu": tf.nn.relu,
 	"sigmoid": tf.nn.sigmoid,
 	"mi": mi_activation,
-	"abs": lambda x: tf.nn.relu(x) + tf.nn.relu(-x),
+	"abs": absu,
+	"tanh_abs": lambda x: tf.concat([tf.tanh(x), absu(x)], axis=-1)
 }
 
 def generate_args_derivatives(args):
