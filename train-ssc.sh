@@ -9,6 +9,7 @@ python -m macgraph.train \
 	--control-width 128 \
 	--disable-kb-node \
 	--disable-dynamic-decode \
+	--disable-memory-cell \
 	--disable-question-state \
 	--input-layers 1 \
 	--input-width 64 \
