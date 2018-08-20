@@ -129,7 +129,7 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	
 	
 	taps = ["question_word_attn", "kb_node_attn", "kb_edge_attn", "kb_node_word_attn",
-		"control_state", "memory_state"]
+		"control_state", "memory_state", "memory_forget"]
 
 	if args["use_dynamic_decode"]:
 		r = dynamic_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)

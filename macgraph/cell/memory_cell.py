@@ -31,4 +31,4 @@ def memory_cell(args, features, in_memory_state, in_data_read, in_control_state)
 	
 		out_memory_state = (new_memory_state * forget_scalar) + (in_memory_state * (1-forget_scalar))
 		out_memory_state = dynamic_assert_shape(out_memory_state, memory_shape)
-		return out_memory_state
+		return out_memory_state, forget_scalar

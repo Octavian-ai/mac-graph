@@ -67,10 +67,11 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		
 			
 			if self.args["use_memory_cell"]:
-				out_memory_state = memory_cell(self.args, self.features,
+				out_memory_state, tap_memory_forget = memory_cell(self.args, self.features,
 					in_memory_state, read, out_control_state)
 			else:
 				out_memory_state = in_memory_state
+				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)
 
 			if self.args["use_data_stack"]:
 				out_data_stack = write_cell(self.args, self.features, 
@@ -90,6 +91,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				read_taps.get("kb_node_word_query", empty_query),
 				out_control_state,
 				out_memory_state,
+				tap_memory_forget,
 				)
 
 			return out_data, out_state
@@ -109,13 +111,6 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 	@property
 	def output_size(self):
-
-		read_attn_width = 0
-		for i in ["kb_edge", "kb_node"]:
-			if self.args["use_"+i]:
-				read_attn_width += self.args[i+"_width"] * self.args["embed_width"]
-		
-
 		return (
 			self.args["output_classes"], 
 			self.features["d_src_len"], # tap_question_attn
@@ -124,6 +119,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			self.args["kb_node_width"],
 			self.args["control_width"], # tap_control_state
 			self.args["memory_width"], # tap_control_state
+			1, # tap_memory_forget
 		)
 
 
