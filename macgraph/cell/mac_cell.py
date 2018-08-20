@@ -91,7 +91,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				read_taps.get("kb_node_word_query", empty_query),
 				out_control_state,
 				out_memory_state,
-				tap_memory_forget,
+				tf.tile(tap_memory_forget, [0, 10]),
 				)
 
 			return out_data, out_state
@@ -119,7 +119,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			self.args["kb_node_width"],
 			self.args["control_width"], # tap_control_state
 			self.args["memory_width"], # tap_control_state
-			1, # tap_memory_forget
+			10, # tap_memory_forget
 		)
 
 
