@@ -117,8 +117,8 @@ def read_cell(args, features, vocab_embedding,
 
 		in_signal = []
 
-		if in_memory_state is not None and args["use_memory_cell"]:
-			in_signal.append(in_memory_state)
+		# if in_memory_state is not None and args["use_memory_cell"]:
+		# 	in_signal.append(in_memory_state)
 
 		# We may run the network with no control cell
 		if in_control_state is not None and args["use_control_cell"]:
