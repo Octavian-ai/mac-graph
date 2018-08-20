@@ -119,7 +119,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		return (
 			self.args["output_classes"], 
 			self.features["d_src_len"], # tap_question_attn
-			read_attn_width, # tap_read_attn
+			self.args["kb_node_width"] * self.args["embed_width"],
+			self.args["kb_edge_width"] * self.args["embed_width"],
 			self.args["kb_node_width"],
 			self.args["control_width"], # tap_control_state
 			self.args["memory_width"], # tap_control_state
