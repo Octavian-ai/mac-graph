@@ -121,7 +121,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--output-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--output-layers',				type=int, default=2)
 	parser.add_argument('--output-classes',	       		type=int, default=128,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
-	
+
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
 	parser.add_argument('--disable-summary', 			action='store_false', dest='use_summary')
@@ -131,6 +131,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-read-question-state', action='store_true',  dest='use_read_question_state')
 	parser.add_argument('--disable-control-cell', 		action='store_false', dest="use_control_cell")
 	parser.add_argument('--disable-memory-cell', 		action='store_false', dest="use_memory_cell")
+	parser.add_argument('--disable-output-read', 		action='store_false', dest="use_output_read")
 	parser.add_argument('--disable-dynamic-decode', 	action='store_false', dest="use_dynamic_decode")
 	parser.add_argument('--disable-question-state', 	action='store_false', dest="use_question_state")
 	parser.add_argument('--enable-lr-finder', 			action='store_true',  dest="use_lr_finder")
