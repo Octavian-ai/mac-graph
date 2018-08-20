@@ -142,10 +142,8 @@ def model_fn(features, labels, mode, params):
 							weights=tf.equal(features["type_string"], type_string))
 
 
-			print("output_classes")
 			with tf.gfile.GFile(args["output_classes_path"]) as file:
 				doc = yaml.load(file)
-				print("output_classes", doc)
 				for answer_class in doc.keys():
 					e = vocab.lookup(pretokenize_json(answer_class))
 					weights = tf.equal(labels, tf.cast(e, tf.int64))

@@ -14,7 +14,7 @@ python -m macgraph.train \
 	--input-layers 1 \
 	--input-width 64 \
 	--learning-rate 0.001 \
-	--max-decode-iterations 1 \
+	--max-decode-iterations 2 \
 	--max-gradient-norm 0.4 \
 	--output-activation mi \
 	--output-classes 100 \
