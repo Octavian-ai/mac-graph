@@ -98,7 +98,7 @@ def static_decode(args, features, inputs, question_state, question_tokens, taps,
 		final_output = states[-1][0][0]
 
 		def get_tap(idx, key):
-			with tf.name_scope(f"get_tap_{idx}"):
+			with tf.name_scope(f"get_tap_{key}"):
 				tap = [i[0][idx] for i in states if i[0] is not None]
 				for i in tap:
 					if i is None:

@@ -194,6 +194,12 @@ The successful station property model does no better than random guessing. I'm e
 	- 88% on station adjacency
 	- 99% on all station property questions
 
+### Station shortest count
+
+- `9ecf10e` 
+	- Feeding memory into the read_cell was hampering performance
+	- Idea to use softmax selection of read input (and possibly activation) to allow specialisation of read heads
+
 
 ## Notes on training infrastructure
 
