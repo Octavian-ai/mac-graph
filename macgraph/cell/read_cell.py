@@ -98,7 +98,6 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 			table_max_len=args[f"{noun}_max_len"])
 
 
-
 def read_cell(args, features, vocab_embedding, 
 	in_memory_state, in_control_state, in_data_stack, in_question_tokens, in_question_state):
 	"""
@@ -134,14 +133,14 @@ def read_cell(args, features, vocab_embedding,
 
 		in_signal = tf.concat(in_signal, -1)
 
-		reads = []
+		
 		tap_attns = []
 		tap_table = None
 
 		taps = {}
 		read_word_width = 0
 
-		read_datas = []
+		reads = []
 
 		for j in range(args["read_heads"]):
 			for i in ["kb_node", "kb_edge"]:
@@ -154,8 +153,8 @@ def read_cell(args, features, vocab_embedding,
 						noun=i
 					)
 
-					read_word_width += args[i+"_width"]
-					reads.append(read)
+					read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
+					reads.append(attention_by_index(in_control_state, read_words))
 					taps[i+"_attn"] = attn
 
 			if args["use_data_stack"]:
@@ -167,28 +166,19 @@ def read_cell(args, features, vocab_embedding,
 					width=args["data_stack_width"] * args["embed_width"])
 
 				read_word_width += args["data_stack_width"]
-				reads.append(read)
-				reads.append(in_data_stack[:,0,:]) # Head read
-
-
-			if len(reads) > 0:
-				read_data = tf.concat(reads, -1)
-
-				if args[f"use_read_extract"]:
-					read_words = tf.reshape(read_data, [features["d_batch_size"], read_word_width, args["embed_width"]])
-					word_query = tf.layers.dense(in_signal, read_word_width)
-					word_query = tf.nn.softmax(word_query, axis=1)
-					read_data = read_words * tf.expand_dims(word_query, -1)
-					read_data = tf.reduce_sum(read_data, axis=1)
-					taps["read_word_query"] = word_query
+				read_words = tf.reshape(read, [features["d_batch_size"], args["data_stack_width"], args["embed_width"]])
+				reads.append(attention_by_index(in_control_state, read_words))
 
 				read_datas.append(read_data)
+
+		reads = tf.stack(reads)
+		reads = attention_by_index(in_control_state, reads)
 
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
 		
-		out_data = tf.concat([*read_datas, in_signal], -1)
+		out_data = tf.concat([reads, in_signal], -1)
 		
 		for i in range(args["read_layers"]):
 			out_data = tf.layers.dense(out_data, args["read_width"])

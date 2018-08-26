@@ -98,26 +98,24 @@ def attention(table, query, word_size=None, table_len=None, table_max_len=None, 
 		return output, scores
 
 
+def attention_by_index(control, head_stack):
+	'''
+	Essentially a weighted sum over the last dimension of head_stack, 
+	using a dense softmax of control for the weights
 
-# A big effort to do a dense layer on scores (it has a dynamic width)
-# if global_args["use_attn_score_dense"]:
-# 	need_to_set_shape = scores.shape[1].value is None
-# 	assert word_size is not None, "Cannot use_dense with unknown width_size"
-# 	assert not need_to_set_shape or table_max_len is not None, f"Please supply max seq len since seq len {db.name} is dynamic"
 
-# 	scores = tf.squeeze(scores, axis=2)
+	Shapes:
+		* control [batch, w]
+		* head_stack [batch, r, n]
 
-# 	if need_to_set_shape:
-# 		delta = table_max_len - seq_len
-# 		scores = tf.pad(scores, [[0, 0], [0, delta]])
-# 		scores = tf.reshape(scores, [-1, table_max_len])
-		
-# 	scores = tf.layers.dense(scores, word_size)
+	Returns [batch, r]		
 
-# 	if need_to_set_shape:
-# 		scores = scores[:,0:seq_len]
+	'''
+	
+	query = tf.layers.dense(control, head_stack.shape[-1], activation=tf.nn.softmax)
 
-# 	scores = tf.expand_dims(scores, axis=2)
-# 	scores = dynamic_assert_shape(scores, scores_shape)
-		
+	output = tf.tensordot(query, head_stack, [-1, -1])
+	output = dynamic_assert_shape(output, [tf.shape(control)[0], tf.shape(head_stack)[-2]])
+	return output
+	
 
