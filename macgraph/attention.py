@@ -113,15 +113,12 @@ def attention_by_index(control, head_stack):
 	'''
 
 	with tf.name_scope("attention_by_index"):
-		
+
 		word_size = tf.shape(head_stack)[-1]
 		seq_len = head_stack.shape[-2]
 		output_shape = [tf.shape(control)[0], word_size]
 
 		assert seq_len is not None, "Seq len must be defined"
-
-		print("control shape", control.shape)
-		print("head shape", head_stack.shape)
 		
 		query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
 		query = tf.expand_dims(query, -1)
@@ -130,11 +127,6 @@ def attention_by_index(control, head_stack):
 		weighted_sum = tf.reduce_sum(weighted_stack, -2)
 
 		output = weighted_sum
-
-		# output = tf.tensordot(query, head_stack, [[-1], [-2]], name="output")
-		print("query", query)
-		print("output", output)
-
 		output = dynamic_assert_shape(output, output_shape)
 		return output
 		

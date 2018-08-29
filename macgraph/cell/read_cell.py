@@ -138,8 +138,6 @@ def read_cell(args, features, vocab_embedding,
 		tap_table = None
 
 		taps = {}
-		read_word_width = 0
-
 		reads = []
 
 		for j in range(args["read_heads"]):
@@ -154,7 +152,7 @@ def read_cell(args, features, vocab_embedding,
 					)
 
 					read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
-					reads.append(attention_by_index(in_control_state, read_words))
+					reads.append(attention_by_index(in_signal, read_words))
 					taps[i+"_attn"] = attn
 
 			if args["use_data_stack"]:
@@ -165,16 +163,14 @@ def read_cell(args, features, vocab_embedding,
 					table=in_data_stack, 
 					width=args["data_stack_width"] * args["embed_width"])
 
-				read_word_width += args["data_stack_width"]
 				read_words = tf.reshape(read, [features["d_batch_size"], args["data_stack_width"], args["embed_width"]])
-				reads.append(attention_by_index(in_control_state, read_words))
+				reads.append(attention_by_index(in_signal, read_words))
 
 				read_datas.append(read_data)
 
 		reads_count = len(reads)
-		reads = tf.stack(reads)
-		reads.set_shape([None, reads_count, args["embed_width"]])
-		reads = attention_by_index(in_control_state, reads)
+		reads = tf.stack(reads, 1)
+		reads = attention_by_index(in_signal, reads)
 
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
