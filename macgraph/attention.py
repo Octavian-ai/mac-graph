@@ -100,22 +100,42 @@ def attention(table, query, word_size=None, table_len=None, table_max_len=None, 
 
 def attention_by_index(control, head_stack):
 	'''
-	Essentially a weighted sum over the last dimension of head_stack, 
+	Essentially a weighted sum over the second-last dimension of head_stack, 
 	using a dense softmax of control for the weights
 
 
 	Shapes:
-		* control [batch, w]
-		* head_stack [batch, r, n]
+		* control [batch, word_size]
+		* head_stack [batch, seq_len, word_size]
 
-	Returns [batch, r]		
+	Returns [batch, word_size]		
 
 	'''
-	
-	query = tf.layers.dense(control, head_stack.shape[-1], activation=tf.nn.softmax)
 
-	output = tf.tensordot(query, head_stack, [-1, -1])
-	output = dynamic_assert_shape(output, [tf.shape(control)[0], tf.shape(head_stack)[-2]])
-	return output
-	
+	with tf.name_scope("attention_by_index"):
+		
+		word_size = tf.shape(head_stack)[-1]
+		seq_len = head_stack.shape[-2]
+		output_shape = [tf.shape(control)[0], word_size]
+
+		assert seq_len is not None, "Seq len must be defined"
+
+		print("control shape", control.shape)
+		print("head shape", head_stack.shape)
+		
+		query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
+		query = tf.expand_dims(query, -1)
+
+		weighted_stack = head_stack * query
+		weighted_sum = tf.reduce_sum(weighted_stack, -2)
+
+		output = weighted_sum
+
+		# output = tf.tensordot(query, head_stack, [[-1], [-2]], name="output")
+		print("query", query)
+		print("output", output)
+
+		output = dynamic_assert_shape(output, output_shape)
+		return output
+		
 

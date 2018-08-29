@@ -171,7 +171,9 @@ def read_cell(args, features, vocab_embedding,
 
 				read_datas.append(read_data)
 
+		reads_count = len(reads)
 		reads = tf.stack(reads)
+		reads.set_shape([None, reads_count, args["embed_width"]])
 		reads = attention_by_index(in_control_state, reads)
 
 		# --------------------------------------------------------------------------
