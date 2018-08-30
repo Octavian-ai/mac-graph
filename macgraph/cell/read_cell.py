@@ -156,7 +156,7 @@ def read_cell(args, features, vocab_embedding,
 					if args["use_read_extract"]:
 						d, taps[i+"_word_attn"] = attention_by_index(in_signal, read_words)
 						d = tf.concat([d, in_signal], -1)
-						d = tf.layers.dense(out_data, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
+						d = tf.layers.dense(d, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
 						reads.append(d)
 					else:
 						reads.append(read_words)
