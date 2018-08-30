@@ -160,7 +160,10 @@ def read_cell(args, features, vocab_embedding,
 					
 
 		if args["use_read_extract"]:
-			reads = tf.concat(reads, -1)
+			# reads_len = len(reads)
+			# reads = tf.concat(reads, -1)
+			# reads.set_shape([None, reads_len, None]) # add missing dimension
+			reads = tf.stack(reads, axis=1)
 			reads = attention_by_index(in_signal, reads)
 		else:
 			reads = tf.concat(reads, -2)
