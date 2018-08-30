@@ -154,8 +154,10 @@ def read_cell(args, features, vocab_embedding,
 					read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
 					
 					if args["use_read_extract"]:
-						re, taps[i+"_word_attn"] = attention_by_index(in_signal, read_words)
-						reads.append(re)
+						d, taps[i+"_word_attn"] = attention_by_index(in_signal, read_words)
+						d = tf.concat([d, in_signal], -1)
+						d = tf.layers.dense(out_data, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
+						reads.append(d)
 					else:
 						reads.append(read_words)
 					
