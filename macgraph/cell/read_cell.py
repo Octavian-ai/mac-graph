@@ -164,7 +164,7 @@ def read_cell(args, features, vocab_embedding,
 			reads = attention_by_index(in_signal, reads)
 		else:
 			reads = tf.concat(reads, -2)
-			reads = tf.reshape(reads, [features["d_batch_size"], -1])
+			reads = tf.reshape(reads, [features["d_batch_size"], reads.shape[-1]*reads.shape[-2]])
 
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
