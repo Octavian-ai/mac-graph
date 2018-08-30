@@ -152,7 +152,8 @@ def read_cell(args, features, vocab_embedding,
 					)
 
 					read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
-					reads.append(attention_by_index(in_signal, read_words))
+					# reads.append(attention_by_index(in_signal, read_words))
+					reads.append(read_words)
 					taps[i+"_attn"] = attn
 
 			if args["use_data_stack"]:
@@ -168,8 +169,9 @@ def read_cell(args, features, vocab_embedding,
 
 				read_datas.append(read_data)
 
-		reads_count = len(reads)
-		reads = tf.stack(reads, 1)
+		
+		# reads = tf.stack(reads, 1)
+		reads = tf.concat(reads, -1)
 		reads = attention_by_index(in_signal, reads)
 
 		# --------------------------------------------------------------------------
