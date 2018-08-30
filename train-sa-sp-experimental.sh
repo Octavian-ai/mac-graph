@@ -3,7 +3,7 @@
 COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
 python -m macgraph.train \
-	--model-dir output/model/sa_sp/exp/$COMMIT \
+	--model-dir output/model/sa_sp/$COMMIT \
 	--input-dir input_data/processed/sa_sp_small_100k \
 	--control-dropout 0 \
 	--disable-dynamic-decode \
@@ -25,5 +25,4 @@ python -m macgraph.train \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
 	--vocab-size 110 \
-	--batch-size 8 \
 	$@
