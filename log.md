@@ -196,7 +196,9 @@ The successful station property model does no better than random guessing. I'm e
 
 - `6d5eb35` 99% on just station adjacency (1 read layer and read act tanh_abs helped immensely)
 - `a427516` 99% on just station adjacency (3 read layers)
-	- this proves that the read activation fn is the critical part to succesfully solving s.a.
+	- this proves that the read activation fn is the critical part to succesfully solving SA
+
+- `4ff3692` 99% on just station properties (using same net as previous successful 99% SA run)
 
 ### Station shortest count
 
