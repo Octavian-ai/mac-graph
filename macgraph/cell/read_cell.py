@@ -171,7 +171,7 @@ def read_cell(args, features, vocab_embedding,
 
 		
 		# reads = tf.stack(reads, 1)
-		reads = tf.concat(reads, -1)
+		reads = tf.concat(reads, -2)
 		reads = attention_by_index(in_signal, reads)
 
 		# --------------------------------------------------------------------------
