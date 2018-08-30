@@ -200,6 +200,10 @@ The successful station property model does no better than random guessing. I'm e
 
 - `4ff3692` 99% on just station properties (using same net as previous successful 99% SA run)
 
+- `9e7ab2d` 99% on SP, 85% on SA (70k steps)
+	- net known to get 99% on each task individually
+	- net gets to 99% on SA alone after 5k steps
+
 ### Station shortest count
 
 - `9ecf10e` 
