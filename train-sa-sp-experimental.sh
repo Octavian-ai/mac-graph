@@ -5,8 +5,8 @@ COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
 
 python -m macgraph.train \
-	--model-dir output/model/sa_sp/exp_just_sa/$COMMIT \
-	--input-dir input_data/processed/sa_small_100k \
+	--model-dir output/model/sa_sp/exp_just_sp/$COMMIT \
+	--input-dir input_data/processed/sp_small_100k \
 	--control-dropout 0 \
 	--disable-dynamic-decode \
 	--disable-memory-cell \
