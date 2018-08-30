@@ -121,13 +121,12 @@ def attention_by_index(control, head_stack):
 		assert seq_len is not None, "Seq len must be defined"
 		
 		query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
-		query = tf.expand_dims(query, -1)
-
-		weighted_stack = head_stack * query
+		
+		weighted_stack = head_stack * tf.expand_dims(query, -1)
 		weighted_sum = tf.reduce_sum(weighted_stack, -2)
 
 		output = weighted_sum
 		output = dynamic_assert_shape(output, output_shape)
-		return output
+		return output, query
 		
 

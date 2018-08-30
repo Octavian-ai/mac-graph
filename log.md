@@ -204,6 +204,10 @@ The successful station property model does no better than random guessing. I'm e
 	- net known to get 99% on each task individually
 	- net gets to 99% on SA alone after 5k steps
 
+- `8064864` Running same net against SA, SP, SA+SP with summaries shows that
+	SA choses to use the edge head, and SP choses to use the node head. SA+SP
+	choses to use the node head.
+
 ### Station shortest count
 
 - `9ecf10e` 

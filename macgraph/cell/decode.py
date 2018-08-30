@@ -128,7 +128,10 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 		question_tokens = add_location_encoding_1d(question_tokens)
 	
 	
-	taps = ["question_word_attn", "kb_node_attn", "kb_edge_attn", "kb_node_word_attn",
+	taps = ["question_word_attn", 
+		"kb_node_attn", "kb_node_word_attn",
+		"kb_edge_attn", "kb_edge_word_attn", 
+		"read_head_attn",
 		"control_state", "memory_state", "memory_forget"]
 
 	if args["use_dynamic_decode"]:

@@ -2,7 +2,7 @@
 
 COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
-
+MAX_STEPS=21
 
 python -m macgraph.train \
 	--model-dir output/model/sa_sp/exp/$COMMIT \
@@ -15,7 +15,7 @@ python -m macgraph.train \
 	--input-layers 1 \
 	--input-width 128 \
 	--learning-rate 0.001 \
-	--max-decode-iterations 1 \
+	--max-decode-iterations 2 \
 	--max-gradient-norm 0.4 \
 	--output-activation mi \
 	--output-classes 110 \
@@ -27,7 +27,7 @@ python -m macgraph.train \
 	--read-indicator-rows 1 \
 	--read-layers 3 \
 	--vocab-size 110 \
-	--max-steps 20 \
+	--max-steps $MAX_STEPS \
 	$@ \
 
 python -m macgraph.train \
@@ -41,7 +41,7 @@ python -m macgraph.train \
 	--input-layers 1 \
 	--input-width 128 \
 	--learning-rate 0.001 \
-	--max-decode-iterations 1 \
+	--max-decode-iterations 2 \
 	--max-gradient-norm 0.4 \
 	--output-activation mi \
 	--output-classes 110 \
@@ -53,7 +53,7 @@ python -m macgraph.train \
 	--read-indicator-rows 1 \
 	--read-layers 3 \
 	--vocab-size 110 \
-	--max-steps 20 \
+	--max-steps $MAX_STEPS \
 	$@ \
 
 python -m macgraph.train \
@@ -67,7 +67,7 @@ python -m macgraph.train \
 	--input-layers 1 \
 	--input-width 128 \
 	--learning-rate 0.001 \
-	--max-decode-iterations 1 \
+	--max-decode-iterations 2 \
 	--max-gradient-norm 0.4 \
 	--output-activation mi \
 	--output-classes 110 \
@@ -79,7 +79,7 @@ python -m macgraph.train \
 	--read-indicator-rows 1 \
 	--read-layers 3 \
 	--vocab-size 110 \
-	--max-steps 20 \
+	--max-steps $MAX_STEPS \
 	$@ \
 
 

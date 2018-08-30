@@ -87,8 +87,10 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			out_data  = (output, 
 				tf.squeeze(tap_question_attn, 2), 
 				tf.squeeze(read_taps.get("kb_node_attn", empty_attn), 2),
+				read_taps.get("kb_node_word_attn", empty_query),
 				tf.squeeze(read_taps.get("kb_edge_attn", empty_attn), 2),
-				read_taps.get("kb_node_word_query", empty_query),
+				read_taps.get("kb_edge_word_attn", empty_query),
+				read_taps.get("read_head_attn", empty_query),
 				out_control_state,
 				out_memory_state,
 				tf.tile(tap_memory_forget, [0, 10]),
@@ -115,8 +117,10 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			self.args["output_classes"], 
 			self.features["d_src_len"], # tap_question_attn
 			self.args["kb_node_width"] * self.args["embed_width"],
-			self.args["kb_edge_width"] * self.args["embed_width"],
 			self.args["kb_node_width"],
+			self.args["kb_edge_width"] * self.args["embed_width"],
+			self.args["kb_edge_width"],
+			2 * self.args["read_heads"],
 			self.args["control_width"], # tap_control_state
 			self.args["memory_width"], # tap_control_state
 			10, # tap_memory_forget
