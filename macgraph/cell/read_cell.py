@@ -143,7 +143,7 @@ def read_cell(args, features, vocab_embedding,
 		for j in range(args["read_heads"]):
 			for i in ["kb_node", "kb_edge"]:
 				if args[f"use_{i}"]:
-					read, attn, table = read_from_table_with_embedding(
+					read, taps[i+"_attn"], table = read_from_table_with_embedding(
 						args, 
 						features, 
 						vocab_embedding, 
@@ -152,32 +152,25 @@ def read_cell(args, features, vocab_embedding,
 					)
 
 					read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
-					# reads.append(attention_by_index(in_signal, read_words))
-					reads.append(read_words)
-					taps[i+"_attn"] = attn
+					
+					if args["use_read_extract"]:
+						reads.append(attention_by_index(in_signal, read_words))
+					else:
+						reads.append(read_words)
+					
 
-			if args["use_data_stack"]:
-				# Attentional read
-				read, attn, table = read_from_table(args, 
-					features, in_signal, 
-					noun="data_stack", 
-					table=in_data_stack, 
-					width=args["data_stack_width"] * args["embed_width"])
-
-				read_words = tf.reshape(read, [features["d_batch_size"], args["data_stack_width"], args["embed_width"]])
-				reads.append(attention_by_index(in_signal, read_words))
-
-				read_datas.append(read_data)
-
-		
-		# reads = tf.stack(reads, 1)
-		reads = tf.concat(reads, -2)
-		reads = attention_by_index(in_signal, reads)
+		if args["use_read_extract"]:
+			reads = tf.concat(reads, -1)
+			reads = attention_by_index(in_signal, reads)
+		else:
+			reads = tf.concat(reads, -2)
+			reads = tf.reshape(reads, [features["d_batch_size"], -1])
 
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
 		
+		# Residual skip connection
 		out_data = tf.concat([reads, in_signal], -1)
 		
 		for i in range(args["read_layers"]):
