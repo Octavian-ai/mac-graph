@@ -14,15 +14,15 @@ python -m macgraph.train \
 	--input-width 128 \
 	--learning-rate 0.001 \
 	--max-decode-iterations 1 \
-	--max-gradient-norm 4.0 \
+	--max-gradient-norm 0.4 \
 	--output-activation mi \
-	--output-classes 512 \
+	--output-classes 110 \
 	--output-layers 1 \
-	--read-activation tanh \
+	--read-activation tanh_abs \
 	--read-dropout 0 \
 	--read-heads 1 \
 	--read-from-question \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
-	--vocab-size 512 \
+	--vocab-size 110 \
 	$@
