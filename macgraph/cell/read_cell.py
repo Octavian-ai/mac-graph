@@ -160,12 +160,12 @@ def read_cell(args, features, vocab_embedding,
 						reads.append(read_words)
 					
 
-		if args["use_read_extract"]:
-			reads = tf.stack(reads, axis=1)
-			reads, taps["read_head_attn"] = attention_by_index(in_signal, reads)
-		else:
-			reads = tf.concat(reads, -2)
-			reads = tf.reshape(reads, [features["d_batch_size"], reads.shape[-1]*reads.shape[-2]])
+		# if args["use_read_extract"]:
+		# 	reads = tf.stack(reads, axis=1)
+		# 	reads, taps["read_head_attn"] = attention_by_index(in_signal, reads)
+		# else:
+		reads = tf.concat(reads, -2)
+		reads = tf.reshape(reads, [features["d_batch_size"], reads.shape[-1]*reads.shape[-2]])
 
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
