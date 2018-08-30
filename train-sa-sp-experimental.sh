@@ -9,7 +9,6 @@ python -m macgraph.train \
 	--input-dir input_data/processed/sa_sp_small_100k \
 	--control-dropout 0 \
 	--disable-dynamic-decode \
-	--disable-memory-cell \
 	--disable-question-state \
 	--enable-read-question-state \
 	--input-layers 1 \
@@ -35,7 +34,6 @@ python -m macgraph.train \
 	--input-dir input_data/processed/sp_small_100k \
 	--control-dropout 0 \
 	--disable-dynamic-decode \
-	--disable-memory-cell \
 	--disable-question-state \
 	--enable-read-question-state \
 	--input-layers 1 \
@@ -61,7 +59,6 @@ python -m macgraph.train \
 	--input-dir input_data/processed/sa_small_100k \
 	--control-dropout 0 \
 	--disable-dynamic-decode \
-	--disable-memory-cell \
 	--disable-question-state \
 	--enable-read-question-state \
 	--input-layers 1 \
