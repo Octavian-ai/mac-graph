@@ -163,9 +163,9 @@ def read_cell(args, features, vocab_embedding,
 					
 
 		if args["use_read_extract"]:
-			reads = tf.stack(reads, axis=1)
-			reads, taps["read_head_attn"] = attention_by_index(in_question_state, reads)
-			# reads = tf.concat(reads, -1)
+			# reads = tf.stack(reads, axis=1)
+			# reads, taps["read_head_attn"] = attention_by_index(in_question_state, reads)
+			reads = tf.concat(reads, -1)
 		else:
 			reads = tf.concat(reads, -2)
 			reads = tf.reshape(reads, [features["d_batch_size"], reads.shape[-1]*reads.shape[-2]])
