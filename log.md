@@ -194,6 +194,8 @@ The successful station property model does no better than random guessing. I'm e
 	- 88% on station adjacency
 	- 99% on all station property questions
 
+- `6d5eb35` 99% on just station adjacency (1 read layer and read act tanh_abs helped immensely)
+
 ### Station shortest count
 
 - `9ecf10e` 

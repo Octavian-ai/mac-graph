@@ -26,7 +26,7 @@ python -m macgraph.train \
 	--read-heads 1 \
 	--read-from-question \
 	--read-indicator-rows 1 \
-	--read-layers 1 \
+	--read-layers 3 \
 	--vocab-size 110 \
 	$@
 
