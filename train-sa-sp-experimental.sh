@@ -20,7 +20,7 @@ python -m macgraph.train \
 	--output-layers 1 \
 	--read-activation tanh_abs \
 	--read-dropout 0 \
-	--read-heads 1 \
+	--read-heads 4 \
 	--read-from-question \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
