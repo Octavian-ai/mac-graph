@@ -25,4 +25,5 @@ python -m macgraph.train \
 	--read-indicator-rows 1 \
 	--read-layers 1 \
 	--vocab-size 110 \
+	--type-string-prefix StationAdjacent \
 	$@
