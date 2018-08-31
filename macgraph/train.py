@@ -39,7 +39,9 @@ def train(args):
 		max_steps=args["max_steps"]*1000 if args["max_steps"] is not None else None,
 		hooks=hooks)
 	
-	eval_spec  = tf.estimator.EvalSpec(input_fn=gen_input_fn(args, "eval"))
+	eval_spec  = tf.estimator.EvalSpec(
+		input_fn=gen_input_fn(args, "eval"),
+		throttle_secs=300)
 
 	tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
 
