@@ -9,6 +9,7 @@ from .graph_util import *
 from .text_util import *
 from .util import *
 from .args import *
+from .balancer import TwoLevelBalancer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -84,23 +85,24 @@ if __name__ == "__main__":
 
 	logger.info("Generate TFRecords")
 	with Partitioner(args) as p:
-		with Balancer(p, args["balance_batch"]) as balancer:
+		with TwoLevelBalancer(lambda d: d["answer"], lambda d: d["question"]["type_string"], p, args["balance_batch"]) as balancer:
 			for doc in tqdm(read_gqa(args)):
 				try:
 					record = generate_record(args, vocab, doc)
-					p.write(record)
 					question_types[doc["question"]["type_string"]] += 1
 					output_classes[doc["answer"]] += 1
-					balancer.record_batch_item(doc, record)
-					balancer.oversample_every(args["balance_batch"])
+					balancer.add(doc, record)
 
 				except ValueError as ex:
 					logger.debug(ex)
 					pass
 
 
-			with tf.gfile.GFile(args["output_classes_path"], "w") as file:
-				yaml.dump(dict(balancer.total_classes), file)
+		with tf.gfile.GFile(args["answer_classes_path"], "w") as file:
+			yaml.dump(dict(p.answer_classes), file)
+
+		with tf.gfile.GFile(args["answer_classes_types_path"], "w") as file:
+			yaml.dump(dict(p.answer_classes_types), file)
 
 		logger.info(f"Wrote {p.written} TFRecords")
 

@@ -65,6 +65,9 @@ class Partitioner(object):
 	def __init__(self, args):
 		self.args = args
 		self.written = 0
+		self.answer_classes = Counter()
+		self.answer_classes_types = Counter()
+
 
 
 	def __enter__(self, *vargs):
@@ -76,7 +79,7 @@ class Partitioner(object):
 		return self
 
 
-	def write(self, *vargs):
+	def write(self, doc, record):
 		r = random.random()
 
 		if r < self.args["eval_holdback"]:
@@ -86,7 +89,11 @@ class Partitioner(object):
 		else:
 			mode = "train"
 
-		self.files[mode].write(*vargs)
+		key = str(doc["answer"]) + "/" + doc["question"]["type_string"]
+
+		self.files[mode].write(record)
+		self.answer_classes[str(doc["answer"])] += 1
+		self.answer_classes_types[key] += 1
 		self.written += 1
 
 
@@ -95,62 +102,6 @@ class Partitioner(object):
 			i.close()
 
 		self.files = None
-
-
-class Balancer(object):
-	"""Streaming oversampler. Will only oversample classes seen in batch, bigger frequency is better"""
-
-	def __init__(self, partitioner, hold_back=100):
-		self.partitioner = partitioner
-		self.total_classes = Counter()
-		self.records_by_class = {}
-		self.batch_i = 0
-		self.hold_back = hold_back
-
-	def __enter__(self, *vargs):
-		return self
-
-	def __exit__(self, *vargs):
-		logger.debug(f"Classes after oversampling: {self.total_classes}")
-		self.oversample()
-
-	# --------------------------------------------------------------------------
-	# Class balancing
-	# --------------------------------------------------------------------------
-
-	def record_batch_item(self, doc, record):
-		self.total_classes[doc["answer"]] += 1
-
-		if doc["answer"] not in self.records_by_class:
-			self.records_by_class[doc["answer"]] = []
-
-		self.records_by_class[doc["answer"]].append(record)
-		if len(self.records_by_class[doc["answer"]]) > self.hold_back:
-			self.records_by_class[doc["answer"]] = self.records_by_class[doc["answer"]][-self.hold_back:]
-		
-		assert len(self.records_by_class[doc["answer"]]) <= self.hold_back
-
-		self.batch_i += 1
-
-	def oversample(self):
-		if len(self.total_classes) > 0:
-			target = max(self.total_classes.values())
-
-			for key, count in self.total_classes.items():
-				if count < target:
-					delta = target - count
-					logger.debug(f"Oversampling {key} x {delta}")
-					for i in range(delta):
-						self.partitioner.write(random.choice(self.records_by_class[key]))
-						self.total_classes[key] += 1
-						
-			self.batch_classes = Counter()
-			self.batch_i = 0
-
-	def oversample_every(self, freq):
-		if self.batch_i >= freq:
-			self.oversample()
-
 
 
 # --------------------------------------------------------------------------

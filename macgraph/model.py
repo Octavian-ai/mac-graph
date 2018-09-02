@@ -142,7 +142,7 @@ def model_fn(features, labels, mode, params):
 							weights=tf.equal(features["type_string"], type_string))
 
 
-			with tf.gfile.GFile(args["output_classes_path"]) as file:
+			with tf.gfile.GFile(args["answer_classes_path"]) as file:
 				doc = yaml.load(file)
 				for answer_class in doc.keys():
 					e = vocab.lookup(pretokenize_json(answer_class))
