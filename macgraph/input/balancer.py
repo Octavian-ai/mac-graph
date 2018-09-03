@@ -54,8 +54,6 @@ class ListBalancer(Balancer):
 
 		delta = n - len(self.data)
 
-		print(f"ListBalancer sample len={len(self.data)}, n={n}, {self.name}")
-
 		if len(self.data) == 0:
 			raise ValueError("Cannot sample empty list")
 
@@ -93,9 +91,8 @@ class DictBalancer(Balancer):
 		super().add(doc, item)
 
 	def oversample(self, n):
-		print(f"DictBalancer sample len={len(self.data)}, n={n}, {self.name}")
-
 		n_per_class = math.ceil(n / len(self.data))
+
 		r = []
 		for k, v in self.data.items():
 			o = v.oversample(n_per_class)
@@ -108,72 +105,4 @@ class TwoLevelBalancer(DictBalancer):
 	def __init__(self, key1, key2, partitioner, balance_freq):
 		Inner = lambda partitioner, balance_freq, name: DictBalancer(key2, ListBalancer, partitioner, balance_freq, name)
 		super().__init__(key1, Inner, partitioner, balance_freq, "TwoLevelBalancer")
-
-
-
-
-
-# class Balancer(object):
-# 	"""Streaming oversampler. Will only oversample classes seen in batch, bigger frequency is better"""
-
-# 	def __init__(self, partitioner, hold_back=100):
-# 		self.partitioner = partitioner
-# 		self.total_classes = Counter()
-# 		self.records_by_class = {}
-# 		self.batch_i = 0
-# 		self.hold_back = hold_back
-
-# 	def __enter__(self, *vargs):
-# 		return self
-
-# 	def __exit__(self, *vargs):
-# 		logger.debug(f"Classes after oversampling: {self.total_classes}")
-# 		self.oversample()
-
-# 	# --------------------------------------------------------------------------
-# 	# Class balancing
-# 	# --------------------------------------------------------------------------
-
-# 	# Need to balance hierarchically by answer, then question type
-# 	# Need a primative that is recursive and can
-# 	# - Construct taking a storage class
-# 	# - Store
-# 	# - Sample
-# 	# Make a base list wrapper, and a balancer
-
-# 	def record_batch_item(self, doc, record):
-# 		self.total_classes[doc["answer"]] += 1
-
-# 		if doc["answer"] not in self.records_by_class:
-# 			self.records_by_class[doc["answer"]] = []
-
-# 		self.records_by_class[doc["answer"]].append(record)
-# 		if len(self.records_by_class[doc["answer"]]) > self.hold_back:
-# 			self.records_by_class[doc["answer"]] = self.records_by_class[doc["answer"]][-self.hold_back:]
-		
-# 		assert len(self.records_by_class[doc["answer"]]) <= self.hold_back
-
-# 		self.batch_i += 1
-
-# 	def oversample(self):
-# 		if len(self.total_classes) > 0:
-# 			target = max(self.total_classes.values())
-
-# 			for key, count in self.total_classes.items():
-# 				if count < target:
-# 					delta = target - count
-# 					logger.debug(f"Oversampling {key} x {delta}")
-# 					for i in range(delta):
-# 						self.partitioner.write(random.choice(self.records_by_class[key]))
-# 						self.total_classes[key] += 1
-						
-# 			self.batch_classes = Counter()
-# 			self.batch_i = 0
-
-# 	def oversample_every(self, freq):
-# 		if self.batch_i >= freq:
-# 			self.oversample()
-
-
-
 
