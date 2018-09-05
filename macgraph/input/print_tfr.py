@@ -4,6 +4,8 @@ import numpy as np
 
 from collections import Counter
 from tqdm import tqdm
+import tableprint as tp
+import re
 
 from .args import *
 from .util import *
@@ -25,6 +27,9 @@ if __name__ == "__main__":
 	tf.enable_eager_execution()
 
 	dist = Counter()
+	types = set()
+	labels = set()
+
 
 	for i in tqdm(tf.python_io.tf_record_iterator(args["train_input_path"]), total=args["limit"]):
 
@@ -46,8 +51,10 @@ if __name__ == "__main__":
 			if not r["type_string"].startswith(args["type_string_prefix"]):
 				continue
 
-		dist[r["label"] + "/" + r["type_string"]] += 1
+		types.add(r["type_string"])
+		labels.add(r["label"])
 
+		dist[(r["label"], r["type_string"])] += 1
 		
 		if args["print_records"]:
 			print(r["src"] + " = " + r["label"])
@@ -55,10 +62,20 @@ if __name__ == "__main__":
 				print("NODE: " + j)
 			print()
 		
-		
-
-	print("\nDistribution:")
-	for k, v in dist.most_common():
-		print(k + "\t" + str(v))
+	
 
 	print(f"\nTotal records processed: {count}")
+
+	def shorten(i):
+		return re.sub('[^A-Z]', '', i)
+		# return i.replace("Station", "S").replace("Property", "P").replace("Adjacent", "A")
+
+	headers = ["Label"] + [shorten(i) for i in list(types)] + ["Total"]
+	data = [ [label] + [dist[(label, tpe)] for tpe in types] + [sum([dist[(label, tpe)] for tpe in types])] for label in labels]
+	data.append(["Total"] + [sum([dist[(label, tpe)] for label in labels]) for tpe in types] + [sum(dist.values())])
+	width = [20] + [7 for i in types] + [7]
+	tp.table(data, headers, width=width)
+
+
+
+
