@@ -1,16 +1,11 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [dev-packages]
 
-
-
 [packages]
-
 tensorflow = "*"
 numpy = "*"
 pyyaml = "*"
@@ -22,8 +17,7 @@ pika = "*"
 coloredlogs = "*"
 matplotlib = "*"
 python-json-logger = "*"
-
+floyd-cli = "*"
 
 [requires]
-
 python_version = "3.6"
