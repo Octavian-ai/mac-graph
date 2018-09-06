@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 # Helpers
 # --------------------------------------------------------------------------
 
+
 def generate_record(args, vocab, doc):
 
 	q = vocab.english_to_ids(doc["question"]["english"])
@@ -68,7 +69,10 @@ if __name__ == "__main__":
 	logger.setLevel(args["log_level"])
 	logging.getLogger("mac-graph.input.util").setLevel(args["log_level"])
 
-	pathlib.Path(args["input_dir"]).mkdir(parents=True, exist_ok=True)
+	try:
+		pathlib.Path(args["input_dir"]).mkdir(parents=True, exist_ok=True)
+	except FileExistsError:
+		pass
 
 	if not args["skip_vocab"]:
 		logger.info("Build vocab")
@@ -85,8 +89,8 @@ if __name__ == "__main__":
 
 	logger.info("Generate TFRecords")
 	with Partitioner(args) as p:
-		with TwoLevelBalancer(lambda d: d["answer"], lambda d: d["question"]["type_string"], p, args["balance_batch"]) as balancer:
-			for doc in tqdm(read_gqa(args)):
+		with TwoLevelBalancer(lambda d: d["answer"], lambda d: d["question"]["type_string"], p, min_none(args["balance_batch"], args["limit"])) as balancer:
+			for doc in tqdm(read_gqa(args), total=args["limit"]):
 				try:
 					record = generate_record(args, vocab, doc)
 					question_types[doc["question"]["type_string"]] += 1
@@ -103,6 +107,8 @@ if __name__ == "__main__":
 
 		with tf.gfile.GFile(args["answer_classes_types_path"], "w") as file:
 			yaml.dump(dict(p.answer_classes_types), file)
+
+		logger.info(f"Class distribution: {p.answer_classes}")
 
 		logger.info(f"Wrote {p.written} TFRecords")
 

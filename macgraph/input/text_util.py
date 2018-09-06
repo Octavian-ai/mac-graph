@@ -212,7 +212,7 @@ class Vocab(object):
 				if token not in ["", " ", "\n"]:
 					hits[token] += 1
 
-		for i in tqdm(read_gqa(args)):
+		for i in tqdm(read_gqa(args), total=args["limit"]):
 			add(gqa_to_tokens(i))
 
 		tokens = list()

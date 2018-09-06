@@ -74,14 +74,14 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--batch-size',            		type=int, default=32,   help="Number of items in a full batch")
 	parser.add_argument('--max-steps',             		type=int, default=None, help="In thousands")
 		
-	parser.add_argument('--max-gradient-norm',     		type=float, default=30.0)
-	parser.add_argument('--learning-rate',         		type=float, default=2.4E-3)
+	parser.add_argument('--max-gradient-norm',     		type=float, default=0.4)
+	parser.add_argument('--learning-rate',         		type=float, default=0.001)
 
 	# --------------------------------------------------------------------------
 	# Network topology
 	# --------------------------------------------------------------------------
 
-	parser.add_argument('--vocab-size',	           		type=int, default=128,   help="How many different words are in vocab")
+	parser.add_argument('--vocab-size',	           		type=int, default=110,   help="How many different words are in vocab")
 	
 	parser.add_argument('--max-seq-len',	  	 		type=int, default=20,   help="Maximum length of question token list")
 	
@@ -100,10 +100,10 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--read-width',         		type=int, default=128,  help="Width of the read state output")
 	parser.add_argument('--read-heads',         		type=int, default=1,    help="Number of read heads for each knowledge base table")
 	parser.add_argument('--read-layers',         		type=int, default=1,    help="Number of read transformation layers")
-	parser.add_argument('--read-indicator-rows',        type=int, default=0,    help="Number of extra trainable rows")
+	parser.add_argument('--read-indicator-rows',        type=int, default=1,    help="Number of extra trainable rows")
 	parser.add_argument('--read-indicator-cols',        type=int, default=0,    help="Number of extra trainable rows")
-	parser.add_argument('--read-dropout',         		type=float, default=0.2,    help="Dropout on read heads")
-	parser.add_argument('--read-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
+	parser.add_argument('--read-dropout',         		type=float, default=0.0,    help="Dropout on read heads")
+	parser.add_argument('--read-activation',			type=str, default="tanh_abs", choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--read-from-question',			action='store_true')
 	parser.add_argument('--disable-read-extract', 		action='store_false', dest='use_read_extract')
 
@@ -112,7 +112,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	
 	parser.add_argument('--control-width',	           	type=int, default=64,	help="The width of control state")
 	parser.add_argument('--control-heads',	           	type=int, default=1,	help="The number of control question-word attention heads")
-	parser.add_argument('--control-dropout',	        type=float, default=0.2, help="Dropout on the control unit")
+	parser.add_argument('--control-dropout',	        type=float, default=0.0, help="Dropout on the control unit")
 
 	parser.add_argument('--memory-width',	           	type=int, default=64,	help="The width of memory state")
 	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
@@ -120,8 +120,8 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--memory-activation',			type=str, default="tanh", 		choices=ACTIVATION_FNS.keys())
 
 	parser.add_argument('--output-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
-	parser.add_argument('--output-layers',				type=int, default=2)
-	parser.add_argument('--output-classes',	       		type=int, default=128,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
+	parser.add_argument('--output-layers',				type=int, default=1)
+	parser.add_argument('--output-classes',	       		type=int, default=110,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
 
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
@@ -129,7 +129,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-data-stack', 			action='store_true',  dest='use_data_stack')
 	parser.add_argument('--enable-attn-score-dense', 	action='store_true',  dest='use_attn_score_dense')
 	parser.add_argument('--enable-position-encoding', 	action='store_true',  dest='use_position_encoding')
-	parser.add_argument('--enable-read-question-state', action='store_true',  dest='use_read_question_state')
+	parser.add_argument('--disable-read-question-state', action='store_false',  dest='use_read_question_state')
 	parser.add_argument('--disable-control-cell', 		action='store_false', dest="use_control_cell")
 	parser.add_argument('--disable-memory-cell', 		action='store_false', dest="use_memory_cell")
 	parser.add_argument('--disable-output-read', 		action='store_false', dest="use_output_read")
@@ -141,10 +141,9 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-tf-debug', 			action='store_true',  dest="use_tf_debug")
 	parser.add_argument('--enable-comet', 				action='store_true',  dest="use_comet")
 
-	parser.add_argument('--max-decode-iterations', 		type=int, default=8)
+	parser.add_argument('--max-decode-iterations', 		type=int, default=1)
 	
 	args = vars(parser.parse_args(argv))
-
 
 	args.update(generate_args_derivatives(args))
 	

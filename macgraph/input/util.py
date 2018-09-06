@@ -9,6 +9,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 # --------------------------------------------------------------------------
+# Miscel
+# --------------------------------------------------------------------------
+
+def min_none(a, b):
+	if a is None:
+		return b
+	if b is None:
+		return a
+	return min(a,b)
+
+
+# --------------------------------------------------------------------------
 # TFRecord functions
 # --------------------------------------------------------------------------
 
@@ -89,7 +101,7 @@ class Partitioner(object):
 		else:
 			mode = "train"
 
-		key = str(doc["answer"]) + "/" + doc["question"]["type_string"]
+		key = (str(doc["answer"]), doc["question"]["type_string"])
 
 		self.files[mode].write(record)
 		self.answer_classes[str(doc["answer"])] += 1
