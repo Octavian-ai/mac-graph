@@ -108,8 +108,6 @@ class DictBalancer(Balancer):
 		total_target = self.oversampled_so_far() + n
 		target_per_class = math.ceil(total_target / len(self.data))
 
-		print(f"oversample DictBalancer {self.name} target:", total_target, "total so far:", self.oversampled_so_far(), "n:", n, " target_per_class:", target_per_class)
-		
 		if n <= 0:
 			return []
 
