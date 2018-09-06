@@ -131,6 +131,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-position-encoding', 	action='store_true',  dest='use_position_encoding')
 	parser.add_argument('--disable-read-question-state', action='store_false',  dest='use_read_question_state')
 	parser.add_argument('--disable-control-cell', 		action='store_false', dest="use_control_cell")
+	parser.add_argument('--disable-output-cell', 		action='store_false', dest="use_output_cell")
 	parser.add_argument('--disable-memory-cell', 		action='store_false', dest="use_memory_cell")
 	parser.add_argument('--disable-output-read', 		action='store_false', dest="use_output_read")
 	parser.add_argument('--disable-dynamic-decode', 	action='store_false', dest="use_dynamic_decode")

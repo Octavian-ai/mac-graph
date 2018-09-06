@@ -79,9 +79,11 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			else:
 				out_data_stack = in_data_stack
 			
-		
-			output = output_cell(self.args, self.features,
-				self.question_state, out_memory_state, read, out_control_state)	
+			if self.args["use_output_cell"]:
+				output = output_cell(self.args, self.features,
+					self.question_state, out_memory_state, read, out_control_state)	
+			else:
+				output = read
 
 			out_state = (out_control_state, out_memory_state, out_data_stack)
 			out_data  = (output, 
