@@ -9,5 +9,5 @@ python -m macgraph.train \
 	--disable-memory-cell \
 	--disable-question-state \
 	--read-from-question \
-	--type-string-prefix StationProp \
+	--type-string-prefix Station \
 	$@
