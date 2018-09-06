@@ -81,7 +81,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	# Network topology
 	# --------------------------------------------------------------------------
 
-	parser.add_argument('--vocab-size',	           		type=int, default=110,   help="How many different words are in vocab")
+	parser.add_argument('--vocab-size',	           		type=int, default=128,   help="How many different words are in vocab")
 	
 	parser.add_argument('--max-seq-len',	  	 		type=int, default=20,   help="Maximum length of question token list")
 	
@@ -121,7 +121,7 @@ def get_args(extend=lambda parser:None, argv=None):
 
 	parser.add_argument('--output-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--output-layers',				type=int, default=1)
-	parser.add_argument('--output-classes',	       		type=int, default=110,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
+	parser.add_argument('--output-classes',	       		type=int, default=128,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
 
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
