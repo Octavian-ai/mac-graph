@@ -119,6 +119,13 @@ def model_fn(features, labels, mode, params):
 			"src":  features["src"],
 			"type_string": features["type_string"],
 			"read_head_attn": taps["read_head_attn"],
+			"question_word_attn": taps["question_word_attn"],
+			"kb_node_attn": taps["kb_node_attn"],
+			"kb_edge_attn": taps["kb_edge_attn"],
+			"kb_nodes": features["kb_nodes"],
+			"kb_edges": features["kb_edges"],
+			"kb_node_word_attn": taps["kb_node_word_attn"],
+			"kb_edge_word_attn": taps["kb_edge_word_attn"],
 		}
 
 	# --------------------------------------------------------------------------
