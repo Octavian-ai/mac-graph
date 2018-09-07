@@ -8,6 +8,4 @@ python -m macgraph.train \
 	--disable-dynamic-decode \
 	--disable-memory-cell \
 	--disable-question-state \
-	--read-from-question \
-	--type-string-prefix StationProp \
 	$@
