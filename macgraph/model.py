@@ -49,7 +49,7 @@ def model_fn(features, labels, mode, params):
 
 	question_tokens, question_state = encode_input(args, features, vocab_embedding)
 
-	logits = execute_reasoning(args, 
+	logits, taps = execute_reasoning(args, 
 		features=features, 
 		question_state=question_state,
 		labels=labels,
@@ -118,6 +118,7 @@ def model_fn(features, labels, mode, params):
 			"actual_label": features["label"],
 			"src":  features["src"],
 			"type_string": features["type_string"],
+			"read_head_attn": taps["read_head_attn"],
 		}
 
 	# --------------------------------------------------------------------------

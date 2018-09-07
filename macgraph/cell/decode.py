@@ -149,7 +149,8 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 				tf.summary.image(k, expand_if_needed(v))
 
 	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["output_classes"]])
-	return final_output
+	
+	return final_output, out_taps
 
 
 

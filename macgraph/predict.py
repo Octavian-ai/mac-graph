@@ -7,58 +7,56 @@ from .args import get_args
 from .estimator import get_estimator
 from .input import *
 
+def extend_args(parser):
+	parser.add_argument("--n-detail-rows",type=int,default=15)
+
 
 def predict(args):
 	estimator = get_estimator(args)
 	predictions = estimator.predict(input_fn=gen_input_fn(args, "predict"))
 	vocab = Vocab.load(args)
 
+	def print_row(row):
+		for k, v in row.items():
+			print(f"{k}: {v}")
+		print("-------")
+
+
+	def decode_row(row):
+		for i in ["type_string", "actual_label", "predicted_label", "src"]:
+			row[i] = vocab.prediction_value_to_string(row[i])
+
 	stats = Counter()
 	output_classes = Counter()
 	predicted_classes = Counter()
 	confusion = Counter()
 
-	for p in predictions:
+	for count, p in enumerate(predictions):
+		decode_row(p)
+		if args["type_string_prefix"] is None or p["type_string"].startswith(args["type_string_prefix"]):
 
-		p["type_string"] = vocab.prediction_value_to_string(p["type_string"])
-		p["answer_string"] = vocab.prediction_value_to_string(p["actual_label"])
-		p["predicted_label"] = vocab.prediction_value_to_string(p["predicted_label"])
-		
-		output_classes[p["answer_string"]] += 1
-		predicted_classes[p["predicted_label"]] += 1
+			output_classes[p["actual_label"]] += 1
+			predicted_classes[p["predicted_label"]] += 1
 
-		if p["answer_string"] == p["predicted_label"]:
-			emoji = "✅"
-		else:
-			emoji = "❌"
+			if p["actual_label"] == p["predicted_label"]:
+				emoji = "✅"
+			else:
+				emoji = "❌"
 
-		confusion[emoji + " \texp:" + p["answer_string"] +" \tact:" + p["predicted_label"] + " \t" + p["type_string"]] += 1
+			confusion[emoji + " \texp:" + p["actual_label"] +" \tact:" + p["predicted_label"] + " \t" + p["type_string"]] += 1
 
-		# for k, v in p.items():
-		# 	s = vocab.prediction_value_to_string(v)
-		# 	print(f"{k}: {s}")
-		# print("-------")
-
-		print_row(p)
+			if count <= args["n_detail_rows"]:
+				print_row(p)
 
 	print(f"\nConfusion matrix:")
 	for k, v in confusion.most_common():
 		print(f"{k}: {v}")
 
-	# print(f"\nPredicted classes:")
-	# for k, v in predicted_classes.most_common():
-	# 	print(f"{k}: {v}")
-
-	# print(f"\nAnswer classes:")
-	# for k, v in output_classes.most_common():
-	# 	print(f"{k}: {v}")
-
-
 
 
 if __name__ == "__main__":
 	tf.logging.set_verbosity(tf.logging.WARN)
-	args = get_args()
+	args = get_args(extend_args)
 	predict(args)
 
 
