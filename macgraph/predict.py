@@ -20,24 +20,26 @@ def predict(args):
 
 	for p in predictions:
 
-		type_string = vocab.prediction_value_to_string(p["type_string"])
-		answer_string = vocab.prediction_value_to_string(p["actual_label"])
-		predicted_label = vocab.prediction_value_to_string(p["predicted_label"])
+		p["type_string"] = vocab.prediction_value_to_string(p["type_string"])
+		p["answer_string"] = vocab.prediction_value_to_string(p["actual_label"])
+		p["predicted_label"] = vocab.prediction_value_to_string(p["predicted_label"])
 		
-		output_classes[answer_string] += 1
-		predicted_classes[predicted_label] += 1
+		output_classes[p["answer_string"]] += 1
+		predicted_classes[p["predicted_label"]] += 1
 
-		if answer_string == predicted_label:
+		if p["answer_string"] == p["predicted_label"]:
 			emoji = "✅"
 		else:
 			emoji = "❌"
 
-		confusion[emoji + " \texp:"+answer_string+" \tact:" + predicted_label + " \t"+type_string] += 1
+		confusion[emoji + " \texp:" + p["answer_string"] +" \tact:" + p["predicted_label"] + " \t" + p["type_string"]] += 1
 
 		# for k, v in p.items():
 		# 	s = vocab.prediction_value_to_string(v)
 		# 	print(f"{k}: {s}")
 		# print("-------")
+
+		print_row(p)
 
 	print(f"\nConfusion matrix:")
 	for k, v in confusion.most_common():
