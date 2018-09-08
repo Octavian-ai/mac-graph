@@ -25,7 +25,7 @@ BG_DARK_GREY = 237
 ATTN_THRESHOLD = 0.4
 
 def extend_args(parser):
-	parser.add_argument("--n-detail-rows",type=int,default=15)
+	parser.add_argument("--n-rows",type=int,default=20)
 
 def color_text(text_array, levels, color_fg=True):
 	out = []
@@ -54,21 +54,24 @@ def predict(args):
 
 		iterations = len(row["question_word_attn"])
 
+		print(emoji, " ", answer_part)
+
 		for i in range(iterations):
-			print(emoji, ' '.join(color_text(row["src"].split(' '), row["question_word_attn"][i])), " ", answer_part, "\t")
+			print(f"{i}: " + ' '.join(color_text(row["src"].split(' '), row["question_word_attn"][i])))
 			read_head_part = ' '.join(color_text(["nodes","edges"], row["read_head_attn"][i]))
-			print("read_head_attn: ",read_head_part)
+			print(f"{i}: read_head_attn: ",read_head_part)
 			for idx0, noun in enumerate(["node", "edge"]):
 				# if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
-				db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"kb_{noun}s"] if kb_row[0] != UNK_ID]
-				print(noun+"_attn: ",', '.join(color_text(db, row[f"kb_{noun}_attn"][i])))
+				db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"kb_{noun}s"]]
+				print(f"{i}: " + noun+"_attn: ",', '.join(color_text(db, row[f"kb_{noun}_attn"][i])))
 
 				for idx, attn in enumerate(row[f"kb_{noun}_attn"][i]):
 					if attn > ATTN_THRESHOLD:
-						print(noun+"_word_attn: ",', '.join(color_text(
+						print(f"{i}: " +noun+"_word_attn: ",', '.join(color_text(
 							vocab.prediction_value_to_string(row[f"kb_{noun}s"][idx]).split(' '),
-							row[f"kb_{noun}_word_attn"][i]))
-						)
+							row[f"kb_{noun}_word_attn"][i],
+							)
+						))
 
 		hr()
 
@@ -95,7 +98,7 @@ def predict(args):
 
 			confusion[emoji + " \texp:" + p["actual_label"] +" \tact:" + p["predicted_label"] + " \t" + p["type_string"]] += 1
 
-			if count <= args["n_detail_rows"]:
+			if count <= args["n_rows"]:
 				print_row(p)
 			else:
 				break

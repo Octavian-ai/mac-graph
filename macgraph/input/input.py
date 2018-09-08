@@ -44,6 +44,13 @@ def reshape_example(args, i):
 		
 	}, i["label"])
 
+def switch_to_from(db):
+	return db[:,2] + db[:,1] + db[:,0]
+
+def make_edges_bidirectional(features, labels):
+	features["kb_edges"] = tf.concat([features["kb_edges"], switch_to_from(features["kb_edges"])], 0)
+	return (features, labels)
+
 def input_fn(args, mode, question=None):
 
 	# --------------------------------------------------------------------------
