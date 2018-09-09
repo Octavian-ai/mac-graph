@@ -8,4 +8,5 @@ python -m macgraph.train \
 	--disable-dynamic-decode \
 	--disable-question-state \
 	--disable-memory-cell \
+	--read-indicator-rows 0 \
 	$@
