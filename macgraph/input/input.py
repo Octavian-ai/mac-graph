@@ -45,10 +45,11 @@ def reshape_example(args, i):
 	}, i["label"])
 
 def switch_to_from(db):
-	return db[:,2] + db[:,1] + db[:,0]
+	return tf.stack([db[:,2], db[:,1], db[:,0]], -1)
 
 def make_edges_bidirectional(features, labels):
 	features["kb_edges"] = tf.concat([features["kb_edges"], switch_to_from(features["kb_edges"])], 0)
+	features["kb_edges_len"] *= 2
 	return (features, labels)
 
 def input_fn(args, mode, question=None):
@@ -65,6 +66,7 @@ def input_fn(args, mode, question=None):
 	# --------------------------------------------------------------------------
 
 	d = d.map(lambda i: reshape_example(args,i))
+	d = d.map(make_edges_bidirectional)
 
 
 	if args["limit"] is not None:

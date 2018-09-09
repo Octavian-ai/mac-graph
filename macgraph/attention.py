@@ -83,19 +83,19 @@ def attention(table, query, word_size=None, table_len=None, table_max_len=None, 
 			scores_mask = tf.sequence_mask(table_len, seq_len)
 			scores_mask = tf.expand_dims(scores_mask, -1) # I like to tightly assert my shapes
 			scores_mask = dynamic_assert_shape(scores_mask, scores_shape, "scores_mask")
-			scores = softmax_with_masking(scores, mask=scores_mask, axis=1)
+			scores_sm = softmax_with_masking(scores, mask=scores_mask, axis=1)
 		else:
-			scores = tf.nn.softmax(scores + EPSILON, axis=1)
+			scores_sm = tf.nn.softmax(scores + EPSILON, axis=1)
 
-		scores = dynamic_assert_shape(scores, scores_shape, "scores")
+		scores_sm = dynamic_assert_shape(scores_sm, scores_shape, "scores")
 		
-		weighted_db = db * scores
+		weighted_db = db * scores_sm
 
 		output = tf.reduce_sum(weighted_db, 1)
 		output = dynamic_assert_shape(output, q_shape, "output")
 		output = tf.check_numerics(output, "attention_output")
 
-		return output, scores
+		return output, scores_sm, tf.reduce_sum(scores, axis=1)
 
 
 def attention_by_index(control, head_stack):

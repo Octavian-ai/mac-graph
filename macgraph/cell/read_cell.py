@@ -20,14 +20,14 @@ def read_from_table(args, features, in_signal, noun, table, width, table_len=Non
 	# query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
 	query = tf.layers.dense(in_signal, width)
 
-	output, score = attention(table, query,
+	output, score_sm, total_raw_score = attention(table, query,
 		word_size=width, 
 		table_len=table_len,
 		table_max_len=table_max_len,
 	)
 
 	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
-	return output, score, table
+	return output, score_sm, table, total_raw_score
 
 
 def get_table_with_embedding(args, features, vocab_embedding, noun):
@@ -139,17 +139,20 @@ def read_cell(args, features, vocab_embedding,
 
 		taps = {}
 		reads = []
+		additional_signals = []
 
 		for j in range(args["read_heads"]):
 			for i in ["kb_node", "kb_edge"]:
 				if args[f"use_{i}"]:
-					read, taps[i+"_attn"], table = read_from_table_with_embedding(
+					read, taps[i+"_attn"], table, score_raw_total = read_from_table_with_embedding(
 						args, 
 						features, 
 						vocab_embedding, 
 						in_signal, 
 						noun=i
 					)
+
+					additional_signals.append(score_raw_total)
 
 					read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
 					
@@ -175,7 +178,7 @@ def read_cell(args, features, vocab_embedding,
 		# --------------------------------------------------------------------------
 		
 		# Residual skip connection
-		out_data = tf.concat([reads, in_signal], -1)
+		out_data = tf.concat([reads, in_signal] + additional_signals, -1)
 		
 		for i in range(args["read_layers"]):
 			out_data = tf.layers.dense(out_data, args["read_width"])
