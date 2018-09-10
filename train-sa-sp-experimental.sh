@@ -9,4 +9,5 @@ python -m macgraph.train \
 	--disable-memory-cell \
 	--disable-question-state \
 	--control-heads 2 \
+	--disable-summary \
 	$@

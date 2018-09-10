@@ -22,7 +22,7 @@ def expand_if_needed(t, target=4):
 # RNN loops
 # --------------------------------------------------------------------------
 
-def dynamic_decode(args, features, inputs, question_state, question_tokens, taps, labels, vocab_embedding):
+def dynamic_decode(args, features, inputs, question_state, question_tokens, labels, vocab_embedding):
 	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE) as decoder_scope:
 
 		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
@@ -70,7 +70,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, taps
 
 		out_taps = {
 			key: decoded_outputs.rnn_output[idx+1]
-			for idx, key in enumerate(taps)
+			for idx, key in enumerate(d_cell.get_taps().values())
 		}
 		
 		# Take the final reasoning step output
@@ -82,7 +82,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, taps
 
 
 
-def static_decode(args, features, inputs, question_state, question_tokens, taps, labels, vocab_embedding):
+def static_decode(args, features, inputs, question_state, question_tokens, labels, vocab_embedding):
 	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE):
 
 		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
@@ -111,14 +111,12 @@ def static_decode(args, features, inputs, question_state, question_tokens, taps,
 					tap = tf.transpose(tap, [1,0,2]) # => batch, iteration, data
 				if len(tap.shape) == 4:
 					tap = tf.transpose(tap, [2,0,1,3]) # => batch, iteration, control_head, data
-
-				tap = tf.Print(tap, [tf.shape(tap)], f"{tap.name}: ", summarize=10)
-				
+					
 				return tap
 
 		out_taps = {
 			key: get_tap(idx+1, key)
-			for idx, key in enumerate(taps)
+			for idx, key in enumerate(d_cell.get_taps().keys())
 		}
 		
 		return final_output, out_taps
@@ -133,20 +131,11 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 
 	if args["use_position_encoding"]:
 		question_tokens = add_location_encoding_1d(question_tokens)
-	
-	
-	taps = ["question_word_attn", 
-		"kb_node_attn", "kb_node_word_attn",
-		"kb_edge_attn", "kb_edge_word_attn", 
-		"read_head_attn",
-		"control_state", "memory_state", "memory_forget"]
 
 	if args["use_dynamic_decode"]:
-		r = dynamic_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
+		final_output, out_taps = dynamic_decode(args, features, inputs, question_state, question_tokens, **kwargs)
 	else:
-		r = static_decode(args, features, inputs, question_state, question_tokens, taps, **kwargs)
-
-	final_output, out_taps = r
+		final_output, out_taps = static_decode(args, features, inputs, question_state, question_tokens, **kwargs)
 
 	if args["use_summary"]:
 		tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))

@@ -11,6 +11,7 @@ from ..minception import *
 
 
 
+
 class MACCell(tf.nn.rnn_cell.RNNCell):
 
 	def __init__(self, args, features, question_state, question_tokens, vocab_embedding):
@@ -21,6 +22,20 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		self.vocab_embedding = vocab_embedding
 
 		super().__init__(self)
+
+	def get_taps(self):
+		return {
+			"question_word_attn": 	self.args["control_heads"] * self.features["d_src_len"],
+			"kb_node_attn": 		self.args["kb_node_width"] * self.args["embed_width"],
+			"kb_node_word_attn": 	self.args["kb_node_width"],
+			"kb_edge_attn": 		self.args["kb_edge_width"] * self.args["embed_width"], 
+			"kb_edge_word_attn": 	self.args["kb_edge_width"], 
+			"read_head_attn": 		2 * self.args["read_heads"],
+			"read_head_attn_focus": 2 * self.args["read_heads"],
+			# "control_state": 		self.args["control_width"], 
+			# "memory_state": 		self.args["memory_width"], 
+			# "memory_forget": 		10,
+		}
 
 
 
@@ -86,6 +101,10 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				output = read
 
 			out_state = (out_control_state, out_memory_state, out_data_stack)
+			
+			# TODO: Move this tap manipulation upstream, 
+			#	have generic taps dict returned from the fns,
+			#	and make this just use get_taps to append the data
 			out_data  = (output, 
 				tf.squeeze(tap_question_attn, -1), # remove attention score unot dimension
 				tf.squeeze(read_taps.get("kb_node_attn", empty_attn), 2),
@@ -93,10 +112,13 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				tf.squeeze(read_taps.get("kb_edge_attn", empty_attn), 2),
 				read_taps.get("kb_edge_word_attn", empty_query),
 				read_taps.get("read_head_attn", empty_query),
-				out_control_state,
-				out_memory_state,
-				tf.tile(tap_memory_forget, [0, 10]),
+				read_taps.get("read_head_attn_focus", empty_query),
+				# out_control_state,
+				# out_memory_state,
+				# tf.tile(tap_memory_forget, [1, 10]),
 				)
+
+			print(out_data)
 
 			return out_data, out_state
 
@@ -105,7 +127,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 	@property
 	def state_size(self):
 		"""
-		Returns a size tuple (control_state, memory_state)
+		Returns a size tuple
 		"""
 		return (
 			self.args["control_width"], 
@@ -117,16 +139,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 	def output_size(self):
 		return (
 			self.args["output_classes"], 
-			self.args["control_heads"] * self.features["d_src_len"], # tap_question_attn
-			self.args["kb_node_width"] * self.args["embed_width"],
-			self.args["kb_node_width"],
-			self.args["kb_edge_width"] * self.args["embed_width"],
-			self.args["kb_edge_width"],
-			2 * self.args["read_heads"],
-			self.args["control_width"], # tap_control_state
-			self.args["memory_width"], # tap_control_state
-			10, # tap_memory_forget
-		)
+		) + self.get_taps().values()
 
 
 

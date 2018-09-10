@@ -139,7 +139,7 @@ def read_cell(args, features, vocab_embedding,
 
 		taps = {}
 		reads = []
-		additional_signals = []
+		attn_focus = []
 
 		for j in range(args["read_heads"]):
 			for i in ["kb_node", "kb_edge"]:
@@ -152,7 +152,7 @@ def read_cell(args, features, vocab_embedding,
 						noun=i
 					)
 
-					additional_signals.append(score_raw_total)
+					attn_focus.append(score_raw_total)
 
 					read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
 					
@@ -177,8 +177,10 @@ def read_cell(args, features, vocab_embedding,
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
 		
+		taps["read_head_attn_focus"] = tf.concat(attn_focus, -1)
+
 		# Residual skip connection
-		out_data = tf.concat([reads, in_signal] + additional_signals, -1)
+		out_data = tf.concat([reads, in_signal] + attn_focus, -1)
 		
 		for i in range(args["read_layers"]):
 			out_data = tf.layers.dense(out_data, args["read_width"])

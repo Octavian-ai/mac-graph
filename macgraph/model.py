@@ -116,17 +116,15 @@ def model_fn(features, labels, mode, params):
 		predictions = {
 			"predicted_label": predicted_labels,
 			"actual_label": features["label"],
-			"src":  features["src"],
-			"type_string": features["type_string"],
-			"read_head_attn": taps["read_head_attn"],
-			"question_word_attn": taps["question_word_attn"],
-			"kb_node_attn": taps["kb_node_attn"],
-			"kb_edge_attn": taps["kb_edge_attn"],
-			"kb_nodes": features["kb_nodes"],
-			"kb_edges": features["kb_edges"],
-			"kb_node_word_attn": taps["kb_node_word_attn"],
-			"kb_edge_word_attn": taps["kb_edge_word_attn"],
 		}
+
+		# For diagnostic visualisation
+		predictions.update(features)
+		predictions.update(taps)
+
+		# Fake features do not have batch, must be removed
+		del predictions["d_batch_size"]
+		del predictions["d_src_len"]
 
 	# --------------------------------------------------------------------------
 	# Eval metrics
