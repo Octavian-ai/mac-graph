@@ -105,7 +105,14 @@ def static_decode(args, features, inputs, question_state, question_tokens, taps,
 						return None
 
 				tap = tf.convert_to_tensor(tap)
-				tap = tf.transpose(tap, [1,0,2])
+
+				 # Deal with batch vs iteration axis layout
+				if len(tap.shape) == 3:
+					tap = tf.transpose(tap, [1,0,2]) # => batch, iteration, data
+				if len(tap.shape) == 4:
+					tap = tf.transpose(tap, [2,0,1,3]) # => batch, iteration, control_head, data
+
+				tap = tf.Print(tap, [tf.shape(tap)], f"{tap.name}: ", summarize=10)
 				
 				return tap
 
