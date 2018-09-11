@@ -62,7 +62,7 @@ def predict(args, cmd_args):
 			
 			read_head_part = ' '.join(color_text(["nodes","edges"], row["read_head_attn"][i]))
 			print(f"{i}: read_head_attn: ",read_head_part)
-			print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"])
+			print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
 
 			for idx0, noun in enumerate(["node", "edge"]):
 				if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
