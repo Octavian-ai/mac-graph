@@ -57,8 +57,10 @@ def predict(args, cmd_args):
 		print(emoji, " ", answer_part)
 
 		for i in range(iterations):
-			for control_head in row["question_word_attn"][i]:
-				print(f"{i}: " + ' '.join(color_text(row["src"].split(' '), control_head)))
+
+			if args["use_control_head"]:
+				for control_head in row["question_word_attn"][i]:
+					print(f"{i}: " + ' '.join(color_text(row["src"].split(' '), control_head)))
 			
 			read_head_part = ' '.join(color_text(["nodes","edges"], row["read_head_attn"][i]))
 			print(f"{i}: read_head_attn: ",read_head_part)
