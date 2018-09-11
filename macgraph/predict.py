@@ -4,9 +4,11 @@ import numpy as np
 from collections import Counter
 from colored import fg, bg, stylize
 import math
+import argparse
+import yaml
+import os.path
 
 from .input.text_util import UNK_ID
-from .args import get_args
 from .estimator import get_estimator
 from .input import *
 
@@ -24,8 +26,6 @@ BG_DARK_GREY = 237
 
 ATTN_THRESHOLD = 0.3
 
-def extend_args(parser):
-	parser.add_argument("--n-rows",type=int,default=20)
 
 def color_text(text_array, levels, color_fg=True):
 	out = []
@@ -39,7 +39,7 @@ def color_text(text_array, levels, color_fg=True):
 
 
 
-def predict(args):
+def predict(args, cmd_args):
 	estimator = get_estimator(args)
 	predictions = estimator.predict(input_fn=gen_input_fn(args, "predict"))
 	vocab = Vocab.load(args)
@@ -89,8 +89,11 @@ def predict(args):
 	confusion = Counter()
 
 	for count, p in enumerate(predictions):
+		if count > cmd_args["n_rows"]:
+			break
+
 		decode_row(p)
-		if args["type_string_prefix"] is None or p["type_string"].startswith(args["type_string_prefix"]):
+		if cmd_args["type_string_prefix"] is None or p["type_string"].startswith(cmd_args["type_string_prefix"]):
 
 			output_classes[p["actual_label"]] += 1
 			predicted_classes[p["predicted_label"]] += 1
@@ -102,10 +105,8 @@ def predict(args):
 
 			confusion[emoji + " \texp:" + p["actual_label"] +" \tact:" + p["predicted_label"] + " \t" + p["type_string"]] += 1
 
-			if count <= args["n_rows"]:
-				print_row(p)
-			else:
-				break
+			print_row(p)
+			
 
 	# print(f"\nConfusion matrix:")
 	# for k, v in confusion.most_common():
@@ -115,8 +116,17 @@ def predict(args):
 
 if __name__ == "__main__":
 	tf.logging.set_verbosity(tf.logging.WARN)
-	args = get_args(extend_args)
-	predict(args)
+
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--n-rows",type=int,default=20)
+	parser.add_argument("--type-string-prefix",type=str,default=None)
+	parser.add_argument("--model-dir",type=str,required=True)
+	cmd_args = vars(parser.parse_args())
+
+	with tf.gfile.GFile(os.path.join(cmd_args["model_dir"], "config.yaml"), "r") as file:
+		frozen_args = yaml.load(file)
+
+	predict(frozen_args, cmd_args)
 
 
 

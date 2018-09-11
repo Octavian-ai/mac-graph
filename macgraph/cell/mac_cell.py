@@ -118,8 +118,6 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				# tf.tile(tap_memory_forget, [1, 10]),
 				)
 
-			print(out_data)
-
 			return out_data, out_state
 
 
