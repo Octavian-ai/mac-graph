@@ -124,7 +124,7 @@ def get_args(extend=lambda parser:None, argv=None):
 
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
-	parser.add_argument('--disable-summary', 			action='store_false', dest='use_summary')
+	parser.add_argument('--enable-summary', 			action='store_true', dest='use_summary')
 	parser.add_argument('--enable-data-stack', 			action='store_true',  dest='use_data_stack')
 	parser.add_argument('--enable-attn-score-dense', 	action='store_true',  dest='use_attn_score_dense')
 	parser.add_argument('--enable-position-encoding', 	action='store_true',  dest='use_position_encoding')
