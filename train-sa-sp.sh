@@ -7,5 +7,4 @@ python -m macgraph.train \
 	--input-dir input_data/processed/sa_sp_small_100k \
 	--disable-dynamic-decode \
 	--disable-memory-cell \
-	--disable-question-state \
 	$@

@@ -109,8 +109,8 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--data-stack-width',         	type=int, default=1,   help="Width of stack entry")
 	parser.add_argument('--data-stack-len',         	type=int, default=20,   help="Length of stack")
 	
-	parser.add_argument('--control-width',	           	type=int, default=64,	help="The width of control state")
-	parser.add_argument('--control-heads',	           	type=int, default=1,	help="The number of control question-word attention heads")
+	parser.add_argument('--control-width',	           	type=int, default=128,	help="The width of control state")
+	parser.add_argument('--control-heads',	           	type=int, default=2,	help="The number of control question-word attention heads")
 	parser.add_argument('--control-dropout',	        type=float, default=0.0, help="Dropout on the control unit")
 
 	parser.add_argument('--memory-width',	           	type=int, default=64,	help="The width of memory state")
@@ -134,7 +134,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--disable-memory-cell', 		action='store_false', dest="use_memory_cell")
 	parser.add_argument('--disable-output-read', 		action='store_false', dest="use_output_read")
 	parser.add_argument('--disable-dynamic-decode', 	action='store_false', dest="use_dynamic_decode")
-	parser.add_argument('--disable-question-state', 	action='store_false', dest="use_question_state")
+	parser.add_argument('--enable-question-state', 		action='store_true', dest="use_question_state")
 	parser.add_argument('--enable-lr-finder', 			action='store_true',  dest="use_lr_finder")
 	parser.add_argument('--enable-lr-decay', 			action='store_true',  dest="use_lr_decay")
 
