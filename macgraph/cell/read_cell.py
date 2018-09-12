@@ -9,7 +9,7 @@ from ..args import ACTIVATION_FNS
 
 # TODO: Make indicator row data be special token
 
-def read_from_table(args, features, in_signal, noun, table, width, table_len=None, table_max_len=None):
+def read_from_table(args, features, in_signal, noun, table, width, table_len=None):
 
 	if args["read_indicator_cols"] > 0:
 		ind_col = tf.get_variable(f"{noun}_indicator_col", [1, 1, args["read_indicator_cols"]])
@@ -24,7 +24,6 @@ def read_from_table(args, features, in_signal, noun, table, width, table_len=Non
 	output, score_sm, total_raw_score = attention(table, query,
 		word_size=width, 
 		table_len=table_len,
-		table_max_len=table_max_len,
 	)
 
 	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
@@ -95,8 +94,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 			noun,
 			table, 
 			width=full_width, 
-			table_len=table_len, 
-			table_max_len=args[f"{noun}_max_len"])
+			table_len=table_len)
 
 
 def read_cell(args, features, vocab_embedding, 

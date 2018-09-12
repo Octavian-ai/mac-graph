@@ -41,7 +41,6 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 				query=question_token_query, 
 				word_size=question_token_width, 
 				table_len=features["src_len"],
-				table_max_len=args["max_seq_len"],
 			)
 
 			attention_calls.append(a)
