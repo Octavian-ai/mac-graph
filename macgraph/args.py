@@ -37,6 +37,9 @@ def generate_args_derivatives(args):
 	r["answer_classes_path"] = os.path.join(args["input_dir"], "answer_classes.yaml")
 	r["answer_classes_types_path"] = os.path.join(args["input_dir"], "answer_classes_types.yaml")
 
+	if args["control_width"] is None:
+		r["control_width"] = args["embed_width"] * args["control_heads"]
+
 	return r
 
 def get_args(extend=lambda parser:None, argv=None):
@@ -109,7 +112,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--data-stack-width',         	type=int, default=1,   help="Width of stack entry")
 	parser.add_argument('--data-stack-len',         	type=int, default=20,   help="Length of stack")
 	
-	parser.add_argument('--control-width',	           	type=int, default=128,	help="The width of control state")
+	parser.add_argument('--control-width',	           	type=int, default=None,	help="The width of control state")
 	parser.add_argument('--control-heads',	           	type=int, default=2,	help="The number of control question-word attention heads")
 	parser.add_argument('--control-dropout',	        type=float, default=0.0, help="Dropout on the control unit")
 
