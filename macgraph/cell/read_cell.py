@@ -19,6 +19,7 @@ def read_from_table(args, features, in_signal, noun, table, width, table_len=Non
 
 	# query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
 	query = tf.layers.dense(in_signal, width)
+	# TODO: Make this block level
 
 	output, score_sm, total_raw_score = attention(table, query,
 		word_size=width, 
@@ -123,10 +124,6 @@ def read_cell(args, features, vocab_embedding,
 		# We may run the network with no control cell
 		if in_control_state is not None and args["use_control_cell"]:
 			in_signal.append(in_control_state)
-
-		if args["read_from_question"]:
-			in_signal.append(in_question_tokens[:,2])
-			in_signal.append(in_question_tokens[:,6])
 
 		if args["use_read_question_state"] or len(in_signal)==0:
 			in_signal.append(in_question_state)

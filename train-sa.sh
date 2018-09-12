@@ -9,4 +9,7 @@ python -m macgraph.train \
 	--disable-kb-node \
 	--disable-memory-cell \
 	--disable-question-state \
-	--control-heads 2
+	--control-heads 2 \
+	--control-width 128 \
+	--disable-summary \
+	$@

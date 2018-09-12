@@ -104,7 +104,6 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--read-indicator-cols',        type=int, default=0,    help="Number of extra trainable rows")
 	parser.add_argument('--read-dropout',         		type=float, default=0.0,    help="Dropout on read heads")
 	parser.add_argument('--read-activation',			type=str, default="tanh_abs", choices=ACTIVATION_FNS.keys())
-	parser.add_argument('--read-from-question',			action='store_true')
 	parser.add_argument('--disable-read-extract', 		action='store_false', dest='use_read_extract')
 
 	parser.add_argument('--data-stack-width',         	type=int, default=1,   help="Width of stack entry")

@@ -38,7 +38,7 @@ def softmax_with_masking(logits, mask, axis):
 			return l / (d + EPSILON)
 
 
-def attention(table, query, word_size=None, table_len=None, table_max_len=None, name="attention"):
+def attention(table, query, word_size=None, table_len=None, name="attention"):
 	"""
 	Apply attention
 

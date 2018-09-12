@@ -19,7 +19,7 @@ def hr():
 hr()
 
 DARK_GREY = 242
-WHITE = 256
+WHITE = 255
 
 BG_BLACK = 232
 BG_DARK_GREY = 237
@@ -44,6 +44,12 @@ def predict(args, cmd_args):
 	predictions = estimator.predict(input_fn=gen_input_fn(args, "predict"))
 	vocab = Vocab.load(args)
 
+	read_heads = []
+	if args["use_kb_node"]:
+		read_heads.append("node")
+	if args["use_kb_edge"]:
+		read_heads.append("edge")
+
 	def print_row(row):
 		if p["actual_label"] == p["predicted_label"]:
 			emoji = "✅"
@@ -58,7 +64,7 @@ def predict(args, cmd_args):
 
 		for i in range(iterations):
 
-			if args["use_control_head"]:
+			if args["use_control_cell"]:
 				for control_head in row["question_word_attn"][i]:
 					print(f"{i}: " + ' '.join(color_text(row["src"].split(' '), control_head)))
 			
@@ -66,7 +72,7 @@ def predict(args, cmd_args):
 			print(f"{i}: read_head_attn: ",read_head_part)
 			print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
 
-			for idx0, noun in enumerate(["node", "edge"]):
+			for idx0, noun in enumerate(read_heads):
 				if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
 					db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"kb_{noun}s"]]
 					print(f"{i}: " + noun+"_attn: ",', '.join(color_text(db, row[f"kb_{noun}_attn"][i])))
