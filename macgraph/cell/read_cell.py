@@ -17,9 +17,21 @@ def read_from_table(args, features, in_signal, noun, table, width, table_len=Non
 		table = tf.concat([table, ind_col], axis=2)
 		width += args["read_indicator_cols"]
 
-	# query = tf.layers.dense(in_signal, width, activation=tf.nn.tanh)
-	query = tf.layers.dense(in_signal, width)
-	# TODO: Make this block level
+	if args["use_read_query_block"]:
+		assert in_signal.shape[-1] is not None, "input signal width must be known"
+		assert in_signal.shape[-1] % args["input_width"] == 0, "in_signal size must be mulitple of input_width"
+		assert width % args["input_width"] == 0, "table width must be multiple of input_width"
+
+		n_input_blocks = in_signal.shape[-1] // args["input_width"]
+		in_s = tf.reshape(in_signal, [features["d_batch_size"], n_input_blocks, args["input_width"]])
+		n_query_blocks = width // args["input_width"]
+
+		query_proj_w = tf.get_variable("query_proj_w", [1, n_query_blocks, n_input_blocks, 1])
+		query_proj_b = tf.get_variable("query_proj_b", [n_query_blocks, 1])
+		query = tf.matmul(in_signal, query_proj_w)
+		query = tf.nn.bias_add(query, query_proj_b)
+	else:
+		query = tf.layers.dense(in_signal, width)
 
 	output, score_sm, total_raw_score = attention(table, query,
 		word_size=width, 
