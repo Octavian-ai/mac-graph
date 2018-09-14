@@ -66,7 +66,7 @@ def predict(args, cmd_args):
 
 			if args["use_control_cell"]:
 				for control_head in row["question_word_attn"][i]:
-					print(f"{i}: " + ' '.join(color_text(row["src"].split(' '), control_head)))
+					print(f"{i}: " + ' '.join(color_text(row["src"], control_head)))
 			
 			read_head_part = ' '.join(color_text(["nodes","edges"], row["read_head_attn"][i]))
 			print(f"{i}: read_head_attn: ",read_head_part)
@@ -80,7 +80,7 @@ def predict(args, cmd_args):
 					for idx, attn in enumerate(row[f"kb_{noun}_attn"][i]):
 						if attn > ATTN_THRESHOLD:
 							print(f"{i}: " +noun+"_word_attn: ",', '.join(color_text(
-								vocab.prediction_value_to_string(row[f"kb_{noun}s"][idx]).split(' '),
+								vocab.prediction_value_to_string(row[f"kb_{noun}s"][idx], True),
 								row[f"kb_{noun}_word_attn"][i],
 								)
 							))
@@ -89,7 +89,7 @@ def predict(args, cmd_args):
 
 	def decode_row(row):
 		for i in ["type_string", "actual_label", "predicted_label", "src"]:
-			row[i] = vocab.prediction_value_to_string(row[i])
+			row[i] = vocab.prediction_value_to_string(row[i], True)
 
 	stats = Counter()
 	output_classes = Counter()

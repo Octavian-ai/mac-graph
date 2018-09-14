@@ -122,8 +122,12 @@ class Vocab(object):
 		except IndexError:
 			return UNK
 
-	def ids_to_string(self, line):
-		return ' '.join([self.inverse_lookup(i) for i in line])
+	def ids_to_string(self, line, output_as_array=False):
+		d = [self.inverse_lookup(i) for i in line]
+		if output_as_array:
+			return d
+		else:
+			return ' '.join(d)
 
 	def string_to_ids(self, line):
 		return [self.lookup(i) for i in line.split(' ')]
@@ -153,7 +157,7 @@ class Vocab(object):
 		return line
 
 
-	def prediction_value_to_string(self, v):
+	def prediction_value_to_string(self, v, output_as_array=False):
 		"""Rough 'n' ready get me the hell outta here fn. 
 		Tries its best to deal with the mess of datatypes that end up coming out"""
 
@@ -161,7 +165,7 @@ class Vocab(object):
 			s = self.inverse_lookup(v)
 		elif isinstance(v, np.ndarray):
 			if v.dtype == np.int64:
-				s = self.ids_to_string(v)
+				s = self.ids_to_string(v, output_as_array)
 			elif v.dtype == object:
 				s = bytes_to_string(v)
 			else:
