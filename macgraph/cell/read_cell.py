@@ -109,6 +109,15 @@ def read_cell(args, features, vocab_embedding,
 
 	with tf.name_scope("read_cell"):
 
+		tap_attns = []
+		tap_table = None
+
+		taps = {}
+		reads = []
+		attn_focus = []
+
+		head_total = args["read_heads"] * len(args["kb_list"])
+
 		# --------------------------------------------------------------------------
 		# Read data
 		# --------------------------------------------------------------------------
@@ -121,43 +130,48 @@ def read_cell(args, features, vocab_embedding,
 
 		# We may run the network with no control cell
 		if in_control_state is not None and args["use_control_cell"]:
-			in_signal.append(in_control_state)
+			if args["use_read_control_share"]:
+				in_signal.append(in_control_state)
+			else:
+				control_head_count = args["control_width"] / args["input_width"]
+				assert args["control_width"] % args["input_width"] == 0, "If not sharing control heads between read heads, the control width must be integer multiple of input_width"
+				assert control_head_count % head_total == 0, "If not sharing control heads then number of control heads must be multiple of read heads"
+				control_heads = tf.reshape(in_control_state, [features["d_batch_size"], head_total, -1, args["input_width"]])
 
 		if args["use_read_question_state"] or len(in_signal)==0:
 			in_signal.append(in_question_state)
 
-		in_signal = tf.concat(in_signal, -1)
 
-		
-		tap_attns = []
-		tap_table = None
-
-		taps = {}
-		reads = []
-		attn_focus = []
-
+		head_i = 0
 		for j in range(args["read_heads"]):
-			for i in ["kb_node", "kb_edge"]:
-				if args[f"use_{i}"]:
-					read, taps[i+"_attn"], table, score_raw_total = read_from_table_with_embedding(
-						args, 
-						features, 
-						vocab_embedding, 
-						in_signal, 
-						noun=i
-					)
+			for i in args["kb_list"]:
 
-					attn_focus.append(score_raw_total)
+				if args["use_read_control_share"]:
+					in_signal_to_head = tf.concat(in_signal, -1)
+				else:
+					in_signal_to_head = tf.concat(in_signal + control_heads[:,head_i,:,:], -1)
 
-					read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
-					
-					if args["use_read_extract"]:
-						d, taps[i+"_word_attn"] = attention_by_index(in_signal, read_words)
-						d = tf.concat([d, in_signal], -1)
-						d = tf.layers.dense(d, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
-						reads.append(d)
-					else:
-						reads.append(read_words)
+				read, taps[i+"_attn"], table, score_raw_total = read_from_table_with_embedding(
+					args, 
+					features, 
+					vocab_embedding, 
+					in_signal_to_head, 
+					noun=i
+				)
+
+				attn_focus.append(score_raw_total)
+
+				read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
+				
+				if args["use_read_extract"]:
+					d, taps[i+"_word_attn"] = attention_by_index(in_signal_to_head, read_words)
+					d = tf.concat([d, in_signal_to_head], -1)
+					d = tf.layers.dense(d, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
+					reads.append(d)
+				else:
+					reads.append(read_words)
+
+				head_i += 1
 					
 
 		if args["use_read_extract"]:
@@ -175,7 +189,7 @@ def read_cell(args, features, vocab_embedding,
 		taps["read_head_attn_focus"] = tf.concat(attn_focus, -1)
 
 		# Residual skip connection
-		out_data = tf.concat([reads, in_signal] + attn_focus, -1)
+		out_data = tf.concat([reads] + in_signal + attn_focus, -1)
 		
 		for i in range(args["read_layers"]):
 			out_data = tf.layers.dense(out_data, args["read_width"])

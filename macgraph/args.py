@@ -40,6 +40,13 @@ def generate_args_derivatives(args):
 	if args["control_width"] is None:
 		r["control_width"] = args["input_width"] * args["control_heads"]
 
+	r["kb_list"] = []
+	if args["use_kb_node"]:
+		r["kb_list"].append("kb_node")
+	if args["use_kb_edge"]:
+		r["kb_list"].append("kb_edge")
+
+
 	return r
 
 def get_args(extend=lambda parser:None, argv=None):
@@ -108,12 +115,14 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--read-dropout',         		type=float, default=0.0,    help="Dropout on read heads")
 	parser.add_argument('--read-activation',			type=str, default="tanh_abs", choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--disable-read-extract', 		action='store_false', dest='use_read_extract')
-
+	parser.add_argument('--enable-read-control-sharing', action='store_true', dest='use_read_control_sharing')
+	parser.add_argument('--disable-read-question-state', action='store_false',  dest='use_read_question_state')
+	
 	parser.add_argument('--data-stack-width',         	type=int, default=1,   help="Width of stack entry")
 	parser.add_argument('--data-stack-len',         	type=int, default=20,   help="Length of stack")
 	
 	parser.add_argument('--control-width',	           	type=int, default=None,	help="The width of control state")
-	parser.add_argument('--control-heads',	           	type=int, default=2,	help="The number of control question-word attention heads")
+	parser.add_argument('--control-heads',	           	type=int, default=4,	help="The number of control question-word attention heads")
 	parser.add_argument('--control-dropout',	        type=float, default=0.0, help="Dropout on the control unit")
 
 	parser.add_argument('--memory-width',	           	type=int, default=64,	help="The width of memory state")
@@ -131,7 +140,6 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-data-stack', 			action='store_true',  dest='use_data_stack')
 	parser.add_argument('--enable-attn-score-dense', 	action='store_true',  dest='use_attn_score_dense')
 	parser.add_argument('--enable-position-encoding', 	action='store_true',  dest='use_position_encoding')
-	parser.add_argument('--disable-read-question-state', action='store_false',  dest='use_read_question_state')
 	parser.add_argument('--disable-control-cell', 		action='store_false', dest="use_control_cell")
 	parser.add_argument('--disable-output-cell', 		action='store_false', dest="use_output_cell")
 	parser.add_argument('--disable-memory-cell', 		action='store_false', dest="use_memory_cell")
