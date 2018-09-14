@@ -133,10 +133,11 @@ def read_cell(args, features, vocab_embedding,
 			if args["use_read_control_share"]:
 				in_signal.append(in_control_state)
 			else:
-				control_head_count = args["control_width"] / args["input_width"]
+				control_head_count = args["control_width"] // args["input_width"]
+				control_heads_per_read_head = control_head_count // head_total
 				assert args["control_width"] % args["input_width"] == 0, "If not sharing control heads between read heads, the control width must be integer multiple of input_width"
 				assert control_head_count % head_total == 0, "If not sharing control heads then number of control heads must be multiple of read heads"
-				control_heads = tf.reshape(in_control_state, [features["d_batch_size"], head_total, -1, args["input_width"]])
+				control_heads = tf.reshape(in_control_state, [features["d_batch_size"], head_total, control_heads_per_read_head * args["input_width"]])
 
 		if args["use_read_question_state"] or len(in_signal)==0:
 			in_signal.append(in_question_state)
@@ -149,7 +150,8 @@ def read_cell(args, features, vocab_embedding,
 				if args["use_read_control_share"]:
 					in_signal_to_head = tf.concat(in_signal, -1)
 				else:
-					in_signal_to_head = tf.concat(in_signal + control_heads[:,head_i,:,:], -1)
+					control_head_slice = control_heads[:,head_i,:]
+					in_signal_to_head = tf.concat(in_signal + [control_head_slice], -1)
 
 				read, taps[i+"_attn"], table, score_raw_total = read_from_table_with_embedding(
 					args, 
