@@ -210,6 +210,7 @@ The successful station property model does no better than random guessing. I'm e
 
 - `63a8a8b` 99% on all tasks
 	- added dedicated control heads x2 for each read head
+	- `use_read_query_block` didn't seem to help
 
 ### Station shortest count
 

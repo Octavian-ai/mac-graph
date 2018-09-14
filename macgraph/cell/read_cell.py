@@ -27,13 +27,16 @@ def read_from_table(args, features, in_signal, noun, table, width, table_len=Non
 		in_signal_blocked = tf.reshape(in_signal, [features["d_batch_size"], n_input_blocks, args["embed_width"]])
 		n_query_blocks = width // args["embed_width"]
 
-		query_proj_w = tf.get_variable("query_proj_w", [n_query_blocks, n_input_blocks])
-		query_proj_b = tf.get_variable("query_proj_b", [1, n_query_blocks, args["embed_width"]])
-		query = tf.einsum('bie,qi -> bqe', in_signal_blocked, query_proj_b)
-		query = tf.matmul(in_signal_blocked, query_proj_w)
-		query = tf.nn.bias_add(query, query_proj_b)
+		query_proj_w = tf.get_variable(noun+"_query_proj_w", [n_query_blocks, n_input_blocks])
+		query_proj_b = tf.get_variable(noun+"_query_proj_b", [n_query_blocks, args["embed_width"]])
+		query = tf.einsum('bie,qi->bqe', in_signal_blocked, query_proj_w)
+		# query = tf.matmul(in_signal_blocked, query_proj_w)
+		query += query_proj_b
+		query = tf.reshape(query, [features["d_batch_size"], n_query_blocks * args["embed_width"]])
 	else:
 		query = tf.layers.dense(in_signal, width)
+
+	print(query)
 
 	output, score_sm, total_raw_score = attention(table, query,
 		word_size=width, 
