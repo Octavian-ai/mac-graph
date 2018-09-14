@@ -39,7 +39,7 @@ def model_fn(features, labels, mode, params):
 
 	# vocab_embedding = tf.Variable(tf.eye(args["vocab_size"], args["embed_width"]), name="vocab_embedding")
 
-	if args["use_summary"]:
+	if args["use_summary_image"]:
 		tf.summary.image("vocab_embedding", tf.reshape(vocab_embedding,
 			[-1, args["vocab_size"], args["embed_width"], 1]))
 
@@ -81,13 +81,13 @@ def model_fn(features, labels, mode, params):
 				decay_rate=1.1)
 
 		elif args["use_lr_decay"]:
-			learning_rate = args["learning_rate"] - tf.train.exponential_decay(
+			learning_rate = tf.train.exponential_decay(
 				args["learning_rate"], 
 				global_step,
 				decay_steps=10000, 
 				decay_rate=0.9)
 
-		if args["use_summary"]:
+		if args["use_summary_scalar"]:
 			var = tf.trainable_variables()
 			gradients = tf.gradients(loss, var)
 			norms = [tf.norm(i, 2) for i in gradients if i is not None]

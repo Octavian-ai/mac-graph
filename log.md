@@ -208,6 +208,9 @@ The successful station property model does no better than random guessing. I'm e
 	SA choses to use the edge head, and SP choses to use the node head. SA+SP
 	choses to use the node head.
 
+- `63a8a8b` 99% on all tasks
+	- added dedicated control heads x2 for each read head
+
 ### Station shortest count
 
 - `9ecf10e` 
