@@ -18,6 +18,7 @@ def read_from_table(args, features, in_signal, noun, table, width, table_len=Non
 		width += args["read_indicator_cols"]
 
 	if args["use_read_query_block"]:
+		# Perform word copy op at the block level, should be easier to train
 		assert in_signal.shape[-1] is not None, "input signal width must be known"
 		assert in_signal.shape[-1] % args["embed_width"] == 0, "in_signal size must be mulitple of embed_width"
 		assert width % args["embed_width"] == 0, f"table width {width} must be multiple of embed_width {args['embed_width']}"
