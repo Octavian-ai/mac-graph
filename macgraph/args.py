@@ -38,7 +38,7 @@ def generate_args_derivatives(args):
 	r["answer_classes_types_path"] = os.path.join(args["input_dir"], "answer_classes_types.yaml")
 
 	if args["control_width"] is None:
-		r["control_width"] = args["embed_width"] * args["control_heads"]
+		r["control_width"] = args["input_width"] * args["control_heads"]
 
 	return r
 
