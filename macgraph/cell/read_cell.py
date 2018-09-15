@@ -142,8 +142,8 @@ def read_cell(args, features, vocab_embedding,
 		in_signal = []
 
 		# Commented out because it was hampering progress
-		# if in_memory_state is not None and args["use_memory_cell"]:
-		# 	in_signal.append(in_memory_state)
+		if in_memory_state is not None and args["use_memory_cell"]:
+			in_signal.append(in_memory_state)
 
 		# We may run the network with no control cell
 		if in_control_state is not None and args["use_control_cell"]:
@@ -158,6 +158,7 @@ def read_cell(args, features, vocab_embedding,
 
 		if args["use_read_question_state"] or len(in_signal)==0:
 			in_signal.append(in_question_state)
+
 
 
 		head_i = 0

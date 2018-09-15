@@ -22,22 +22,27 @@ The core codebase implements graph question answering (GQA), using [CLEVR-graph]
 		<tr>
 			<td>Recall station (node) properties</td>
 			<td><strong>Complete</strong></td>
-			<td>99% accuracy after 10k training steps</td></tr>
+			<td>99.9% accuracy after 10k training steps</td></tr>
 		<tr>
 			<td>Answer if stations adjacent</td>
 			<td><strong>Complete</strong></td>
-			<td>99% accuracy after 200k training steps</td>
+			<td>99% accuracy after 20k training steps</td>
 		</tr>
 		<tr>
-			<td>Count length of shortest path between nodes</td>
+			<td>Stations one apart</td>
 			<td><strong>In progress</strong></td>
 			<td></td>
-    </tr>
+    	</tr>
+    	<tr>
+			<td>Station with property adjacent</td>
+			<td><strong>TBC</strong></td>
+			<td></td>
+    	</tr>
 		<tr>
-			<td>Recall station (node) properties via PBT</td>
-			<td><strong>Not started</strong></td>
-			<td>No clue</td></tr>
-		
+			<td>Count length of shortest path between nodes</td>
+			<td><strong>TBC</strong></td>
+			<td></td>
+    	</tr>
 	</tbody>
 </table>
 

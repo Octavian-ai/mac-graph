@@ -106,7 +106,9 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--kb-node-max-len',         	type=int, default=40,   help="Maximum number of nodes in kb")
 	parser.add_argument('--kb-edge-width',         		type=int, default=3,    help="Width of edge entry into graph table aka the knowledge base")
 	parser.add_argument('--kb-edge-max-len',         	type=int, default=40,   help="Maximum number of edges in kb")
-	
+	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
+	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
+
 	parser.add_argument('--read-width',         		type=int, default=128,  help="Width of the read state output")
 	parser.add_argument('--read-heads',         		type=int, default=1,    help="Number of read heads for each knowledge base table")
 	parser.add_argument('--read-layers',         		type=int, default=1,    help="Number of read transformation layers")
@@ -126,7 +128,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--control-heads',	           	type=int, default=4,	help="The number of control question-word attention heads")
 	parser.add_argument('--control-dropout',	        type=float, default=0.0, help="Dropout on the control unit")
 
-	parser.add_argument('--memory-width',	           	type=int, default=64,	help="The width of memory state")
+	parser.add_argument('--memory-width',	           	type=int, default=128,	help="The width of memory state")
 	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
 	parser.add_argument('--memory-forget-activation',	type=str, default="sigmoid", 	choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--memory-activation',			type=str, default="tanh", 		choices=ACTIVATION_FNS.keys())
@@ -134,11 +136,6 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--output-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--output-layers',				type=int, default=1)
 	parser.add_argument('--output-classes',	       		type=int, default=128,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
-
-	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
-	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
-	parser.add_argument('--disable-summary-scalar', 	action='store_false', dest='use_summary_scalar')
-	parser.add_argument('--enable-summary-image', 		action='store_true', dest='use_summary_image')
 
 	parser.add_argument('--enable-data-stack', 			action='store_true',  dest='use_data_stack')
 	parser.add_argument('--enable-attn-score-dense', 	action='store_true',  dest='use_attn_score_dense')
@@ -154,6 +151,8 @@ def get_args(extend=lambda parser:None, argv=None):
 
 	parser.add_argument('--enable-tf-debug', 			action='store_true',  dest="use_tf_debug")
 	parser.add_argument('--enable-comet', 				action='store_true',  dest="use_comet")
+	parser.add_argument('--disable-summary-scalar', 	action='store_false', dest='use_summary_scalar')
+	parser.add_argument('--enable-summary-image', 		action='store_true', dest='use_summary_image')
 
 	parser.add_argument('--max-decode-iterations', 		type=int, default=1)
 	
