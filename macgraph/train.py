@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
 	# DO IT!
 	train(args)
-	predict(args)
+	predict(args, args)
 
 
 

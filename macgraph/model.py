@@ -168,10 +168,6 @@ def model_fn(features, labels, mode, params):
 
 		eval_hooks = [FloydHubMetricHook(eval_metric_ops)]
 
-
-
-
-
 	return tf.estimator.EstimatorSpec(mode,
 		loss=loss,
 		train_op=train_op,

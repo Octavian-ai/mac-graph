@@ -36,8 +36,6 @@ def read_from_table(args, features, in_signal, noun, table, width, table_len=Non
 	else:
 		query = tf.layers.dense(in_signal, width)
 
-	print(query)
-
 	output, score_sm, total_raw_score = attention(table, query,
 		word_size=width, 
 		table_len=table_len,

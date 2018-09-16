@@ -70,7 +70,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 
 		out_taps = {
 			key: decoded_outputs.rnn_output[idx+1]
-			for idx, key in enumerate(d_cell.get_taps().values())
+			for idx, key in enumerate(d_cell.get_taps().keys())
 		}
 		
 		# Take the final reasoning step output
@@ -94,7 +94,6 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 			with tf.variable_scope("decoder_cell", reuse=tf.AUTO_REUSE):
 				states.append(d_cell(inputs[i], states[-1][1]))
 
-		# print(states)
 		final_output = states[-1][0][0]
 
 		def get_tap(idx, key):
@@ -136,6 +135,9 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 		final_output, out_taps = dynamic_decode(args, features, inputs, question_state, question_tokens, **kwargs)
 	else:
 		final_output, out_taps = static_decode(args, features, inputs, question_state, question_tokens, **kwargs)
+
+	for k, v in out_taps.items():
+		out_taps[k] = tf.Print(v, [tf.shape(v)], "\n"+k, summarize=10)
 
 	if args["use_summary_image"]:
 		tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))

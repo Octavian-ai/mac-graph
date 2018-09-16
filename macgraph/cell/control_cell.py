@@ -49,6 +49,8 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 		control_out  = tf.concat(control_out, -1)
 
 		tap_qw_attn = [i[1] for i in attention_calls]
+		tap_qw_attn = tf.concat(tap_qw_attn, -1) # Concat the unitary score dimensions
+		tap_qw_attn = tf.transpose(tap_qw_attn, [0, 2, 1]) # switch so last dimension is words
 
 		if control_out.shape[-1] != args["control_width"]:
 			control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")

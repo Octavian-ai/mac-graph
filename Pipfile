@@ -11,7 +11,7 @@ name = "pypi"
 
 [packages]
 
-tensorflow = "*"
+tensorflow = "==1.10"
 numpy = "*"
 pyyaml = "*"
 tqdm = "*"

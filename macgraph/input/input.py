@@ -118,7 +118,8 @@ def input_fn(args, mode, question=None):
 				"type_string": 		tf.cast("", tf.string),
 			},
 			zero64 # label (unused)
-		)
+		),
+		drop_remainder=(mode == "predict")
 	)
 
 	# Add dynamic dimensions for convenience (e.g. to do shape assertions)
@@ -127,6 +128,8 @@ def input_fn(args, mode, question=None):
 		"d_batch_size": tf.shape(features["src"])[0], 
 		"d_src_len":    tf.shape(features["src"])[1],
 	}, labels))
+
+	d = d.repeat()
 	
 	return d
 

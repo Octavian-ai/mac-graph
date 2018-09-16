@@ -12,6 +12,9 @@ from .input.text_util import UNK_ID
 from .estimator import get_estimator
 from .input import *
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Block annoying warnings
 def hr():
 	print(stylize("---------------", fg("blue")))
@@ -41,14 +44,21 @@ def color_text(text_array, levels, color_fg=True):
 
 def predict(args, cmd_args):
 	estimator = get_estimator(args)
+
+	# Logging setup
+	logging.basicConfig()
+	tf.logging.set_verbosity(args["log_level"])
+	logger.setLevel(args["log_level"])
+	logging.getLogger("mac-graph").setLevel(args["log_level"])
+
+	# Info about the experiment, for the record
+	tfr_size = sum(1 for _ in tf.python_io.tf_record_iterator(args["predict_input_path"]))
+	logger.info(args)
+	logger.info(f"Predicting on {tfr_size} input records")
+
+	# Actually do some work
 	predictions = estimator.predict(input_fn=gen_input_fn(args, "predict"))
 	vocab = Vocab.load(args)
-
-	read_heads = []
-	if args["use_kb_node"]:
-		read_heads.append("node")
-	if args["use_kb_edge"]:
-		read_heads.append("edge")
 
 	def print_row(row):
 		if p["actual_label"] == p["predicted_label"]:
@@ -68,20 +78,20 @@ def predict(args, cmd_args):
 				for control_head in row["question_word_attn"][i]:
 					print(f"{i}: " + ' '.join(color_text(row["src"], control_head)))
 			
-			read_head_part = ' '.join(color_text(["nodes","edges"], row["read_head_attn"][i]))
+			read_head_part = ' '.join(color_text(args["kb_list"], row["read_head_attn"][i]))
 			print(f"{i}: read_head_attn: ",read_head_part)
 			print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
 
-			for idx0, noun in enumerate(read_heads):
+			for idx0, noun in enumerate(args["kb_list"]):
 				if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
-					db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"kb_{noun}s"]]
-					print(f"{i}: " + noun+"_attn: ",', '.join(color_text(db, row[f"kb_{noun}_attn"][i])))
+					db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"]]
+					print(f"{i}: " + noun+"_attn: ",', '.join(color_text(db, row[f"{noun}_attn"][i])))
 
-					for idx, attn in enumerate(row[f"kb_{noun}_attn"][i]):
+					for idx, attn in enumerate(row[f"{noun}_attn"][i]):
 						if attn > ATTN_THRESHOLD:
 							print(f"{i}: " +noun+"_word_attn: ",', '.join(color_text(
-								vocab.prediction_value_to_string(row[f"kb_{noun}s"][idx], True),
-								row[f"kb_{noun}_word_attn"][i],
+								vocab.prediction_value_to_string(row[f"{noun}s"][idx], True),
+								row[f"{noun}_word_attn"][i],
 								)
 							))
 

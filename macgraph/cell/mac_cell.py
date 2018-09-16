@@ -102,11 +102,13 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 			out_state = (out_control_state, out_memory_state, out_data_stack)
 			
+			tap_question_attn = tf.Print(tap_question_attn, [tf.shape(tap_question_attn)], "tap_question_attn raw",summarize=6)
+
 			# TODO: Move this tap manipulation upstream, 
 			#	have generic taps dict returned from the fns,
 			#	and make this just use get_taps to append the data
 			out_data  = [output, 
-				tf.squeeze(tap_question_attn, -1), # remove attention score unot dimension
+				tap_question_attn,
 				tf.squeeze(read_taps.get("kb_node_attn", empty_attn), 2),
 				read_taps.get("kb_node_word_attn", empty_query),
 				tf.squeeze(read_taps.get("kb_edge_attn", empty_attn), 2),
