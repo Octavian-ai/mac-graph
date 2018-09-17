@@ -136,9 +136,6 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 	else:
 		final_output, out_taps = static_decode(args, features, inputs, question_state, question_tokens, **kwargs)
 
-	for k, v in out_taps.items():
-		out_taps[k] = tf.Print(v, [tf.shape(v)], "\n"+k, summarize=10)
-
 	if args["use_summary_image"]:
 		tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))
 

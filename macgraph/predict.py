@@ -116,14 +116,17 @@ def predict(args, cmd_args):
 			output_classes[p["actual_label"]] += 1
 			predicted_classes[p["predicted_label"]] += 1
 
-			if p["actual_label"] == p["predicted_label"]:
+			correct = p["actual_label"] == p["predicted_label"]
+
+			if correct:
 				emoji = "✅"
 			else:
 				emoji = "❌"
 
 			confusion[emoji + " \texp:" + p["actual_label"] +" \tact:" + p["predicted_label"] + " \t" + p["type_string"]] += 1
 
-			print_row(p)
+			if not cmd_args["correct_only"] or correct:
+				print_row(p)
 			
 
 	# print(f"\nConfusion matrix:")
@@ -139,6 +142,8 @@ if __name__ == "__main__":
 	parser.add_argument("--n-rows",type=int,default=20)
 	parser.add_argument("--type-string-prefix",type=str,default=None)
 	parser.add_argument("--model-dir",type=str,required=True)
+	parser.add_argument("--correct-only",action='store_true')
+
 	cmd_args = vars(parser.parse_args())
 
 	with tf.gfile.GFile(os.path.join(cmd_args["model_dir"], "config.yaml"), "r") as file:

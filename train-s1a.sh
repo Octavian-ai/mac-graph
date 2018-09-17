@@ -2,7 +2,7 @@
 
 COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
-SIZE=10k
+SIZE=100k
 
 python -m macgraph.train \
 	--model-dir output/model/s1a/$SIZE/$COMMIT \
@@ -10,4 +10,5 @@ python -m macgraph.train \
 	--max-decode-iterations 2 \
 	--disable-kb-node \
 	--control-heads 2 \
+	--read-heads 2 \
 	$@

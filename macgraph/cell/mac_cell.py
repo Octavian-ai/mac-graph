@@ -102,8 +102,6 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 			out_state = (out_control_state, out_memory_state, out_data_stack)
 			
-			tap_question_attn = tf.Print(tap_question_attn, [tf.shape(tap_question_attn)], "tap_question_attn raw",summarize=6)
-
 			# TODO: Move this tap manipulation upstream, 
 			#	have generic taps dict returned from the fns,
 			#	and make this just use get_taps to append the data
