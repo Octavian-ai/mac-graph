@@ -39,8 +39,8 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 			a = attention(
 				table=in_question_tokens, 
 				query=question_token_query, 
-				word_size=question_token_width, 
-				table_len=features["src_len"],
+				key_width=question_token_width, 
+				keys_len=features["src_len"],
 			)
 
 			attention_calls.append(a)

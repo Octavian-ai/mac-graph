@@ -9,7 +9,7 @@ from ..args import ACTIVATION_FNS
 
 # TODO: Make indicator row data be special token
 
-def read_from_table(args, features, in_signal, noun, table, width, table_len=None):
+def read_from_table(args, features, in_signal, noun, table, width, keys_len=None):
 
 	if args["read_indicator_cols"] > 0:
 		ind_col = tf.get_variable(f"{noun}_indicator_col", [1, 1, args["read_indicator_cols"]])
@@ -37,8 +37,8 @@ def read_from_table(args, features, in_signal, noun, table, width, table_len=Non
 		query = tf.layers.dense(in_signal, width)
 
 	output, score_sm, total_raw_score = attention(table, query,
-		word_size=width, 
-		table_len=table_len,
+		key_width=width, 
+		keys_len=keys_len,
 	)
 
 	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
@@ -52,7 +52,7 @@ def get_table_with_embedding(args, features, vocab_embedding, noun):
 	# --------------------------------------------------------------------------
 
 	table = features[f"{noun}s"]
-	table_len = features[f"{noun}s_len"]
+	keys_len = features[f"{noun}s_len"]
 
 	width = args[f"{noun}_width"]
 	full_width = width * args["embed_width"]
@@ -70,7 +70,7 @@ def get_table_with_embedding(args, features, vocab_embedding, noun):
 		ind_row_shape = [features["d_batch_size"], args["read_indicator_rows"], width]
 		ind_row = tf.fill(ind_row_shape, tf.cast(UNK_ID, table.dtype))
 		table = tf.concat([table, ind_row], axis=1)
-		table_len += args["read_indicator_rows"]
+		keys_len += args["read_indicator_rows"]
 		d_len += args["read_indicator_rows"]
 
 	# --------------------------------------------------------------------------
@@ -85,7 +85,7 @@ def get_table_with_embedding(args, features, vocab_embedding, noun):
 	emb_kb = dynamic_assert_shape(emb_kb, 
 		[features["d_batch_size"], d_len, full_width])
 
-	return emb_kb, full_width, table_len
+	return emb_kb, full_width, keys_len
 
 
 def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun):
@@ -98,7 +98,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 
 	with tf.name_scope(f"read_from_{noun}"):
 
-		table, full_width, table_len = get_table_with_embedding(args, features, vocab_embedding, noun)
+		table, full_width, keys_len = get_table_with_embedding(args, features, vocab_embedding, noun)
 
 		# --------------------------------------------------------------------------
 		# Read
@@ -109,7 +109,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 			noun,
 			table, 
 			width=full_width, 
-			table_len=table_len)
+			keys_len=keys_len)
 
 
 def read_cell(args, features, vocab_embedding, 

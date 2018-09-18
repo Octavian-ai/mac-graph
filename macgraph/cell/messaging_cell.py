@@ -31,10 +31,11 @@ def messaging_cell(args, features, in_node_state, in_write_query, in_write_signa
 	node_state = in_node_state
 
 	# Add write signal:
-	write_signal = attention_write_by_key(
+	write_signal, _, _ = attention_write_by_key(
 		keys=features["kb_nodes"],
+		keys_len=features["kb_nodes_len"],
 		query=in_write_query,
-		signal=in_write_signal,
+		value=in_write_signal,
 	)
 
 	node_state += write_signal
@@ -61,11 +62,13 @@ def messaging_cell(args, features, in_node_state, in_write_query, in_write_signa
 	# Outputs
 	out_node_state = node_state
 
-	out_read_signal = attention_key_value(
+	out_read_signal, _, _ = attention_key_value(
 		table=out_node_state,
 		keys=features["kb_nodes"],
+		keys_len=feature["kb_nodes_len"],
+		key_width=args["kb_node_width"],
 		query=in_read_query,
-		word_size=args["kb_node_width"])
+		)
 
 
 	return out_read_signal, out_node_state

@@ -38,37 +38,32 @@ def softmax_with_masking(logits, mask, axis):
 			return l / (d + EPSILON)
 
 
-def attention(table, query, word_size=None, table_len=None, name="attention"):
-	"""
-	Apply attention
+def attention(table, query, key_width=None, keys_len=None, name="attention"):
+	return attention_key_value(table, table, query, key_width, keys_len, name)
 
-	Arguments:
-		- `query`, shape (batch_size, width)
-		- `table`, shape (batch_size, len, width)
-		- word_size: The width of the table entries
-		- `table_len` A tensor of the lengths of the tables (in the batch) that is used to mask the scores before applying softmax (i.e. meaning that any table values after the length are ignored in the lookup)
 
-	"""
-	
+def attention_compute_scores(keys, key_width=None, keys_len=None, query, name="attention"):
 	with tf.name_scope(name):
 
 		q = query
-		db = table
 
 		# --------------------------------------------------------------------------
 		# Validate inputs
 		# --------------------------------------------------------------------------
 
-		assert len(db.shape) == 3, "table should be shape [batch, len, width]"
+		assert len(keys.shape) == 3, "keys should be shape [batch, len, key_width]"
+		assert len(table.shape) == 3, "table should be shape [batch, len, value_width]"
 
-		batch_size = tf.shape(db)[0]
-		seq_len = tf.shape(db)[1]
+		batch_size = tf.shape(table)[0]
+		seq_len = tf.shape(table)[1]
 
-		if word_size is None:
-			word_size = tf.shape(db)[2]
+		if key_width is None:
+			key_width = tf.shape(keys)[2]
 
-		db_shape = tf.shape(db)
-		q_shape = [batch_size, word_size]
+		value_width = tf.shape(table)[2]
+
+		table_shape = tf.shape(table)
+		q_shape = [batch_size, key_width]
 		scores_shape = [batch_size, seq_len, 1]
 
 		q = dynamic_assert_shape(q, q_shape, "query")
@@ -77,10 +72,10 @@ def attention(table, query, word_size=None, table_len=None, name="attention"):
 		# Run model
 		# --------------------------------------------------------------------------
 
-		scores = tf.matmul(db, tf.expand_dims(q, 2))
+		scores = tf.matmul(keys, tf.expand_dims(q, 2))
 
-		if table_len is not None:
-			scores_mask = tf.sequence_mask(table_len, seq_len)
+		if keys_len is not None:
+			scores_mask = tf.sequence_mask(keys_len, seq_len)
 			scores_mask = tf.expand_dims(scores_mask, -1) # I like to tightly assert my shapes
 			scores_mask = dynamic_assert_shape(scores_mask, scores_shape, "scores_mask")
 			scores_sm = softmax_with_masking(scores, mask=scores_mask, axis=1)
@@ -88,14 +83,43 @@ def attention(table, query, word_size=None, table_len=None, name="attention"):
 			scores_sm = tf.nn.softmax(scores + EPSILON, axis=1)
 
 		scores_sm = dynamic_assert_shape(scores_sm, scores_shape, "scores")
-		
-		weighted_db = db * scores_sm
 
-		output = tf.reduce_sum(weighted_db, 1)
-		output = dynamic_assert_shape(output, q_shape, "output")
+		return scores_sm, tf.reduce_sum(scores, axis=1)
+
+
+def attention_write_by_key(keys, key_width=None, keys_len=None, query, value, name="attention"):
+
+	scores_sm, attn_focus = attention_compute_scores(keys, key_width, keys_len, query, name)
+
+	with tf.name_scope(name):
+		weighted_table = tf.expand_dims(value, 1) * scores_sm	
+		return weighted_table, scores_sm, attn_focus
+
+
+def attention_key_value(keys, key_width=None, keys_len=None, table, query, name="attention"):
+	"""
+	Apply attention
+
+	Arguments:
+		- `keys`, shape (batch_size, len, key_width)
+		- `query`, shape (batch_size, key_width)
+		- `table`, shape (batch_size, len, value_width)
+		- key_width: The width of the key entries
+		- `keys_len` A tensor of the lengths of the tables (in the batch) that is used to mask the scores before applying softmax (i.e. meaning that any table values after the length are ignored in the lookup)
+
+	"""
+	
+	scores_sm, attn_focus = attention_compute_scores(keys, key_width, keys_len, query, name)
+
+	with tf.name_scope(name):
+		
+		weighted_table = table * scores_sm
+
+		output = tf.reduce_sum(weighted_table, 1)
+		output = dynamic_assert_shape(output, [batch_size, value_width], "output")
 		output = tf.check_numerics(output, "attention_output")
 
-		return output, scores_sm, tf.reduce_sum(scores, axis=1)
+		return output, scores_sm, attn_focus
 
 
 def attention_by_index(control, head_stack):
