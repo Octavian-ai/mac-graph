@@ -49,6 +49,8 @@ def conv_bytes_feature(value):
 def tf_startswith(tensor, prefix, axis=None):
 	return tf.reduce_all(tf.equal(tf.substr(tensor, 0, len(prefix)), prefix), axis=axis)
 
+
+
 # --------------------------------------------------------------------------
 # File readers and writers
 # --------------------------------------------------------------------------
