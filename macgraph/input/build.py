@@ -48,7 +48,7 @@ Answer={vocab.ids_to_string([label])}
 		"kb_edges_len": 		write_int64_feature(edges.shape[0]),
 		"kb_nodes": 			write_int64_array_feature(nodes.flatten()),
 		"kb_nodes_len": 		write_int64_feature(nodes.shape[0]),		
-		"kb_adjacency":			write_int64_array_feature(adjacency.flatten()),
+		"kb_adjacency":			write_boolean_array_feature(adjacency.flatten()),
 		"label": 				write_int64_feature(label),
 		"type_string":			write_string_feature(doc["question"]["type_string"]),
 	}

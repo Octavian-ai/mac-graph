@@ -32,6 +32,9 @@ def write_int64_feature(value):
 def write_int64_array_feature(value):
 	return tf.train.Feature(int64_list=tf.train.Int64List(value=value)),
 
+def write_boolean_array_feature(value):
+	return write_int64_array_feature(value)
+
 def write_string_feature(value):
 	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.compat.as_bytes(value)]))
 
@@ -40,6 +43,9 @@ def write_string_feature(value):
 
 def parse_feature_int_array():
 	return tf.FixedLenSequenceFeature([],tf.int64, allow_missing=True)
+
+def parse_feature_boolean_array():
+	return parse_feature_int_array()
 
 def parse_feature_string():
 	return tf.FixedLenSequenceFeature([],tf.string, allow_missing=True)

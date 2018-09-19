@@ -20,7 +20,7 @@ def parse_single_example(i):
 			'kb_edges_len': 	parse_feature_int(),
 			'kb_nodes': 		parse_feature_int_array(),
 			'kb_nodes_len': 	parse_feature_int(),
-			'kb_adjacency':		parse_feature_int_array(),
+			'kb_adjacency':		parse_feature_boolean_array(),
 			
 			'label': 			parse_feature_int(),
 			'type_string':		parse_feature_string(),
@@ -69,7 +69,11 @@ def reshape_adjacency(features, labels):
 
 	return features, labels
 
-def input_fn(args, mode, question=None):
+def cast_adjacency_to_bool(features, labels):
+	features["kb_adjacency"] = tf.cast(features["kb_adjacency"], tf.bool)
+	return features, labels
+
+def input_fn(args, mode, question=None, repeat=True):
 
 	# --------------------------------------------------------------------------
 	# Read TFRecords
@@ -142,6 +146,8 @@ def input_fn(args, mode, question=None):
 		drop_remainder=(mode == "predict")
 	)
 
+	d = d.map(cast_adjacency_to_bool)
+
 	# Add dynamic dimensions for convenience (e.g. to do shape assertions)
 	d = d.map(lambda features, labels: ({
 		**features, 
@@ -149,7 +155,8 @@ def input_fn(args, mode, question=None):
 		"d_src_len":    tf.shape(features["src"])[1],
 	}, labels))
 
-	d = d.repeat()
+	if repeat:
+		d = d.repeat()
 	
 	return d
 
