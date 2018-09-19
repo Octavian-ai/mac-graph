@@ -6,6 +6,8 @@ from .memory_cell import *
 from .control_cell import *
 from .output_cell import *
 from .write_cell import *
+from .messaging_cell import *
+
 from ..util import *
 from ..minception import *
 
@@ -59,7 +61,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 		with tf.variable_scope("mac_cell", reuse=tf.AUTO_REUSE):
 
-			in_control_state, in_memory_state, in_data_stack = in_state
+			in_control_state, in_memory_state, in_data_stack, in_mp_state = in_state
 
 			empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)
 			empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
@@ -93,14 +95,20 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 					out_memory_state, read, out_control_state, in_data_stack)
 			else:
 				out_data_stack = in_data_stack
+
+			if self.args["use_message_passing"]:
+				mp_read, out_mp_state = messaging_cell(args, features, in_mp_state, out_control_state)
+			else:
+				out_mp_state = in_mp_state
+				mp_read = tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0)
 			
 			if self.args["use_output_cell"]:
 				output = output_cell(self.args, self.features,
-					self.question_state, out_memory_state, read, out_control_state)	
+					self.question_state, out_memory_state, read, out_control_state, mp_read)	
 			else:
 				output = read
 
-			out_state = (out_control_state, out_memory_state, out_data_stack)
+			out_state = (out_control_state, out_memory_state, out_data_stack, out_mp_state)
 			
 			# TODO: Move this tap manipulation upstream, 
 			#	have generic taps dict returned from the fns,
@@ -131,6 +139,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			self.args["control_width"], 
 			self.args["memory_width"], 
 			tf.TensorShape([self.args["data_stack_len"], self.args["data_stack_width"]]),
+			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
 		)
 
 	@property

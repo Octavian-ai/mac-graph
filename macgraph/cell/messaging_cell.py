@@ -12,8 +12,20 @@ class MP_Node(NamedTuple):
 	state: MP_State
 
 
+def messaging_cell(args, features, in_node_state, in_control_state, in_control_state):
 
-def messaging_cell(args, features, in_node_state, in_write_query, in_write_signal, in_read_query):
+	flat_control_state = tf.reshape(in_control_state, 
+		[features["d_batch_len"], args["control_width"] * args["control_heads"]])
+
+	in_write_query  = tf.layers.dense(flat_control_state, args["kb_node_width"])
+	in_write_signal = tf.layers.dense(flat_control_state, args["mp_state_width"])
+	in_read_query   = tf.layers.dense(flat_control_state, args["kb_node_width"])
+
+	return do_message_pass(args, features, in_node_state, in_write_query, in_write_signal, in_read_query)
+
+
+
+def do_message_pass(args, features, in_node_state, in_write_query, in_write_signal, in_read_query):
 	'''
 	Operate a message passing cell
 	Each iteration it'll do one round of message passing
@@ -33,6 +45,7 @@ def messaging_cell(args, features, in_node_state, in_write_query, in_write_signa
 	# Add write signal:
 	write_signal, _, _ = attention_write_by_key(
 		keys=features["kb_nodes"],
+		key_width=args["kb_node_width"],
 		keys_len=features["kb_nodes_len"],
 		query=in_write_query,
 		value=in_write_signal,
@@ -63,11 +76,11 @@ def messaging_cell(args, features, in_node_state, in_write_query, in_write_signa
 	out_node_state = node_state
 
 	out_read_signal, _, _ = attention_key_value(
-		table=out_node_state,
 		keys=features["kb_nodes"],
 		keys_len=feature["kb_nodes_len"],
 		key_width=args["kb_node_width"],
 		query=in_read_query,
+		table=out_node_state,
 		)
 
 
