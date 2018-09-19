@@ -7,23 +7,23 @@ logger = logging.getLogger(__name__)
 
 from .text_util import EOS_ID, UNK_ID
 from .graph_util import *
-from .util import tf_startswith
-
+from .util import *
 
 def parse_single_example(i):
 	return tf.parse_single_example(
 		i,
 		features = {
-			'src': 				tf.FixedLenSequenceFeature([],tf.int64, allow_missing=True),
-			'src_len': 			tf.FixedLenFeature([], tf.int64),
+			'src': 				parse_feature_int_array(),
+			'src_len': 			parse_feature_int(),
 			
-			'kb_edges': 		tf.FixedLenSequenceFeature([], tf.int64, allow_missing=True),
-			'kb_edges_len': 	tf.FixedLenFeature([], tf.int64),
-			'kb_nodes': 		tf.FixedLenSequenceFeature([], tf.int64, allow_missing=True),
-			'kb_nodes_len': 	tf.FixedLenFeature([], tf.int64),
+			'kb_edges': 		parse_feature_int_array(),
+			'kb_edges_len': 	parse_feature_int(),
+			'kb_nodes': 		parse_feature_int_array(),
+			'kb_nodes_len': 	parse_feature_int(),
+			'kb_adjacency':		parse_feature_int_array(),
 			
-			'label': 			tf.FixedLenFeature([], tf.int64),
-			'type_string':		tf.FixedLenSequenceFeature([], tf.string, allow_missing=True),
+			'label': 			parse_feature_int(),
+			'type_string':		parse_feature_string(),
 		})
 
 def reshape_example(args, i):
@@ -37,6 +37,7 @@ def reshape_example(args, i):
 		"kb_nodes_len":		i["kb_nodes_len"],
 		"kb_edges": 		tf.reshape(i["kb_edges"], [-1, args["kb_edge_width"]]),
 		"kb_edges_len":		i["kb_edges_len"],
+		"kb_adjacency":		tf.reshape(i["kb_adjacency"], [args["kb_node_max_len"], args["kb_node_max_len"]]),
 
 		# Prediction stats
 		"label":			i["label"], 
@@ -50,7 +51,23 @@ def switch_to_from(db):
 def make_edges_bidirectional(features, labels):
 	features["kb_edges"] = tf.concat([features["kb_edges"], switch_to_from(features["kb_edges"])], 0)
 	features["kb_edges_len"] *= 2
-	return (features, labels)
+	return features, labels
+
+
+def reshape_adjacency(features, labels):
+	a = features["kb_adjacency"]
+
+	nsq = features["kb_nodes_len"] * features["kb_nodes_len"]
+	a = a[:, 0: ]
+	a = tf.reshape(a, [
+		features["d_batch_size"], 
+		features["kb_nodes_len"], 
+		features["kb_nodes_len"]  
+	])
+
+	features["kb_adjacency"] = a
+
+	return features, labels
 
 def input_fn(args, mode, question=None):
 
@@ -78,7 +95,8 @@ def input_fn(args, mode, question=None):
 
 	d = d.shuffle(args["batch_size"]*1000)
 
-	zero64 = tf.cast(0, tf.int64) 
+	zero_64 = tf.cast(0, tf.int64) 
+	unk_64  = tf.cast(UNK_ID, tf.int64)
 
 	d = d.padded_batch(
 		args["batch_size"],
@@ -94,6 +112,7 @@ def input_fn(args, mode, question=None):
 				"kb_nodes_len": 	tf.TensorShape([]), 
 				"kb_edges": 		tf.TensorShape([None, args["kb_edge_width"]]),
 				"kb_edges_len": 	tf.TensorShape([]), 
+				"kb_adjacency": 	tf.TensorShape([args["kb_node_max_len"], args["kb_node_max_len"]]),
 
 				"label": 			tf.TensorShape([]), 
 				"type_string": 		tf.TensorShape([None]),
@@ -107,17 +126,18 @@ def input_fn(args, mode, question=None):
 		padding_values=(
 			{
 				"src": 				tf.cast(EOS_ID, tf.int64), 
-				"src_len": 			zero64, # unused
+				"src_len": 			zero_64, # unused
 
-				"kb_nodes": 		tf.cast(UNK_ID, tf.int64), 
-				"kb_nodes_len": 	zero64, # unused
-				"kb_edges": 		tf.cast(UNK_ID, tf.int64), 
-				"kb_edges_len": 	zero64, # unused
+				"kb_nodes": 		unk_64, 
+				"kb_nodes_len": 	zero_64, # unused
+				"kb_edges": 		unk_64, 
+				"kb_edges_len": 	zero_64, # unused
+				"kb_adjacency": 	zero_64, 
 
-				"label":			zero64,
+				"label":			zero_64,
 				"type_string": 		tf.cast("", tf.string),
 			},
-			zero64 # label (unused)
+			zero_64 # label (unused)
 		),
 		drop_remainder=(mode == "predict")
 	)

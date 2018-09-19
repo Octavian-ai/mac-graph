@@ -58,6 +58,8 @@ def graph_to_table(args, vocab, graph):
 
 	nodes = [pack(node_to_vec(i), args["kb_node_width"]) for i in graph["nodes"]]
 
+	assert len(graph["nodes"]) <= args["kb_node_max_len"]
+
 	for edge in graph["edges"]:
 		s1 = node_to_vec(node_lookup[edge["station1"]], ['name'])
 		s2 = node_to_vec(node_lookup[edge["station2"]], ['name'])
@@ -68,5 +70,34 @@ def graph_to_table(args, vocab, graph):
 		
 		edges.append(row)
 
-	return np.array(nodes), np.array(edges)
+
+	# I'm treating edges as bidirectional for the adjacency matrix
+	# Also, I'm discarding line information. That is still in the edges list 
+	def is_connected(idx_from, idx_to):
+
+		# To produce stable tensor sizes, the adj matrix is padded out to kb_nodes_max_len
+		if idx_from >= len(graph["nodes"]) or idx_to >= len(graph["nodes"]):
+			return False
+
+		id_from = graph["nodes"][idx_from]["id"]
+		id_to   = graph["nodes"][idx_to  ]["id"]
+
+		for edge in graph["edges"]:
+			if edge["station1"] == id_from and edge["station2"] == id_to:
+				return True
+			if edge["station1"] == id_to   and edge["station2"] == id_from:
+				return True
+
+		return False
+
+
+	adjacency = [
+		[
+			is_connected(i, j) for j in range(args["kb_node_max_len"])
+		]
+		for i in range(args["kb_node_max_len"])
+	]
+
+
+	return np.array(nodes), np.array(edges), np.array(adjacency)
 

@@ -33,7 +33,7 @@ def generate_record(args, vocab, doc):
 	if label >= args["output_classes"]:
 		raise ValueError(f"Label {label} greater than answer classes {args['output_classes']}")
 
-	nodes, edges = graph_to_table(args, vocab, doc["graph"])
+	nodes, edges, adjacency = graph_to_table(args, vocab, doc["graph"])
 
 	logger.debug(f"""
 Answer={vocab.ids_to_string([label])} 
@@ -42,33 +42,22 @@ Answer={vocab.ids_to_string([label])}
 {[vocab.ids_to_string(g) for g in edges]}""")
 
 	feature = {
-		"src": 				tf.train.Feature(int64_list=tf.train.Int64List(value=q)),
-		"src_len": 			int64_feature(len(q)),
-		"kb_edges": 		tf.train.Feature(int64_list=tf.train.Int64List(value=edges.flatten())),
-		"kb_edges_len": 	int64_feature(edges.shape[0]),
-		"kb_nodes": 		tf.train.Feature(int64_list=tf.train.Int64List(value=nodes.flatten())),
-		"kb_nodes_len": 	int64_feature(nodes.shape[0]),		
-		"label": 			int64_feature(label),
-		"type_string":		string_feature(doc["question"]["type_string"]),
+		"src": 					write_int64_array_feature(q),
+		"src_len": 				write_int64_feature(len(q)),
+		"kb_edges": 			write_int64_array_feature(edges.flatten()),
+		"kb_edges_len": 		write_int64_feature(edges.shape[0]),
+		"kb_nodes": 			write_int64_array_feature(nodes.flatten()),
+		"kb_nodes_len": 		write_int64_feature(nodes.shape[0]),		
+		"kb_adjacency":			write_int64_array_feature(adjacency.flatten()),
+		"label": 				write_int64_feature(label),
+		"type_string":			write_string_feature(doc["question"]["type_string"]),
 	}
 
 	example = tf.train.Example(features=tf.train.Features(feature=feature))
 	return example.SerializeToString()
 
 
-
-# --------------------------------------------------------------------------
-# Run the script
-# --------------------------------------------------------------------------
-
-if __name__ == "__main__":
-
-	args = get_args()
-
-	logging.basicConfig()
-	logger.setLevel(args["log_level"])
-	logging.getLogger("mac-graph.input.util").setLevel(args["log_level"])
-
+def build(args):
 	try:
 		pathlib.Path(args["input_dir"]).mkdir(parents=True, exist_ok=True)
 	except FileExistsError:
@@ -115,6 +104,21 @@ if __name__ == "__main__":
 		
 	with tf.gfile.GFile(args["question_types_path"], "w") as file:
 		yaml.dump(dict(question_types), file)
+
+
+# --------------------------------------------------------------------------
+# Run the script
+# --------------------------------------------------------------------------
+
+if __name__ == "__main__":
+
+	args = get_args()
+
+	logging.basicConfig()
+	logger.setLevel(args["log_level"])
+	logging.getLogger("mac-graph.input.util").setLevel(args["log_level"])
+
+	build(args)
 
 	
 

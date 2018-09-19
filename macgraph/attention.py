@@ -42,7 +42,7 @@ def attention(table, query, key_width=None, keys_len=None, name="attention"):
 	return attention_key_value(table, table, query, key_width, keys_len, name)
 
 
-def attention_compute_scores(keys, key_width=None, keys_len=None, query, name="attention"):
+def attention_compute_scores(keys, query, key_width=None, keys_len=None, name="attention"):
 	with tf.name_scope(name):
 
 		q = query
@@ -87,7 +87,7 @@ def attention_compute_scores(keys, key_width=None, keys_len=None, query, name="a
 		return scores_sm, tf.reduce_sum(scores, axis=1)
 
 
-def attention_write_by_key(keys, key_width=None, keys_len=None, query, value, name="attention"):
+def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, name="attention"):
 
 	scores_sm, attn_focus = attention_compute_scores(keys, key_width, keys_len, query, name)
 
@@ -96,7 +96,7 @@ def attention_write_by_key(keys, key_width=None, keys_len=None, query, value, na
 		return weighted_table, scores_sm, attn_focus
 
 
-def attention_key_value(keys, key_width=None, keys_len=None, table, query, name="attention"):
+def attention_key_value(keys, table, query, key_width=None, keys_len=None, name="attention"):
 	"""
 	Apply attention
 

@@ -47,7 +47,7 @@ def messaging_cell(args, features, in_node_state, in_write_query, in_write_signa
 	node_state = tf.nn.conv1d(node_state, message_pass_kernel, 1, 'SAME', name="message_pass")
 
 	# Aggregate via adjacency matrix (that does not include self-edges)
-	agg = tf.matmul(node_state, features["kb_node_adjacency"])
+	agg = tf.matmul(node_state, features["kb_adjacency"])
 
 	# Add self-reference
 	self_reference_kernel = tf.get_variable("message_pass_kernel", [1, args["mp_state_width"], args["kb_node_state_width"]])

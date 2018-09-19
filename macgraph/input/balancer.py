@@ -3,6 +3,9 @@ import random
 import math
 from collections import Counter
 
+import logging
+logger = logging.getLogger(__name__)
+
 class Balancer(object):
 
 	def __init__(self, partitioner, balance_freq, name="", parent=None):
@@ -106,7 +109,12 @@ class DictBalancer(Balancer):
 	def oversample(self, n):
 
 		total_target = self.oversampled_so_far() + n
-		target_per_class = math.ceil(total_target / len(self.data))
+
+		if len(self.data) > 0:
+			target_per_class = math.ceil(total_target / len(self.data))
+		else:
+			logger.warn(f"Oversample called on {self.name} but no data added")
+			return []
 
 		if n <= 0:
 			return []

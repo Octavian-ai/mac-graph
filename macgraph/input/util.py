@@ -26,20 +26,26 @@ def min_none(a, b):
 
 # Why it's so awkward to write a record I do not know
 
-def int32_feature(value):
-	return tf.train.Feature(int32_list=tf.train.Int32List(value=[value]))
-
-def int64_feature(value):
+def write_int64_feature(value):
 	return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
 
-def bytes_feature(value):
-	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+def write_int64_array_feature(value):
+	return tf.train.Feature(int64_list=tf.train.Int64List(value=value)),
 
-def string_feature(value):
-	return conv_bytes_feature(value)
-
-def conv_bytes_feature(value):
+def write_string_feature(value):
 	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.compat.as_bytes(value)]))
+
+
+# TODO: Better naming / structure
+
+def parse_feature_int_array():
+	return tf.FixedLenSequenceFeature([],tf.int64, allow_missing=True)
+
+def parse_feature_string():
+	return tf.FixedLenSequenceFeature([],tf.string, allow_missing=True)
+
+def parse_feature_int():
+	return tf.FixedLenFeature([], tf.int64)
 
 
 # --------------------------------------------------------------------------
