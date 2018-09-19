@@ -1,4 +1,6 @@
 
+import tensorflow as tf
+
 from .util import *
 
 from .args import global_args
@@ -41,61 +43,6 @@ def softmax_with_masking(logits, mask, axis):
 def attention(table, query, key_width=None, keys_len=None, name="attention"):
 	return attention_key_value(table, table, query, key_width, keys_len, name)
 
-
-def attention_compute_scores(keys, query, key_width=None, keys_len=None, name="attention"):
-	with tf.name_scope(name):
-
-		q = query
-
-		# --------------------------------------------------------------------------
-		# Validate inputs
-		# --------------------------------------------------------------------------
-
-		assert len(keys.shape) == 3, "keys should be shape [batch, len, key_width]"
-		assert len(table.shape) == 3, "table should be shape [batch, len, value_width]"
-
-		batch_size = tf.shape(table)[0]
-		seq_len = tf.shape(table)[1]
-
-		if key_width is None:
-			key_width = tf.shape(keys)[2]
-
-		value_width = tf.shape(table)[2]
-
-		table_shape = tf.shape(table)
-		q_shape = [batch_size, key_width]
-		scores_shape = [batch_size, seq_len, 1]
-
-		q = dynamic_assert_shape(q, q_shape, "query")
-
-		# --------------------------------------------------------------------------
-		# Run model
-		# --------------------------------------------------------------------------
-
-		scores = tf.matmul(keys, tf.expand_dims(q, 2))
-
-		if keys_len is not None:
-			scores_mask = tf.sequence_mask(keys_len, seq_len)
-			scores_mask = tf.expand_dims(scores_mask, -1) # I like to tightly assert my shapes
-			scores_mask = dynamic_assert_shape(scores_mask, scores_shape, "scores_mask")
-			scores_sm = softmax_with_masking(scores, mask=scores_mask, axis=1)
-		else:
-			scores_sm = tf.nn.softmax(scores + EPSILON, axis=1)
-
-		scores_sm = dynamic_assert_shape(scores_sm, scores_shape, "scores")
-
-		return scores_sm, tf.reduce_sum(scores, axis=1)
-
-
-def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, name="attention"):
-
-	scores_sm, attn_focus = attention_compute_scores(keys, key_width, keys_len, query, name)
-
-	with tf.name_scope(name):
-		weighted_table = tf.expand_dims(value, 1) * scores_sm	
-		return weighted_table, scores_sm, attn_focus
-
-
 def attention_key_value(keys, table, query, key_width=None, keys_len=None, name="attention"):
 	"""
 	Apply attention
@@ -112,7 +59,11 @@ def attention_key_value(keys, table, query, key_width=None, keys_len=None, name=
 	scores_sm, attn_focus = attention_compute_scores(keys, key_width, keys_len, query, name)
 
 	with tf.name_scope(name):
-		
+
+		assert len(table.shape) == 3, "table should be shape [batch, len, value_width]"
+		value_width = tf.shape(table)[2]
+		table_shape = tf.shape(table)
+
 		weighted_table = table * scores_sm
 
 		output = tf.reduce_sum(weighted_table, 1)
@@ -120,6 +71,65 @@ def attention_key_value(keys, table, query, key_width=None, keys_len=None, name=
 		output = tf.check_numerics(output, "attention_output")
 
 		return output, scores_sm, attn_focus
+
+def attention_compute_scores(keys, query, key_width=None, keys_len=None, name="attention"):
+	with tf.name_scope(name):
+
+		# --------------------------------------------------------------------------
+		# Validate inputs
+		# --------------------------------------------------------------------------
+
+		assert query is not None
+		assert keys is not None
+		assert len(keys.shape) == 3, "keys should be shape [batch, len, key_width]"
+		
+		batch_size = tf.shape(keys)[0]
+		seq_len = tf.shape(keys)[1]
+
+		if key_width is None:
+			key_width = tf.shape(keys)[2]
+
+		q_shape = [batch_size, key_width]
+		scores_shape = [batch_size, seq_len, 1]
+
+		query = dynamic_assert_shape(query, q_shape, "query")
+
+		# --------------------------------------------------------------------------
+		# Run model
+		# --------------------------------------------------------------------------
+
+		scores = tf.matmul(keys, tf.expand_dims(query, 2))
+
+		if keys_len is not None:
+			scores_mask = tf.sequence_mask(keys_len, seq_len)
+			scores_mask = tf.expand_dims(scores_mask, -1)
+			scores_mask = dynamic_assert_shape(scores_mask, scores_shape, "scores_mask")
+			scores_sm = softmax_with_masking(scores, mask=scores_mask, axis=1)
+		else:
+			scores_sm = tf.nn.softmax(scores + EPSILON, axis=1)
+
+		scores_sm = dynamic_assert_shape(scores_sm, scores_shape, "scores")
+
+		return scores_sm, tf.reduce_sum(scores, axis=1)
+
+
+def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, name="attention"):
+
+	batch_size = tf.shape(keys)[0]
+	seq_len = tf.shape(keys)[1]
+	value_width = tf.shape(value)[-1]
+
+	assert len(value.shape) == 2, "Value must have batch dimension"
+
+	scores_sm, attn_focus = attention_compute_scores(keys, query, key_width, keys_len, name)
+
+	with tf.name_scope(name):
+		weighted_table = tf.expand_dims(value, 1) * scores_sm	
+		weighted_table = dynamic_assert_shape(weighted_table, [batch_size, seq_len, value_width])
+		return weighted_table, scores_sm, attn_focus
+
+
+
 
 
 def attention_by_index(control, head_stack):
