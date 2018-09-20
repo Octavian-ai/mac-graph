@@ -42,7 +42,7 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 	write_signal, _, _ = attention_write_by_key(
 		keys=node_table,
 		key_width=node_table_width,
-		keys_len=node_table_len,
+		keys_len=None, # Include the sequence padding since it is in the node_state table also
 		query=in_write_query,
 		value=in_write_signal,
 	)
