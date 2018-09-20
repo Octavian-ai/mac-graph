@@ -10,4 +10,6 @@ python -m macgraph.train \
 	--max-decode-iterations 6 \
 	--control-heads 2 \
 	--read-heads 1 \
+	--disable-kb-node \
+	--disable-kb-edge \
 	$@
