@@ -90,6 +90,9 @@ def read_cell(args, features, vocab_embedding,
 
 		head_total = args["read_heads"] * len(args["kb_list"])
 
+		if head_total == 0:
+			return tf.fill([features["d_batch_size"], 1], 0.0), {}
+
 		# --------------------------------------------------------------------------
 		# Read data
 		# --------------------------------------------------------------------------
@@ -147,7 +150,6 @@ def read_cell(args, features, vocab_embedding,
 					reads.append(read_words)
 
 				head_i += 1
-					
 
 		if args["use_read_extract"]:
 			reads = tf.stack(reads, axis=1)

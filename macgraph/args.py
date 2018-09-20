@@ -109,6 +109,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--disable-kb-node', 			action='store_false', dest='use_kb_node')
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
 
+	parser.add_argument('--disable-read-cell',			action='store_false', dest='use_read_cell')
 	parser.add_argument('--read-width',         		type=int, default=128,  help="Width of the read state output")
 	parser.add_argument('--read-heads',         		type=int, default=1,    help="Number of read heads for each knowledge base table")
 	parser.add_argument('--read-layers',         		type=int, default=1,    help="Number of read transformation layers")
