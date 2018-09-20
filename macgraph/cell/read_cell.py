@@ -3,7 +3,7 @@ import tensorflow as tf
 
 from ..util import *
 from ..attention import *
-from ..input import UNK_ID
+from ..input import UNK_ID, get_table_with_embedding
 from ..minception import *
 from ..args import ACTIVATION_FNS
 
@@ -43,49 +43,6 @@ def read_from_table(args, features, in_signal, noun, table, width, keys_len=None
 
 	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
 	return output, score_sm, table, total_raw_score
-
-
-def get_table_with_embedding(args, features, vocab_embedding, noun):
-	
-	# --------------------------------------------------------------------------
-	# Constants and validations
-	# --------------------------------------------------------------------------
-
-	table = features[f"{noun}s"]
-	keys_len = features[f"{noun}s_len"]
-
-	width = args[f"{noun}_width"]
-	full_width = width * args["embed_width"]
-
-	d_len = tf.shape(table)[1]
-	assert table.shape[-1] == width
-
-
-	# --------------------------------------------------------------------------
-	# Extend table if desired
-	# --------------------------------------------------------------------------
-
-	if args["read_indicator_rows"] > 0:
-		# Add a trainable row to the table
-		ind_row_shape = [features["d_batch_size"], args["read_indicator_rows"], width]
-		ind_row = tf.fill(ind_row_shape, tf.cast(UNK_ID, table.dtype))
-		table = tf.concat([table, ind_row], axis=1)
-		keys_len += args["read_indicator_rows"]
-		d_len += args["read_indicator_rows"]
-
-	# --------------------------------------------------------------------------
-	# Embed graph tokens
-	# --------------------------------------------------------------------------
-	
-	emb_kb = tf.nn.embedding_lookup(vocab_embedding, table)
-	emb_kb = dynamic_assert_shape(emb_kb, 
-		[features["d_batch_size"], d_len, width, args["embed_width"]])
-
-	emb_kb = tf.reshape(emb_kb, [-1, d_len, full_width])
-	emb_kb = dynamic_assert_shape(emb_kb, 
-		[features["d_batch_size"], d_len, full_width])
-
-	return emb_kb, full_width, keys_len
 
 
 def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun):
