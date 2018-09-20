@@ -42,10 +42,13 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 	write_signal, _, _ = attention_write_by_key(
 		keys=node_table,
 		key_width=node_table_width,
-		keys_len=None, # Include the sequence padding since it is in the node_state table also
+		keys_len=node_table_len,
 		query=in_write_query,
 		value=in_write_signal,
 	)
+	delta = tf.shape(node_state)[1] - tf.shape(write_signal)[1]
+	write_signal = tf.pad(write_signal, [ [0,0], [0,delta], [0,0] ]) # zero pad out
+	write_signal = dynamic_assert_shape(write_signal, tf.shape(node_state), "write_signal")
 
 	node_state += write_signal
 
@@ -70,18 +73,19 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 	node_state = ACTIVATION_FNS[args["mp_activation"]](node_state)
 
 
-	# Outputs
-	out_node_state = node_state
+	# Output
+	delta = tf.shape(node_state)[1] - tf.shape(node_table)[1]
+	padded_node_table = tf.pad(node_table, [ [0,0], [0,delta], [0,0] ]) # zero pad out
 
 	out_read_signal, _, _ = attention_key_value(
-		keys=node_table,
+		keys=padded_node_table,
 		keys_len=node_table_len,
 		key_width=node_table_width,
 		query=in_read_query,
-		table=out_node_state,
+		table=node_state,
 		)
 
 
-	return out_read_signal, out_node_state
+	return out_read_signal, node_state
 
 

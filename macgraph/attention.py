@@ -59,6 +59,13 @@ def attention_key_value(keys:tf.Tensor, table:tf.Tensor, query:tf.Tensor, key_wi
 		- `keys_len` A tensor of the lengths of the tables (in the batch) that is used to mask the scores before applying softmax (i.e. meaning that any table values after the length are ignored in the lookup)
 
 	"""
+
+	assert len(table.shape) == 3, "table should be shape [batch, len, value_width]"
+	batch_size = tf.shape(table)[0]
+	seq_len = tf.shape(table)[1]
+	value_width = tf.shape(table)[2]
+
+	keys = dynamic_assert_shape(keys, [batch_size, seq_len, tf.shape(keys)[2]], "keys")
 	
 	scores_sm, attn_focus = attention_compute_scores(
 		keys=keys, 
@@ -67,12 +74,9 @@ def attention_key_value(keys:tf.Tensor, table:tf.Tensor, query:tf.Tensor, key_wi
 		keys_len=keys_len, 
 		name=name)
 
+	scores_sm = dynamic_assert_shape(scores_sm, [batch_size, seq_len, 1], "scores_sm")
+
 	with tf.name_scope(name):
-
-		assert len(table.shape) == 3, "table should be shape [batch, len, value_width]"
-		batch_size = tf.shape(table)[0]
-		value_width = tf.shape(table)[2]
-
 		weighted_table = table * scores_sm
 
 		output = tf.reduce_sum(weighted_table, 1)
