@@ -40,10 +40,14 @@ def softmax_with_masking(logits, mask, axis):
 			return l / (d + EPSILON)
 
 
-def attention(table, query, key_width=None, keys_len=None, name="attention"):
-	return attention_key_value(table, table, query, key_width, keys_len, name)
+def attention(table:tf.Tensor, query:tf.Tensor, key_width:int=None, keys_len=None, name="attention"):
+	return attention_key_value(
+		keys=table, 
+		table=table, 
+		query=query, 
+		key_width=key_width, keys_len=keys_len, name=name)
 
-def attention_key_value(keys, table, query, key_width=None, keys_len=None, name="attention"):
+def attention_key_value(keys:tf.Tensor, table:tf.Tensor, query:tf.Tensor, key_width:int=None, keys_len=None, name="attention"):
 	"""
 	Apply attention
 
@@ -56,13 +60,18 @@ def attention_key_value(keys, table, query, key_width=None, keys_len=None, name=
 
 	"""
 	
-	scores_sm, attn_focus = attention_compute_scores(keys, key_width, keys_len, query, name)
+	scores_sm, attn_focus = attention_compute_scores(
+		keys=keys, 
+		query=query, 
+		key_width=key_width, 
+		keys_len=keys_len, 
+		name=name)
 
 	with tf.name_scope(name):
 
 		assert len(table.shape) == 3, "table should be shape [batch, len, value_width]"
+		batch_size = tf.shape(table)[0]
 		value_width = tf.shape(table)[2]
-		table_shape = tf.shape(table)
 
 		weighted_table = table * scores_sm
 
@@ -72,7 +81,7 @@ def attention_key_value(keys, table, query, key_width=None, keys_len=None, name=
 
 		return output, scores_sm, attn_focus
 
-def attention_compute_scores(keys, query, key_width=None, keys_len=None, name="attention"):
+def attention_compute_scores(keys:tf.Tensor, query:tf.Tensor, key_width:int=None, keys_len=None, name:str="attention"):
 	with tf.name_scope(name):
 
 		# --------------------------------------------------------------------------
@@ -121,7 +130,8 @@ def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, na
 
 	assert len(value.shape) == 2, "Value must have batch dimension"
 
-	scores_sm, attn_focus = attention_compute_scores(keys, query, key_width, keys_len, name)
+	scores_sm, attn_focus = attention_compute_scores(
+		keys=keys, query=query, key_width=key_width, keys_len=keys_len, name=name)
 
 	with tf.name_scope(name):
 		weighted_table = tf.expand_dims(value, 1) * scores_sm	

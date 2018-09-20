@@ -97,7 +97,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				out_data_stack = in_data_stack
 
 			if self.args["use_message_passing"]:
-				mp_read, out_mp_state = messaging_cell(args, features, in_mp_state, out_control_state)
+				mp_read, out_mp_state = messaging_cell(self.args, self.features, in_mp_state, out_control_state)
 			else:
 				out_mp_state = in_mp_state
 				mp_read = tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0)

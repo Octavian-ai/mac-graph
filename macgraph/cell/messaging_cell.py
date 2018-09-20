@@ -3,6 +3,7 @@ from typing import NamedTuple
 import tensorflow as tf
 
 from ..args import ACTIVATION_FNS
+from ..attention import *
 
 MP_State = tf.Tensor
 
@@ -12,10 +13,10 @@ class MP_Node(NamedTuple):
 	state: MP_State
 
 
-def messaging_cell(args, features, in_node_state, in_control_state, in_control_state):
+def messaging_cell(args, features, in_node_state, in_control_state):
 
 	flat_control_state = tf.reshape(in_control_state, 
-		[features["d_batch_len"], args["control_width"] * args["control_heads"]])
+		[features["d_batch_size"], args["control_width"] * args["control_heads"]])
 
 	in_write_query  = tf.layers.dense(flat_control_state, args["kb_node_width"])
 	in_write_signal = tf.layers.dense(flat_control_state, args["mp_state_width"])
