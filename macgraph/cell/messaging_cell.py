@@ -58,10 +58,11 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 	# Apply message pass function:
 	node_state = tf.nn.conv1d(node_state, message_pass_kernel, 1, 'SAME', name="message_pass")
 
-	# Aggregate via adjacency matrix (that does not include self-edges)
+	# Aggregate via adjacency matrix with normalisation (that does not include self-edges)
 	adj = tf.cast(features["kb_adjacency"], tf.float32)
-	# agg = tf.matmul(node_state, tf.cast(features["kb_adjacency"], tf.float32))
-	agg = tf.einsum('bnw,bnm->bmw', node_state, adj)
+	inv_diagonal_degree = tf.eye(features["kb_adjacency"].shape[-1]) * tf.reciprocal(tf.reduce_sum(adj, -1))
+	adj_norm = inv_diagonal_degree @ adj
+	agg = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
 
 	# Add self-reference
 	self_reference_kernel = tf.get_variable("message_pass_kernel", [1, args["mp_state_width"], args["mp_state_width"]])
