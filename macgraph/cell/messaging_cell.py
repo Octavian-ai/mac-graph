@@ -60,8 +60,14 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 
 	# Aggregate via adjacency matrix with normalisation (that does not include self-edges)
 	adj = tf.cast(features["kb_adjacency"], tf.float32)
-	inv_diagonal_degree = tf.eye(features["kb_adjacency"].shape[-1]) * tf.reciprocal(tf.reduce_sum(adj, -1))
-	adj_norm = inv_diagonal_degree @ adj
+	degree = tf.reduce_sum(adj, -1, keep_dims=True)
+	inv_degree = tf.reciprocal(degree)
+	node_mask = tf.expand_dims(tf.sequence_mask(features["kb_nodes_len"], args["kb_node_max_len"]), -1)
+	inv_degree = tf.where(node_mask, inv_degree, tf.zeros(tf.shape(inv_degree)))
+	inv_degree = tf.where(tf.greater(degree, 0), inv_degree, tf.zeros(tf.shape(inv_degree)))
+	inv_degree = tf.check_numerics(inv_degree, "inv_degree")
+	adj_norm = inv_degree * adj
+	adj_norm = tf.check_numerics(adj_norm, "adj_norm")
 	agg = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
 
 	# Add self-reference
