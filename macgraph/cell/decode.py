@@ -42,7 +42,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 		sample_fn = lambda time, outputs, state: tf.constant(0) # sampled output
 
 		def next_inputs_fn(time, outputs, state, sample_ids):
-			finished = tf.greater(tf.layers.dense(outputs[0], 1, kernel_initializer=tf.zeros_initializer()), 0.5)
+			finished = outputs[1]
 			next_inputs = tf.gather(inputs, time)
 			next_state = state
 			return (finished, next_inputs, next_state)

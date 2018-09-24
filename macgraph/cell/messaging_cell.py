@@ -31,7 +31,7 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 
 	node_state = in_node_state
 	node_table, node_table_width, node_table_len = get_table_with_embedding(args, features, vocab_embedding, "kb_node")
-
+	taps = {}
 
 	# Read/Write queries
 	in_write_query  = tf.layers.dense(in_control_state, node_table_width)
@@ -39,7 +39,7 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 	in_read_query   = tf.layers.dense(in_control_state, node_table_width)
 
 	# Add write signal:
-	write_signal, _, _ = attention_write_by_key(
+	write_signal, taps["mp_write_scores"], _ = attention_write_by_key(
 		keys=node_table,
 		key_width=node_table_width,
 		keys_len=node_table_len,
@@ -84,7 +84,7 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 	delta = tf.shape(node_state)[1] - tf.shape(node_table)[1]
 	padded_node_table = tf.pad(node_table, [ [0,0], [0,delta], [0,0] ]) # zero pad out
 
-	out_read_signal, _, _ = attention_key_value(
+	out_read_signal, taps["mp_read_scores"], _ = attention_key_value(
 		keys=padded_node_table,
 		keys_len=node_table_len,
 		key_width=node_table_width,
@@ -93,6 +93,6 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 		)
 
 
-	return out_read_signal, node_state
+	return out_read_signal, node_state, taps
 
 

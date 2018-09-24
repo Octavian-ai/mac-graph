@@ -74,26 +74,34 @@ def predict(args, cmd_args):
 
 		for i in range(iterations):
 
+			finished = row['finished'][i]
+			print (f"{i}: {'FINISHED' if finished else 'not finished'}")
+			
 			if args["use_control_cell"]:
 				for control_head in row["question_word_attn"][i]:
 					print(f"{i}: " + ' '.join(color_text(row["src"], control_head)))
 			
-			read_head_part = ' '.join(color_text(args["kb_list"], row["read_head_attn"][i]))
-			print(f"{i}: read_head_attn: ",read_head_part)
-			print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
+			if args["use_read_cell"]:
+				read_head_part = ' '.join(color_text(args["kb_list"], row["read_head_attn"][i]))
+				print(f"{i}: read_head_attn: ",read_head_part)
+				print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
 
-			for idx0, noun in enumerate(args["kb_list"]):
-				if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
-					db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"]]
-					print(f"{i}: " + noun+"_attn: ",', '.join(color_text(db, row[f"{noun}_attn"][i])))
+				for idx0, noun in enumerate(args["kb_list"]):
+					if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
+						db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"]]
+						print(f"{i}: " + noun+"_attn: ",', '.join(color_text(db, row[f"{noun}_attn"][i])))
 
-					for idx, attn in enumerate(row[f"{noun}_attn"][i]):
-						if attn > ATTN_THRESHOLD:
-							print(f"{i}: " +noun+"_word_attn: ",', '.join(color_text(
-								vocab.prediction_value_to_string(row[f"{noun}s"][idx], True),
-								row[f"{noun}_word_attn"][i],
-								)
-							))
+						for idx, attn in enumerate(row[f"{noun}_attn"][i]):
+							if attn > ATTN_THRESHOLD:
+								print(f"{i}: " +noun+"_word_attn: ",', '.join(color_text(
+									vocab.prediction_value_to_string(row[f"{noun}s"][idx], True),
+									row[f"{noun}_word_attn"][i],
+									)
+								))
+			if args["use_message_passing"]:
+				for tap in ["mp_read_attn", "mp_write_attn"]:
+					db = [vocab.prediction_value_to_string(kb_row) for kb_row in row["kb_nodes"]]
+					print(f"{i}: {tap}: ",', '.join(color_text(db, row[tap][i])))
 
 		hr()
 
