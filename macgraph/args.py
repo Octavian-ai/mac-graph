@@ -46,6 +46,9 @@ def generate_args_derivatives(args):
 	if args["use_kb_edge"]:
 		r["kb_list"].append("kb_edge")
 
+	if args["save_checkpoints_steps"] is None and args["save_checkpoints_secs"] is None:
+		r["save_checkpoints_secs"] = 60 * 3
+
 
 	return r
 
@@ -86,6 +89,8 @@ def get_args(extend=lambda parser:None, argv=None):
 		
 	parser.add_argument('--max-gradient-norm',     		type=float, default=0.4)
 	parser.add_argument('--learning-rate',         		type=float, default=0.001)
+	parser.add_argument('--save-checkpoints-steps',		type=int,	default=None, help="Passed to RunConfig in tensorflow")
+	parser.add_argument('--save-checkpoints-secs',		type=int,	default=None, help="Passed to RunConfig in tensorflow")
 
 	# --------------------------------------------------------------------------
 	# Network topology

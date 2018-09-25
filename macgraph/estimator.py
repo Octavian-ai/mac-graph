@@ -8,6 +8,8 @@ def get_estimator(args):
 	run_config = tf.estimator.RunConfig(
 		model_dir=args["model_dir"],
 		tf_random_seed=3,
+		save_checkpoints_steps=args["save_checkpoints_steps"],
+		save_checkpoints_secs=args["save_checkpoints_secs"],
 	)
 
 	return tf.estimator.Estimator(

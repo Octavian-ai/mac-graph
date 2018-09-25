@@ -121,7 +121,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			#	have generic taps dict returned from the fns,
 			#	and make this just use get_taps to append the data
 			out_data  = [output, 
-				finished,
+				tf.cast(finished, tf.float32),
 				tap_question_attn,
 				tf.squeeze(read_taps.get("kb_node_attn", empty_attn), 2),
 				read_taps.get("kb_node_word_attn", empty_query),

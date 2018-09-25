@@ -100,6 +100,7 @@ def predict(args, cmd_args):
 								))
 			if args["use_message_passing"]:
 				for tap in ["mp_read_attn", "mp_write_attn"]:
+					print(row[tap][i])
 					db = [vocab.prediction_value_to_string(kb_row) for kb_row in row["kb_nodes"]]
 					print(f"{i}: {tap}: ",', '.join(color_text(db, row[tap][i])))
 
