@@ -144,7 +144,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--mp-activation',				type=str, default="linear", 		choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--mp-state-width', 			type=int, default=8)
 	parser.add_argument('--mp-self-dampening', 			type=float, default=0.3)
-	parser.add_argument('--disable-massage-passing',    action='store_false', dest='use_message_passing')
+	parser.add_argument('--disable-message-passing',    action='store_false', dest='use_message_passing')
 	
 
 	parser.add_argument('--output-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
