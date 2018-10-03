@@ -40,6 +40,34 @@ def color_text(text_array, levels, color_fg=True):
 		out.append(stylize(s, color))
 	return out
 
+def pad_str(s, target=3):
+	if len(s) < target:
+		s += ' '.join(['' for i in range(target - len(s))])
+	return s
+
+def adj_pretty(mtx, kb_nodes_len, kb_nodes, vocab):
+	output = ""
+
+	for r_idx, row in enumerate(mtx):
+		if r_idx < kb_nodes_len:
+			
+			r_id = kb_nodes[r_idx][0]
+			r_name = vocab.inverse_lookup(r_id)
+			output += pad_str(f"{r_name}: ",target=4)
+			
+			for c_idx, item in enumerate(row):
+				if c_idx < kb_nodes_len:
+
+					c_id = kb_nodes[c_idx][0]
+					c_name = vocab.inverse_lookup(c_id)
+
+					if item:
+						output += pad_str(f"{c_name}")
+					else:
+						output += pad_str(" ")
+			output += "\n"
+
+	return output
 
 
 def predict(args, cmd_args):
@@ -47,9 +75,9 @@ def predict(args, cmd_args):
 
 	# Logging setup
 	logging.basicConfig()
-	tf.logging.set_verbosity(args["log_level"])
-	logger.setLevel(args["log_level"])
-	logging.getLogger("mac-graph").setLevel(args["log_level"])
+	tf.logging.set_verbosity("WARN")
+	logger.setLevel("WARN")
+	logging.getLogger("mac-graph").setLevel("WARN")
 
 	# Info about the experiment, for the record
 	tfr_size = sum(1 for _ in tf.python_io.tf_record_iterator(args["predict_input_path"]))
@@ -75,7 +103,7 @@ def predict(args, cmd_args):
 		for i in range(iterations):
 
 			finished = row['finished'][i]
-			print (f"{i}: {'FINISHED' if finished else 'not finished'}")
+			# print (f"{i}: {'FINISHED' if finished else 'not finished'}")
 			
 			if args["use_control_cell"]:
 				for control_head in row["question_word_attn"][i]:
@@ -100,8 +128,12 @@ def predict(args, cmd_args):
 								))
 			if args["use_message_passing"]:
 				for tap in ["mp_read_attn", "mp_write_attn"]:
-					db = [vocab.prediction_value_to_string(kb_row) for kb_row in row["kb_nodes"]]
+					db = [vocab.prediction_value_to_string(kb_row[0:1]) for kb_row in row["kb_nodes"]]
+					db = db[0:row["kb_nodes_len"]]
 					print(f"{i}: {tap}: ",', '.join(color_text(db, row[tap][i])))
+
+				print(
+					adj_pretty(row["kb_adjacency"], row["kb_nodes_len"], row["kb_nodes"], vocab))
 
 		hr()
 

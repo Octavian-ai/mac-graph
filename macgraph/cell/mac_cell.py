@@ -38,7 +38,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			"mp_read_attn": 		self.args["kb_node_max_len"],
 			"mp_write_attn": 		self.args["kb_node_max_len"],
 			"mp_node_state":		tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
-			"mp_write_query":		self.args["kb_node_width"] * self.args["embed_width"],
+			"mp_write_query":		self.args["kb_node_width"] * self.args["embed_width"],	
 		}
 
 
@@ -137,7 +137,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				mp_taps.get("mp_read_attn", empty_query),
 				mp_taps.get("mp_write_attn", empty_query),
 				out_mp_state,
-				mp_taps.get("mp_write_query", empty_query)
+				mp_taps.get("mp_write_query", empty_query),
 			]
 
 			return out_data, out_state

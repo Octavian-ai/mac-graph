@@ -36,7 +36,8 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 
 	# Read/Write queries
 	in_write_query  = tf.layers.dense(in_control_state, node_table_width)
-	in_write_signal = tf.layers.dense(in_control_state, args["mp_state_width"])
+	in_write_signal = tf.ones([features["d_batch_size"], args["mp_state_width"]])
+	# tf.layers.dense(in_control_state, args["mp_state_width"])
 	in_read_query   = tf.layers.dense(in_control_state, node_table_width)
 	
 	return do_messaging_cell(args, features, vocab_embedding, 
