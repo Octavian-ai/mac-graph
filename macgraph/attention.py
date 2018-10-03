@@ -25,7 +25,7 @@ def softmax_with_masking(logits, mask, axis):
 		l_delta = tf.check_numerics(l_delta, "l_delta")
 
 		# This assert fails, howwwww??
-		with tf.control_dependencies([tf.assert_less_equal(l_delta, 0.0, summarize=100000, data=[logits_max, mask, logits])]):
+		with tf.control_dependencies([tf.assert_less_equal(l_delta, tf.cast(0.0, logits.dtype), summarize=100000, data=[logits_max, mask, logits])]):
 			
 			l = tf.exp(l_delta)
 			l = tf.check_numerics(l, "numerator pre mask")
@@ -100,17 +100,22 @@ def attention_compute_scores(keys:tf.Tensor, query:tf.Tensor, key_width:int=None
 		assert query is not None
 		assert keys is not None
 		assert len(keys.shape) == 3, "keys should be shape [batch, len, key_width]"
-		
+
 		batch_size = tf.shape(keys)[0]
 		seq_len = tf.shape(keys)[1]
+
+		if keys_len is not None:
+			keys_len = dynamic_assert_shape(keys_len, [batch_size], "keys_len")
 
 		if key_width is None:
 			key_width = tf.shape(keys)[2]
 
 		q_shape = [batch_size, key_width]
 		scores_shape = [batch_size, seq_len, 1]
-
+		keys_shape = [batch_size, seq_len, key_width]
+		
 		query = dynamic_assert_shape(query, q_shape, "query")
+		keys = dynamic_assert_shape(keys, keys_shape, "keys") # Somewhat tautalagous
 
 		# --------------------------------------------------------------------------
 		# Run model

@@ -97,12 +97,8 @@ def model_fn(features, labels, mode, params):
 			tf.summary.histogram("grad_norm", norms)
 			tf.summary.scalar("grad_norm", tf.reduce_max(norms), family="hyperparam")
 
-		var_all = tf.trainable_variables()
-		var_weights = [i for i in var_all if not i.name.startswith("darts_")]
-		var_arch = [i for i in var_all if i.name.startswith("darts_")]
-
 		optimizer = tf.train.AdamOptimizer(learning_rate)
-		train_op, gradients = minimize_clipped(optimizer, loss, args["max_gradient_norm"], var_all)
+		train_op, gradients = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
 	
 
 	# --------------------------------------------------------------------------

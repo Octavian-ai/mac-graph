@@ -19,7 +19,9 @@ ACTIVATION_FNS = {
 	"sigmoid": tf.nn.sigmoid,
 	"mi": mi_activation,
 	"abs": absu,
-	"tanh_abs": lambda x: tf.concat([tf.tanh(x), absu(x)], axis=-1)
+	"tanh_abs": lambda x: tf.concat([tf.tanh(x), absu(x)], axis=-1),
+	"linear": tf.identity,
+	"id": tf.identity,
 }
 
 def generate_args_derivatives(args):
@@ -139,7 +141,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--memory-forget-activation',	type=str, default="sigmoid", 	choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--memory-activation',			type=str, default="tanh", 		choices=ACTIVATION_FNS.keys())
 
-	parser.add_argument('--mp-activation',				type=str, default="relu", 		choices=ACTIVATION_FNS.keys())
+	parser.add_argument('--mp-activation',				type=str, default="linear", 		choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--mp-state-width', 			type=int, default=8)
 	parser.add_argument('--mp-self-dampening', 			type=float, default=0.3)
 	parser.add_argument('--disable-massage-passing',    action='store_false', dest='use_message_passing')

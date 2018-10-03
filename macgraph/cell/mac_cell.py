@@ -37,6 +37,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			"read_head_attn_focus": 2 * self.args["read_heads"],
 			"mp_read_attn": 		self.args["kb_node_max_len"],
 			"mp_write_attn": 		self.args["kb_node_max_len"],
+			"mp_node_state":		tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
+			"mp_write_query":		self.args["kb_node_width"] * self.args["embed_width"],
 		}
 
 
@@ -74,8 +76,6 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				tap_question_attn  = empty_attn
 				tap_question_query = empty_query
 
-
-			# tap_attns, tap_table, tap_word_query
 		
 			if self.args["use_read_cell"]:
 				read, read_taps = read_cell(
@@ -115,7 +115,12 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				output = tf.concat([read, mp_read], -1)
 				finished = tf.fill([features["d_batch_size"]], False)
 
-			out_state = (out_control_state, out_memory_state, out_data_stack, out_mp_state)
+			out_state = (
+				out_control_state, 
+				out_memory_state, 
+				out_data_stack, 
+				out_mp_state,
+			)
 			
 			# TODO: Move this tap manipulation upstream, 
 			#	have generic taps dict returned from the fns,
@@ -131,6 +136,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				read_taps.get("read_head_attn_focus", empty_query),
 				mp_taps.get("mp_read_attn", empty_query),
 				mp_taps.get("mp_write_attn", empty_query),
+				out_mp_state,
+				mp_taps.get("mp_write_query", empty_query)
 			]
 
 			return out_data, out_state

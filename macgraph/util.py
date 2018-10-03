@@ -45,6 +45,9 @@ def dynamic_assert_shape(tensor, shape, name=None):
 	
 	t_name = "tensor" if tf.executing_eagerly() else tensor.name
 
+	if isinstance(shape, list):
+		assert len(tensor.shape) == len(shape), f"Tensor shape {tensor_shape} and expected shape {expected_shape} have different lengths"
+
 	assert_op = tf.assert_equal(tensor_shape, expected_shape, message=f"Asserting shape of {t_name}", summarize=10, name=name)
 
 	with tf.control_dependencies([assert_op]):

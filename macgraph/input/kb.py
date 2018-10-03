@@ -11,14 +11,14 @@ def get_table_with_embedding(args, features, vocab_embedding, noun):
 	# Constants and validations
 	# --------------------------------------------------------------------------
 
+	# TODO: remove these pesky ses
 	table = features[f"{noun}s"]
 	table_len = features[f"{noun}s_len"]
-
 	width = args[f"{noun}_width"]
 	full_width = width * args["embed_width"]
 
 	d_len = tf.shape(table)[1]
-	assert table.shape[-1] == width
+	assert table.shape[-1] == width, f"Table shape {table.shape} did not have expected inner width dimensions of {width}"
 
 
 	# --------------------------------------------------------------------------
@@ -37,6 +37,8 @@ def get_table_with_embedding(args, features, vocab_embedding, noun):
 	# Embed graph tokens
 	# --------------------------------------------------------------------------
 	
+	table = dynamic_assert_shape(table, [features["d_batch_size"], d_len, width])
+
 	emb_kb = tf.nn.embedding_lookup(vocab_embedding, table)
 	emb_kb = dynamic_assert_shape(emb_kb, 
 		[features["d_batch_size"], d_len, width, args["embed_width"]])
