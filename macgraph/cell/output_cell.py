@@ -5,7 +5,7 @@ from ..minception import *
 from ..args import ACTIVATION_FNS
 
 
-def output_cell(args, features, in_question_state, in_memory_state, in_read, in_control_state, in_mp_read):
+def output_cell(args, features, in_question_state, in_memory_state, in_read, in_control_state, in_mp_reads):
 
 	with tf.name_scope("output_cell"):
 
@@ -21,7 +21,7 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read, in_
 			in_all.append(in_read)
 
 		if args["use_message_passing"]:
-			in_all.append(in_mp_read)
+			in_all.extend(in_mp_reads)
 
 		v = tf.concat(in_all, -1)
 

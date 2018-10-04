@@ -101,16 +101,16 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				out_data_stack = in_data_stack
 
 			if self.args["use_message_passing"]:
-				mp_read, out_mp_state, mp_taps = messaging_cell(self.args, self.features, self.vocab_embedding,
+				mp_reads, out_mp_state, mp_taps = messaging_cell(self.args, self.features, self.vocab_embedding,
 					in_mp_state, out_control_state)
 			else:
 				out_mp_state = in_mp_state
-				mp_read = tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0)
+				mp_reads = [tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0)]
 				mp_taps = {}
 			
 			if self.args["use_output_cell"]:
 				output, finished = output_cell(self.args, self.features,
-					self.question_state, out_memory_state, read, out_control_state, mp_read)	
+					self.question_state, out_memory_state, read, out_control_state, mp_reads)	
 			else:
 				output = tf.concat([read, mp_read], -1)
 				finished = tf.fill([features["d_batch_size"]], False)
@@ -134,7 +134,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				read_taps.get("kb_edge_word_attn", empty_query),
 				read_taps.get("read_head_attn", empty_query),
 				read_taps.get("read_head_attn_focus", empty_query),
-				mp_taps.get("mp_read_attn", empty_query),
+				mp_taps.get("mp_read0_attn", empty_query),
 				mp_taps.get("mp_write_attn", empty_query),
 				out_mp_state,
 				mp_taps.get("mp_write_query", empty_query),

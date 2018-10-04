@@ -41,7 +41,7 @@ class TestAttention(unittest.TestCase):
         target = 3
         batch_len = 1
 
-        table, scores, focus = attention_write_by_key(keys, keys[:,target,:], tf.ones([batch_len, max_len]))
+        table, focus taps = attention_write_by_key(keys, keys[:,target,:], tf.ones([batch_len, max_len]))
 
         d = math.exp(1) + (max_len-1) * math.exp(0)
         exp = np.full([batch_len, max_len, max_len], 1/d)

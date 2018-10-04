@@ -72,7 +72,7 @@ def attention_key_value(keys:tf.Tensor, table:tf.Tensor, query:tf.Tensor, key_wi
 
 	keys = dynamic_assert_shape(keys, [batch_size, seq_len, tf.shape(keys)[2]], "keys")
 	
-	scores_sm, attn_focus = attention_compute_scores(
+	scores_sm, attn_focus, scores_raw = attention_compute_scores(
 		keys=keys, 
 		query=query, 
 		key_width=key_width, 
@@ -88,7 +88,7 @@ def attention_key_value(keys:tf.Tensor, table:tf.Tensor, query:tf.Tensor, key_wi
 		output = dynamic_assert_shape(output, [batch_size, value_width], "output")
 		output = tf.check_numerics(output, "attention_output")
 
-		return output, scores_sm, attn_focus
+		return output, attn_focus, {"attn": scores_sm, "attn_raw": scores_raw}
 
 def attention_compute_scores(keys:tf.Tensor, query:tf.Tensor, key_width:int=None, keys_len=None, name:str="attention"):
 	with tf.name_scope(name):
@@ -133,7 +133,7 @@ def attention_compute_scores(keys:tf.Tensor, query:tf.Tensor, key_width:int=None
 
 		scores_sm = dynamic_assert_shape(scores_sm, scores_shape, "scores")
 
-		return scores_sm, tf.reduce_sum(scores, axis=1)
+		return scores_sm, tf.reduce_sum(scores, axis=1), scores
 
 
 def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, name="attention"):
@@ -150,13 +150,13 @@ def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, na
 
 	assert len(value.shape) == 2, "Value must have batch dimension"
 
-	scores_sm, attn_focus = attention_compute_scores(
+	scores_sm, attn_focus, scores_raw = attention_compute_scores(
 		keys=keys, query=query, key_width=key_width, keys_len=keys_len, name=name)
 
 	with tf.name_scope(name):
 		weighted_table = tf.expand_dims(value, 1) * scores_sm	
 		weighted_table = dynamic_assert_shape(weighted_table, [batch_size, seq_len, value_width])
-		return weighted_table, scores_sm, attn_focus
+		return weighted_table, attn_focus, {"attn": scores_sm, "attn_raw": scores_raw}
 
 
 
