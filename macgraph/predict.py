@@ -109,6 +109,9 @@ def predict(args, cmd_args):
 			if args["use_control_cell"]:
 				for control_head in row["question_word_attn"][i]:
 					print(f"{i}: " + ' '.join(color_text(row["src"], control_head)))
+
+				print(row["question_word_attn_raw"][i])
+				print(row["question_word_attn"][i])
 			
 			if args["use_read_cell"]:
 				read_head_part = ' '.join(color_text(args["kb_list"], row["read_head_attn"][i]))

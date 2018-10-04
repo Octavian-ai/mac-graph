@@ -48,9 +48,11 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 		control_out  = [i[0] for i in attention_calls]
 		control_out  = tf.concat(control_out, -1)
 
-		tap_qw_attn = [i[2]["attn"] for i in attention_calls]
-		tap_qw_attn = tf.concat(tap_qw_attn, -1) # Concat the unitary score dimensions
-		tap_qw_attn = tf.transpose(tap_qw_attn, [0, 2, 1]) # switch so last dimension is words
+		taps = {}
+		for noun in ["attn", "attn_raw"]:
+			taps[noun] = [i[2][noun] for i in attention_calls]
+			taps[noun] = tf.concat(taps[noun], -1) # Concat the unitary score dimensions
+			taps[noun] = tf.transpose(taps[noun], [0, 2, 1]) # switch so last dimension is words
 
 		if control_out.shape[-1] != args["control_width"]:
 			control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
@@ -58,5 +60,5 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 		control_out = tf.nn.dropout(control_out, 1.0-args["control_dropout"])
 		control_out = dynamic_assert_shape(control_out, control_shape)
 
-		return control_out, tap_qw_attn
+		return control_out, taps
 

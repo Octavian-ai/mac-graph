@@ -20,11 +20,18 @@ use_self_reference = False
 def layer_normalize(tensor):
 	'''Apologies if I've abused this term TBC'''
 
-	# Keep batch axis
-	t = tf.reduce_sum(tensor, axis=range(1, len(tensor.shape)))
-	t += EPSILON
-	tensor /= t
+	in_shape = tf.shape(tensor)
+	axes = list(range(1, len(tensor.shape)))
 
+	# Keep batch axis
+	t = tf.reduce_sum(tensor, axis=axes )
+	t += EPSILON
+	t = tf.reciprocal(t)
+	t = tf.check_numerics(t, "1/sum")
+
+	tensor = tf.einsum('brc,b->brc', tensor, t)
+
+	tensor = dynamic_assert_shape(tensor, in_shape, "layer_normalize_tensor")
 	return tensor
 
 
@@ -64,7 +71,10 @@ def do_messaging_cell(args, features, vocab_embedding,
 
 	with tf.name_scope("messaging_cell"):
 
+		node_state_shape = tf.shape(in_node_state)
 		node_state = layer_normalize(in_node_state)
+
+		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 		taps = {}
 		taps["mp_write_query"] = in_write_query
 		taps["mp_write_signal"] = in_write_signal
@@ -87,6 +97,7 @@ def do_messaging_cell(args, features, vocab_embedding,
 		write_signal = dynamic_assert_shape(write_signal, tf.shape(node_state), "write_signal")
 
 		node_state += write_signal
+		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
 		# Aggregate via adjacency matrix with normalisation (that does not include self-edges)
 		adj = tf.cast(features["kb_adjacency"], tf.float32)
@@ -101,6 +112,7 @@ def do_messaging_cell(args, features, vocab_embedding,
 		adj_norm = tf.check_numerics(adj_norm, "adj_norm")
 		agg = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
 		node_state = agg
+		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
 		if use_self_reference:
 			# Add self-reference
@@ -116,9 +128,11 @@ def do_messaging_cell(args, features, vocab_embedding,
 			node_state = tf.nn.conv1d(node_state, message_pass_kernel, 1, 'SAME', name="message_pass")
 			# Apply activation
 			node_state = ACTIVATION_FNS[args["mp_activation"]](node_state)
+			assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
 
 		node_state = layer_normalize(node_state)
+		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
 		taps["mp_node_state"] = node_state
 
@@ -136,9 +150,13 @@ def do_messaging_cell(args, features, vocab_embedding,
 				query=qry,
 				table=node_state,
 				)
+			print("out_read_signal", out_read_signal, node_state)
 			out_read_signals.append(out_read_signal)
 			for k,v in a_taps.items():
 				taps[f"mp_read{idx}_{k}"] = v
+
+		node_state = dynamic_assert_shape(node_state, node_state_shape, "node_state")
+		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
 		return out_read_signals, node_state, taps
 

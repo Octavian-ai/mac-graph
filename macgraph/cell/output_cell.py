@@ -21,7 +21,10 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read, in_
 			in_all.append(in_read)
 
 		if args["use_message_passing"]:
+			print(in_all)
 			in_all.extend(in_mp_reads)
+			print(in_mp_reads)
+			print(in_all)
 
 		v = tf.concat(in_all, -1)
 

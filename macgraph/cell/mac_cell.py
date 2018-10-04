@@ -27,18 +27,19 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 	def get_taps(self):
 		return {
-			"finished":				1,
-			"question_word_attn": 	self.args["control_heads"] * self.features["d_src_len"],
-			"kb_node_attn": 		self.args["kb_node_width"] * self.args["embed_width"],
-			"kb_node_word_attn": 	self.args["kb_node_width"],
-			"kb_edge_attn": 		self.args["kb_edge_width"] * self.args["embed_width"], 
-			"kb_edge_word_attn": 	self.args["kb_edge_width"], 
-			"read_head_attn": 		2 * self.args["read_heads"],
-			"read_head_attn_focus": 2 * self.args["read_heads"],
-			"mp_read_attn": 		self.args["kb_node_max_len"],
-			"mp_write_attn": 		self.args["kb_node_max_len"],
-			"mp_node_state":		tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
-			"mp_write_query":		self.args["kb_node_width"] * self.args["embed_width"],	
+			"finished":					1,
+			"question_word_attn": 		self.args["control_heads"] * self.features["d_src_len"],
+			"question_word_attn_raw": 	self.args["control_heads"] * self.features["d_src_len"],
+			"kb_node_attn": 			self.args["kb_node_width"] * self.args["embed_width"],
+			"kb_node_word_attn": 		self.args["kb_node_width"],
+			"kb_edge_attn": 			self.args["kb_edge_width"] * self.args["embed_width"], 
+			"kb_edge_word_attn": 		self.args["kb_edge_width"], 
+			"read_head_attn": 			2 * self.args["read_heads"],
+			"read_head_attn_focus": 	2 * self.args["read_heads"],
+			"mp_read_attn": 			self.args["kb_node_max_len"],
+			"mp_write_attn": 			self.args["kb_node_max_len"],
+			"mp_node_state":			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
+			"mp_write_query":			self.args["kb_node_width"] * self.args["embed_width"],	
 		}
 
 
@@ -69,13 +70,10 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
 
 			if self.args["use_control_cell"]:
-				out_control_state, tap_question_attn = control_cell(self.args, self.features, 
+				out_control_state, control_taps = control_cell(self.args, self.features, 
 					inputs, in_control_state, self.question_state, self.question_tokens)
 			else:
 				out_control_state = in_control_state
-				tap_question_attn  = empty_attn
-				tap_question_query = empty_query
-
 		
 			if self.args["use_read_cell"]:
 				read, read_taps = read_cell(
@@ -127,7 +125,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			#	and make this just use get_taps to append the data
 			out_data  = [output, 
 				tf.cast(finished, tf.float32),
-				tap_question_attn,
+				control_taps.get("attn", empty_attn),
+				control_taps.get("attn_raw", empty_attn),
 				tf.squeeze(read_taps.get("kb_node_attn", empty_attn), 2),
 				read_taps.get("kb_node_word_attn", empty_query),
 				tf.squeeze(read_taps.get("kb_edge_attn", empty_attn), 2),
