@@ -42,7 +42,8 @@ def color_text(text_array, levels, color_fg=True):
 
 def pad_str(s, target=3):
 	if len(s) < target:
-		s += ' '.join(['' for i in range(target - len(s))])
+		for i in range(target - len(s)):
+			s += " "
 	return s
 
 def adj_pretty(mtx, kb_nodes_len, kb_nodes, vocab):
