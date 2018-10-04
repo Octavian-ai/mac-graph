@@ -36,13 +36,13 @@ def read_from_table(args, features, in_signal, noun, table, width, keys_len=None
 	else:
 		query = tf.layers.dense(in_signal, width)
 
-	output, score_sm, total_raw_score = attention(table, query,
+	output, total_raw_score, taps = attention(table, query,
 		key_width=width, 
 		keys_len=keys_len,
 	)
 
 	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
-	return output, score_sm, table, total_raw_score
+	return output, table, total_raw_score, taps
 
 
 def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, noun):
@@ -129,13 +129,15 @@ def read_cell(args, features, vocab_embedding,
 					control_head_slice = control_heads[:,head_i,:]
 					in_signal_to_head = tf.concat(in_signal + [control_head_slice], -1)
 
-				read, taps[i+"_attn"], table, score_raw_total = read_from_table_with_embedding(
+				read, table, score_raw_total, read_table_taps = read_from_table_with_embedding(
 					args, 
 					features, 
 					vocab_embedding, 
 					in_signal_to_head, 
 					noun=i
 				)
+				for k,v in read_table_taps.items():
+					taps[i+"_"+k] = v
 
 				attn_focus.append(score_raw_total)
 

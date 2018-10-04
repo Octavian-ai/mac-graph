@@ -6,6 +6,7 @@ python -m macgraph.train \
 	--input-dir input_data/processed/sa_small_10k\
 	--model-dir output/model/sa/$COMMIT \
 	--disable-dynamic-decode \
+	--max-decode-iterations 1 \
 	--disable-kb-node \
 	--disable-memory-cell \
 	--control-heads 2 \
