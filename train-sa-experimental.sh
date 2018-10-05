@@ -10,4 +10,5 @@ python -m macgraph.train \
 	--disable-memory-cell \
 	--disable-read-cell \
 	--disable-input-bilstm \
+	--input-width 64 \
 	$@
