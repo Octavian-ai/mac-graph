@@ -36,7 +36,7 @@ def softmax_with_masking(logits, mask, axis, name="", internal_dtype=tf.float64)
 		# masked_logits = tf.Print(masked_logits, [f"{name}: masked_logits", tf.squeeze(masked_logits)], message="\n", summarize=9999)
 
 		# For numerical stability shrink the values
-		logits_max = tf.reduce_max(masked_logits, axis=axis, keep_dims=True)
+		logits_max = tf.reduce_max(masked_logits, axis=axis, keepdims=True)
 		logits_max = tf.check_numerics(logits_max, "logit_max")
 
 		# Numerator
@@ -78,11 +78,7 @@ def softmax_with_masking(logits, mask, axis, name="", internal_dtype=tf.float64)
 			# 	tf.ones(tf.shape(scores_total)), tf.zeros(tf.shape(scores_total)))
 
 			sum_to_one = tf_assert_almost_equal(scores_total, 1.0, message=f"Checking scores sum to 1.0",summarize=999)
-			# scores_sm = tf.Print(scores_sm, ["mask:",tf.squeeze(scores_mask, -1), ", seq_len:", seq_len, ", keys_len:", keys_len], f"{name}\n", summarize=99999)
-			# scores_sm = tf.Print(scores_sm, [f"{name} scores_sm:",tf.squeeze(scores_sm, -1), ], f"{name}\n", summarize=99999)
-			# scores_sm = tf.Print(scores_sm, [f"{name} scores:",tf.squeeze(scores, -1), ], f"{name}\n", summarize=99999)
-			# scores_sm = tf.Print(scores_sm, [scores_total, ["-"], keys_more_than_zero], f"totals {name}\n", summarize=99999)
-
+			
 			with tf.control_dependencies([sum_to_one]):
 				return normalized
 
@@ -126,8 +122,6 @@ def attention_key_value(keys:tf.Tensor, table:tf.Tensor, query:tf.Tensor, key_wi
 
 	keys = dynamic_assert_shape(keys, [batch_size, seq_len, tf.shape(keys)[2]], "keys")
 
-	keys = tf.Print(keys, [f"keys shape {name}:", tf.shape(keys)], summarize=10)
-	
 	scores_sm, attn_focus, scores_raw = attention_compute_scores(
 		keys=keys, 
 		query=query, 
@@ -184,7 +178,6 @@ def attention_compute_scores(keys:tf.Tensor, query:tf.Tensor, key_width:int=None
 			scores_mask = tf.sequence_mask(keys_len, seq_len)
 			scores_mask = tf.expand_dims(scores_mask, -1)
 			scores_mask = dynamic_assert_shape(scores_mask, scores_shape, "scores_mask")
-			scores_mask = tf.Print(scores_mask, [f"{name} scores_mask shape", tf.shape(scores_mask), "scores shape", tf.shape(scores), "scores_shape", scores_shape])
 			scores_sm = softmax_with_masking(scores, mask=scores_mask, axis=1, name=name)
 		else:
 			scores_sm = tf.nn.softmax(scores + EPSILON, axis=1)

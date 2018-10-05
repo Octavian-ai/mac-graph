@@ -19,8 +19,6 @@ logger = logging.getLogger(__name__)
 def hr():
 	print(stylize("---------------", fg("blue")))
 
-hr()
-
 DARK_GREY = 242
 WHITE = 255
 
@@ -118,7 +116,7 @@ def predict(args, cmd_args):
 				if len(args["kb_list"]) > 0:
 					read_head_part = ' '.join(color_text(args["kb_list"], row["read_head_attn"][i]))
 					print(f"{i}: read_head_attn: ",read_head_part)
-				print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
+				# print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
 
 				for idx0, noun in enumerate(args["kb_list"]):
 					if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
