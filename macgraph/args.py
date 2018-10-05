@@ -86,7 +86,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--batch-size',            		type=int, default=32,   help="Number of items in a full batch")
 	parser.add_argument('--max-steps',             		type=int, default=None, help="In thousands")
 		
-	parser.add_argument('--max-gradient-norm',     		type=float, default=4.0)
+	parser.add_argument('--max-gradient-norm',     		type=float, default=0.4)
 	parser.add_argument('--learning-rate',         		type=float, default=0.001)
 	parser.add_argument('--eval-every',					type=int,	default=120, help="Evaluate every X seconds")
 
@@ -143,6 +143,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--mp-state-width', 			type=int, default=4)
 	parser.add_argument('--mp-self-dampening', 			type=float, default=0.3)
 	parser.add_argument('--disable-message-passing',    action='store_false', dest='use_message_passing')
+	parser.add_argument('--disable-message-passing-fn', action='store_false', dest='use_message_passing_fn')
 	
 
 	parser.add_argument('--output-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())

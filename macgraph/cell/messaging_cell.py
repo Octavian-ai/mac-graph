@@ -121,7 +121,7 @@ def do_messaging_cell(args, features, vocab_embedding,
 			sr *= args["mp_self_dampening"]
 			node_state += sr
 
-		if use_message_passing_fn:
+		if args["use_message_passing_fn"]:
 			# Message passing function is a 1d conv [filter_width, in_channels, out_channels]
 			message_pass_kernel = tf.get_variable("message_pass_kernel", [1, args["mp_state_width"], args["mp_state_width"]])
 			# Apply message pass function:
