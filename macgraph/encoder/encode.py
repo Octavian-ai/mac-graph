@@ -97,7 +97,10 @@ def encode_input(args, features, vocab_embedding):
 			return (question_tokens, question_state)
 
 		else:
-			return (src, tf.zeros(question_state_shape))
+			return (
+				tf.pad(src, [0, args["input_width"] - args["embed_width"], 0]), 
+				tf.zeros(question_state_shape)
+			)
 
 
 
