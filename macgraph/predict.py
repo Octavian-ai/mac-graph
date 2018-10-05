@@ -136,6 +136,8 @@ def predict(args, cmd_args):
 					db = db[0:row["kb_nodes_len"]]
 					print(f"{i}: {tap}: ",', '.join(color_text(db, row[tap][i])))
 
+				print(f"{i}: mp_write_query: {row['mp_write_query'][i]}")
+
 				print(
 					adj_pretty(row["kb_adjacency"], row["kb_nodes_len"], row["kb_nodes"], vocab))
 

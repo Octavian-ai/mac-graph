@@ -9,4 +9,5 @@ python -m macgraph.train \
 	--control-heads 1 \
 	--disable-memory-cell \
 	--disable-read-cell \
+	--disable-input-bilstm \
 	$@

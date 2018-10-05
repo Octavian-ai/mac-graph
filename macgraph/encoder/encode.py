@@ -56,6 +56,8 @@ def encode_input(args, features, vocab_embedding):
 		# Trim down to the residual batch size (e.g. when at end of input data)
 		padded_src_len = features["src_len"][0 : batch_size]
 
+		question_state_shape = [ features["d_batch_size"], args["input_width"] ]
+
 		# --------------------------------------------------------------------------
 		# Embed vocab
 		# --------------------------------------------------------------------------
@@ -67,31 +69,35 @@ def encode_input(args, features, vocab_embedding):
 		# Encoder
 		# --------------------------------------------------------------------------
 		
-		# 1/2 multiplier so that when we concat the layers together we get control_width
-		fw_cell = cell_stack(args, width=math.floor(args['input_width']/2))
-		bw_cell = cell_stack(args, width=math.ceil(args['input_width']/2))
-		
-		(fw_output, bw_output), (fw_states, bw_states) = tf.nn.bidirectional_dynamic_rnn(
-			fw_cell,
-			bw_cell,
-			src,
-			dtype=tf.float32,
-			# sequence_length=padded_src_len, # was causing seg fault 11
-			swap_memory=True)
 
-		
-		question_tokens = tf.concat( (fw_output, bw_output), axis=-1)
-		question_tokens = dynamic_assert_shape(question_tokens, 
-			[ features["d_batch_size"], features["d_src_len"], args["input_width"] ]
-		)
+		if args["use_input_bilstm"]:
 
-		# Top layer, output layer
-		question_state = tf.concat( (fw_states[-1].c, bw_states[-1].c), axis=-1)
-		question_state = dynamic_assert_shape(question_state,
-			[ features["d_batch_size"], args["input_width"] ]
-		)
+			# 1/2 multiplier so that when we concat the layers together we get control_width
+			fw_cell = cell_stack(args, width=math.floor(args['input_width']/2))
+			bw_cell = cell_stack(args, width=math.ceil(args['input_width']/2))
+			
+			(fw_output, bw_output), (fw_states, bw_states) = tf.nn.bidirectional_dynamic_rnn(
+				fw_cell,
+				bw_cell,
+				src,
+				dtype=tf.float32,
+				# sequence_length=padded_src_len, # was causing seg fault 11
+				swap_memory=True)
 
-		return (question_tokens, question_state)
+			
+			question_tokens = tf.concat( (fw_output, bw_output), axis=-1)
+			question_tokens = dynamic_assert_shape(question_tokens, 
+				[ features["d_batch_size"], features["d_src_len"], args["input_width"] ]
+			)
+
+			# Top layer, output layer
+			question_state = tf.concat( (fw_states[-1].c, bw_states[-1].c), axis=-1)
+			question_state = dynamic_assert_shape(question_state, question_state_shape)
+
+			return (question_tokens, question_state)
+
+		else:
+			return (src, tf.zeros(question_state_shape))
 
 
 
