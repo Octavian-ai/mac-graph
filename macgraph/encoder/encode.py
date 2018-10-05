@@ -56,7 +56,8 @@ def encode_input(args, features, vocab_embedding):
 		# Trim down to the residual batch size (e.g. when at end of input data)
 		padded_src_len = features["src_len"][0 : batch_size]
 
-		question_state_shape = [ features["d_batch_size"], args["input_width"] ]
+		question_tokens_shape = [ batch_size, seq_len, args["input_width"]]
+		question_state_shape  = [ batch_size, args["input_width"] ]
 
 		# --------------------------------------------------------------------------
 		# Embed vocab
@@ -71,7 +72,6 @@ def encode_input(args, features, vocab_embedding):
 		
 
 		if args["use_input_bilstm"]:
-
 			# 1/2 multiplier so that when we concat the layers together we get control_width
 			fw_cell = cell_stack(args, width=math.floor(args['input_width']/2))
 			bw_cell = cell_stack(args, width=math.ceil(args['input_width']/2))
@@ -83,24 +83,20 @@ def encode_input(args, features, vocab_embedding):
 				dtype=tf.float32,
 				# sequence_length=padded_src_len, # was causing seg fault 11
 				swap_memory=True)
-
 			
 			question_tokens = tf.concat( (fw_output, bw_output), axis=-1)
-			question_tokens = dynamic_assert_shape(question_tokens, 
-				[ features["d_batch_size"], features["d_src_len"], args["input_width"] ]
-			)
 
 			# Top layer, output layer
 			question_state = tf.concat( (fw_states[-1].c, bw_states[-1].c), axis=-1)
-			question_state = dynamic_assert_shape(question_state, question_state_shape)
-
-			return (question_tokens, question_state)
-
 		else:
-			return (
-				tf.pad(src, [0, args["input_width"] - args["embed_width"], 0]), 
-				tf.zeros(question_state_shape)
-			)
+			question_tokens = tf.pad(src, [[0,0], [0,0], [0,args["input_width"] - args["embed_width"]]])
+			question_state = tf.zeros(question_state_shape)
+
+		
+		question_tokens = dynamic_assert_shape(question_tokens, question_tokens_shape)
+		question_state = dynamic_assert_shape(question_state, question_state_shape)
+
+		return (question_tokens, question_state)
 
 
 
