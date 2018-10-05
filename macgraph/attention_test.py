@@ -34,6 +34,25 @@ class TestAttention(unittest.TestCase):
 
         np.testing.assert_almost_equal(r, expected)
 
+    def test_softmax_masking2(self):
+
+        max_len = 3
+        axis = 1
+        logits = tf.zeros([max_len, max_len])
+        seq_len = [1,2,3]
+        mask = tf.sequence_mask(seq_len, max_len)
+
+        r = softmax_with_masking(logits, mask, axis)
+        r = np.array(r)
+
+        expected = np.array([
+            [1.0,0.0,0],
+            [0.5,0.5,0],
+            [1.0/3.0, 1.0/3.0, 1.0/3.0],
+        ])
+
+        np.testing.assert_almost_equal(r, expected)
+
     def test_softmax_write(self):
 
         max_len = 6
@@ -41,7 +60,7 @@ class TestAttention(unittest.TestCase):
         target = 3
         batch_len = 1
 
-        table, focus taps = attention_write_by_key(keys, keys[:,target,:], tf.ones([batch_len, max_len]))
+        table, focus, taps = attention_write_by_key(keys, keys[:,target,:], tf.ones([batch_len, max_len]))
 
         d = math.exp(1) + (max_len-1) * math.exp(0)
         exp = np.full([batch_len, max_len, max_len], 1/d)

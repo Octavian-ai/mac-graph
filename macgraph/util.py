@@ -2,6 +2,10 @@
 import tensorflow as tf
 import math
 
+
+def tf_assert_almost_equal(x, y, delta=0.001, **kwargs):
+	return tf.assert_less(tf.abs(x-y), delta, **kwargs)
+
 def assert_shape(tensor, shape, batchless=False):
 
 	read_from = 0 if batchless else 1

@@ -39,6 +39,7 @@ def read_from_table(args, features, in_signal, noun, table, width, keys_len=None
 	output, total_raw_score, taps = attention(table, query,
 		key_width=width, 
 		keys_len=keys_len,
+		name="read_from_"+noun,
 	)
 
 	output = dynamic_assert_shape(output, [features["d_batch_size"], width])
@@ -144,7 +145,7 @@ def read_cell(args, features, vocab_embedding,
 				read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
 				
 				if args["use_read_extract"]:
-					d, taps[i+"_word_attn"] = attention_by_index(in_signal_to_head, read_words)
+					d, taps[i+"_word_attn"] = attention_by_index(in_signal_to_head, read_words, i+"_word_attn")
 					d = tf.concat([d, in_signal_to_head], -1)
 					d = tf.layers.dense(d, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
 					reads.append(d)
@@ -155,7 +156,7 @@ def read_cell(args, features, vocab_embedding,
 
 		if args["use_read_extract"]:
 			reads = tf.stack(reads, axis=1)
-			reads, taps["read_head_attn"] = attention_by_index(in_question_state, reads)
+			reads, taps["read_head_attn"] = attention_by_index(in_question_state, reads, "read_head_attn")
 			# reads = tf.concat(reads, -1)
 		else:
 			reads = tf.concat(reads, -2)

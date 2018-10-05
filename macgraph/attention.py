@@ -41,6 +41,13 @@ def softmax_with_masking(logits, mask, axis):
 
 
 def attention(table:tf.Tensor, query:tf.Tensor, key_width:int=None, keys_len=None, name="attention"):
+	"""
+	Returns:
+		- attention_output
+		- focus
+		- taps {"attn", "attn_raw"}
+	"""
+
 	return attention_key_value(
 		keys=table, 
 		table=table, 
@@ -61,8 +68,8 @@ def attention_key_value(keys:tf.Tensor, table:tf.Tensor, query:tf.Tensor, key_wi
 
 	Returns:
 		- attention_output
-		- softmax_scores
 		- focus
+		- taps {"attn", "attn_raw"}
 	"""
 
 	assert len(table.shape) == 3, "table should be shape [batch, len, value_width]"
@@ -128,12 +135,27 @@ def attention_compute_scores(keys:tf.Tensor, query:tf.Tensor, key_width:int=None
 			scores_mask = tf.expand_dims(scores_mask, -1)
 			scores_mask = dynamic_assert_shape(scores_mask, scores_shape, "scores_mask")
 			scores_sm = softmax_with_masking(scores, mask=scores_mask, axis=1)
+			softmax_fn_used = "softmax_with_masking"
 		else:
 			scores_sm = tf.nn.softmax(scores + EPSILON, axis=1)
+			softmax_fn_used = "tf.nn.softmax"
 
 		scores_sm = dynamic_assert_shape(scores_sm, scores_shape, "scores")
 
-		return scores_sm, tf.reduce_sum(scores, axis=1), scores
+		# Total, by batch
+		scores_total = tf.reduce_sum(tf.squeeze(scores_sm, -1), axis=1)
+		keys_more_than_zero = tf.where(
+			tf.greater(keys_len, 0),
+			tf.ones(tf.shape(scores_total)), tf.zeros(tf.shape(scores_total)))
+
+		sum_to_one = tf_assert_almost_equal(scores_total, keys_more_than_zero, message=f"Checking {softmax_fn_used} scores sum to 1.0",summarize=999)
+		
+		scores_sm = tf.Print(scores_sm, [scores_mask, ], f"mask {name}\n", summarize=99999)
+		# scores_sm = tf.Print(scores_sm, [tf.squeeze(scores_sm, -1), ], f"{softmax_fn_used}\n", summarize=99999)
+		scores_sm = tf.Print(scores_sm, [scores_total, ["-"], keys_more_than_zero], f"totals {name}\n", summarize=99999)
+
+		with tf.control_dependencies([sum_to_one]):
+			return scores_sm, tf.reduce_sum(scores, axis=1), scores
 
 
 def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, name="attention"):
@@ -162,7 +184,7 @@ def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, na
 
 
 
-def attention_by_index(control, head_stack):
+def attention_by_index(control, head_stack, name:str="attention_by_index"):
 	'''
 	Essentially a weighted sum over the second-last dimension of head_stack, 
 	using a dense softmax of control for the weights
@@ -176,7 +198,7 @@ def attention_by_index(control, head_stack):
 
 	'''
 
-	with tf.name_scope("attention_by_index"):
+	with tf.name_scope(name):
 
 		word_size = tf.shape(head_stack)[-1]
 		seq_len = head_stack.shape[-2]

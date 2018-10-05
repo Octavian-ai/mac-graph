@@ -110,12 +110,14 @@ def predict(args, cmd_args):
 				for control_head in row["question_word_attn"][i]:
 					print(f"{i}: " + ' '.join(color_text(row["src"], control_head)))
 
-				print(row["question_word_attn_raw"][i])
-				print(row["question_word_attn"][i])
+				print(f"{i}: question_word_attn_raw: ", row["question_word_attn_raw"][i])
+				print(f"{i}: question_word_attn: ",     row["question_word_attn"][i])
 			
 			if args["use_read_cell"]:
-				read_head_part = ' '.join(color_text(args["kb_list"], row["read_head_attn"][i]))
-				print(f"{i}: read_head_attn: ",read_head_part)
+
+				if len(args["kb_list"]) > 0:
+					read_head_part = ' '.join(color_text(args["kb_list"], row["read_head_attn"][i]))
+					print(f"{i}: read_head_attn: ",read_head_part)
 				print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
 
 				for idx0, noun in enumerate(args["kb_list"]):
