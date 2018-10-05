@@ -74,7 +74,7 @@ def do_messaging_cell(args, features, vocab_embedding,
 	with tf.name_scope("messaging_cell"):
 
 		node_state_shape = tf.shape(in_node_state)
-		node_state = layer_normalize(in_node_state)
+		# node_state = layer_normalize(in_node_state)
 
 		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 		taps = {}
@@ -131,7 +131,7 @@ def do_messaging_cell(args, features, vocab_embedding,
 			assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
 
-		node_state = layer_normalize(node_state)
+		# node_state = layer_normalize(node_state)
 		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
 		taps["mp_node_state"] = node_state
