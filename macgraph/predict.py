@@ -110,8 +110,8 @@ def predict(args, cmd_args):
 				for control_head in row["question_word_attn"][i]:
 					print(f"{i}: " + ' '.join(color_text(row["src"], control_head)))
 
-				print(f"{i}: question_word_attn_raw: ", row["question_word_attn_raw"][i])
-				print(f"{i}: question_word_attn: ",     row["question_word_attn"][i])
+				# print(f"{i}: question_word_attn_raw: ", row["question_word_attn_raw"][i])
+				# print(f"{i}: question_word_attn: ",     row["question_word_attn"][i])
 			
 			if args["use_read_cell"]:
 
@@ -122,7 +122,7 @@ def predict(args, cmd_args):
 
 				for idx0, noun in enumerate(args["kb_list"]):
 					if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
-						db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"]]
+						db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"] if kb_row[0] != UNK_ID]
 						print(f"{i}: " + noun+"_attn: ",', '.join(color_text(db, row[f"{noun}_attn"][i])))
 
 						for idx, attn in enumerate(row[f"{noun}_attn"][i]):
@@ -194,6 +194,9 @@ if __name__ == "__main__":
 
 	with tf.gfile.GFile(os.path.join(cmd_args["model_dir"], "config.yaml"), "r") as file:
 		frozen_args = yaml.load(file)
+
+	# If the directory got renamed, the model_dir might be out of sync, convenience hack
+	frozen_args["model_dir"] = cmd_args["model_dir"]
 
 	predict(frozen_args, cmd_args)
 

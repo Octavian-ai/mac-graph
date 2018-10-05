@@ -7,37 +7,84 @@ from .args import global_args
 from .const import EPSILON
 
 
-def softmax_with_masking(logits, mask, axis):
-	with tf.name_scope("softmax_with_masking"):
+def softmax_with_masking(logits, mask, axis, name="", internal_dtype=tf.float64):
+	with tf.name_scope(name+"_softmax_with_masking"):
+
+		# --------------------------------------------------------------------------
+		# Validate inputs
+		# --------------------------------------------------------------------------
+		
+		logits_shape = tf.shape(logits)
+
 		assert mask.dtype == tf.bool
-		mask = dynamic_assert_shape(mask, tf.shape(logits))
+		mask = dynamic_assert_shape(mask, logits_shape)
 		assert axis < len(logits.shape)
 		logits = tf.check_numerics(logits, "logits")
+		mask = dynamic_assert_shape(mask, logits_shape, "mask")
+
+		# --------------------------------------------------------------------------
+		# Mask those logits!
+		# --------------------------------------------------------------------------
+
+		# masked_logits = tf.boolean_mask(logits, mask)
+		# masked_logits = tf.reshape(masked_logits, tf.shape(logits))
+
+		f_mask = tf.cast(mask, internal_dtype)
+		masked_logits = tf.cast(logits, internal_dtype) * f_mask
+		masked_logits = dynamic_assert_shape(masked_logits, logits_shape, "masked_logits")
+
+		# masked_logits = tf.Print(masked_logits, [f"{name}: masked_logits", tf.squeeze(masked_logits)], message="\n", summarize=9999)
 
 		# For numerical stability shrink the values
-		logits_max = tf.reduce_max(tf.boolean_mask(logits, mask))
+		logits_max = tf.reduce_max(masked_logits, axis=axis, keep_dims=True)
 		logits_max = tf.check_numerics(logits_max, "logit_max")
 
-		f_mask = tf.cast(mask, logits.dtype)
-
 		# Numerator
-		l_delta = (logits - logits_max) * f_mask
+		l_delta = (tf.cast(logits, internal_dtype) - logits_max) * f_mask
 		l_delta = tf.check_numerics(l_delta, "l_delta")
+		l_delta = dynamic_assert_shape(l_delta, tf.shape(logits), "l_delta")
+
+	
+		# l_delta = tf.Print(l_delta, [f"{name}: logits", tf.squeeze(logits,-1)], message="\n", summarize=9999)
+		# l_delta = tf.Print(l_delta, [f"{name}: logits_max", logits_max], message="\n", summarize=9999)
+		# l_delta = tf.Print(l_delta, [f"{name}: l_delta", tf.squeeze(l_delta,-1)], message="\n", summarize=9999)
 
 		# This assert fails, howwwww??
-		with tf.control_dependencies([tf.assert_less_equal(l_delta, tf.cast(0.0, logits.dtype), summarize=100000, data=[logits_max, mask, logits])]):
+		with tf.control_dependencies([tf.assert_less_equal(l_delta, tf.cast(0.0, l_delta.dtype), summarize=100000, data=[logits_max, mask, logits])]):
 			
 			l = tf.exp(l_delta)
 			l = tf.check_numerics(l, "numerator pre mask")
-			l *= tf.cast(mask, logits.dtype)
+
+			# l = tf.Print(l, [f"numerator pre mask {name}", tf.squeeze(l,-1)], message="\n", summarize=9999)
+
+			l *= f_mask
 			l = tf.check_numerics(l, "numerator")
+			# l = tf.Print(l, [f"numerator post mask {name}", tf.squeeze(l,-1)], message="\n", summarize=9999)
 			
 			# Denominator
 			d = tf.reduce_sum(l, axis) 
 			d = tf.expand_dims(d, axis)
 			d = tf.check_numerics(d, "denominator")
 
-			return l / (d + EPSILON)
+			normalized = l / (d + EPSILON)
+			normalized = tf.cast(normalized, logits.dtype)
+
+			normalized = dynamic_assert_shape(normalized, logits_shape, "normalized_sm_scores")
+
+			# Total, by batch
+			scores_total = tf.reduce_sum(normalized, axis=axis)
+			# keys_more_than_zero = tf.where(
+			# 	tf.greater(keys_len, 0),
+			# 	tf.ones(tf.shape(scores_total)), tf.zeros(tf.shape(scores_total)))
+
+			sum_to_one = tf_assert_almost_equal(scores_total, 1.0, message=f"Checking scores sum to 1.0",summarize=999)
+			# scores_sm = tf.Print(scores_sm, ["mask:",tf.squeeze(scores_mask, -1), ", seq_len:", seq_len, ", keys_len:", keys_len], f"{name}\n", summarize=99999)
+			# scores_sm = tf.Print(scores_sm, [f"{name} scores_sm:",tf.squeeze(scores_sm, -1), ], f"{name}\n", summarize=99999)
+			# scores_sm = tf.Print(scores_sm, [f"{name} scores:",tf.squeeze(scores, -1), ], f"{name}\n", summarize=99999)
+			# scores_sm = tf.Print(scores_sm, [scores_total, ["-"], keys_more_than_zero], f"totals {name}\n", summarize=99999)
+
+			with tf.control_dependencies([sum_to_one]):
+				return normalized
 
 
 def attention(table:tf.Tensor, query:tf.Tensor, key_width:int=None, keys_len=None, name="attention"):
@@ -72,12 +119,14 @@ def attention_key_value(keys:tf.Tensor, table:tf.Tensor, query:tf.Tensor, key_wi
 		- taps {"attn", "attn_raw"}
 	"""
 
-	assert len(table.shape) == 3, "table should be shape [batch, len, value_width]"
+	assert len(table.shape) == 3, "table should be shape [batch, seq_len, value_width]"
 	batch_size = tf.shape(table)[0]
 	seq_len = tf.shape(table)[1]
 	value_width = tf.shape(table)[2]
 
 	keys = dynamic_assert_shape(keys, [batch_size, seq_len, tf.shape(keys)[2]], "keys")
+
+	keys = tf.Print(keys, [f"keys shape {name}:", tf.shape(keys)], summarize=10)
 	
 	scores_sm, attn_focus, scores_raw = attention_compute_scores(
 		keys=keys, 
@@ -129,33 +178,20 @@ def attention_compute_scores(keys:tf.Tensor, query:tf.Tensor, key_width:int=None
 		# --------------------------------------------------------------------------
 
 		scores = tf.matmul(keys, tf.expand_dims(query, 2))
+		scores = dynamic_assert_shape(scores, scores_shape, "scores")
 
 		if keys_len is not None:
 			scores_mask = tf.sequence_mask(keys_len, seq_len)
 			scores_mask = tf.expand_dims(scores_mask, -1)
 			scores_mask = dynamic_assert_shape(scores_mask, scores_shape, "scores_mask")
-			scores_sm = softmax_with_masking(scores, mask=scores_mask, axis=1)
-			softmax_fn_used = "softmax_with_masking"
+			scores_mask = tf.Print(scores_mask, [f"{name} scores_mask shape", tf.shape(scores_mask), "scores shape", tf.shape(scores), "scores_shape", scores_shape])
+			scores_sm = softmax_with_masking(scores, mask=scores_mask, axis=1, name=name)
 		else:
 			scores_sm = tf.nn.softmax(scores + EPSILON, axis=1)
-			softmax_fn_used = "tf.nn.softmax"
+			
+		scores_sm = dynamic_assert_shape(scores_sm, scores_shape, "scores_sm")
 
-		scores_sm = dynamic_assert_shape(scores_sm, scores_shape, "scores")
-
-		# Total, by batch
-		scores_total = tf.reduce_sum(tf.squeeze(scores_sm, -1), axis=1)
-		keys_more_than_zero = tf.where(
-			tf.greater(keys_len, 0),
-			tf.ones(tf.shape(scores_total)), tf.zeros(tf.shape(scores_total)))
-
-		sum_to_one = tf_assert_almost_equal(scores_total, keys_more_than_zero, message=f"Checking {softmax_fn_used} scores sum to 1.0",summarize=999)
-		
-		scores_sm = tf.Print(scores_sm, [scores_mask, ], f"mask {name}\n", summarize=99999)
-		# scores_sm = tf.Print(scores_sm, [tf.squeeze(scores_sm, -1), ], f"{softmax_fn_used}\n", summarize=99999)
-		scores_sm = tf.Print(scores_sm, [scores_total, ["-"], keys_more_than_zero], f"totals {name}\n", summarize=99999)
-
-		with tf.control_dependencies([sum_to_one]):
-			return scores_sm, tf.reduce_sum(scores, axis=1), scores
+		return scores_sm, tf.reduce_sum(scores, axis=1), scores
 
 
 def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, name="attention"):
