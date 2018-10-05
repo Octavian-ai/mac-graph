@@ -6,8 +6,7 @@ python -m macgraph.train \
 	--model-dir output/model/sa/exp/$COMMIT \
 	--input-dir input_data/processed/sa_small_10k \
 	--max-decode-iterations 1 \
-	--control-heads 2 \
+	--control-heads 1 \
 	--disable-memory-cell \
-	--disable-kb-node \
 	--disable-read-cell \
 	$@

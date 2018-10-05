@@ -35,7 +35,7 @@ def layer_normalize(tensor):
 	return tensor
 
 
-def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_state):
+def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_state, in_question_state):
 	'''
 	Operate a message passing cell
 	Each iteration it'll do one round of message passing
@@ -52,10 +52,12 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 
 	node_table, node_table_width, node_table_len = get_table_with_embedding(args, features, vocab_embedding, "kb_node")
 
+	in_signal = tf.concat([in_control_state, in_question_state], -1)
+
 	# Read/Write queries
-	in_write_query  = tf.layers.dense(in_control_state, node_table_width)
-	in_write_signal = tf.layers.dense(in_control_state, args["mp_state_width"])
-	in_read_query   = tf.layers.dense(in_control_state, node_table_width)
+	in_write_query  = tf.layers.dense(in_signal, node_table_width)
+	in_write_signal = tf.layers.dense(in_signal, args["mp_state_width"])
+	in_read_query   = tf.layers.dense(in_signal, node_table_width)
 	
 	return do_messaging_cell(args, features, vocab_embedding, 
 		in_node_state,
@@ -79,8 +81,6 @@ def do_messaging_cell(args, features, vocab_embedding,
 		taps["mp_write_query"] = in_write_query
 		taps["mp_write_signal"] = in_write_signal
 
-		# print(node_state)
-
 		# Add write signal:
 		write_signal, _, a_taps = attention_write_by_key(
 			keys=node_table,
@@ -101,7 +101,7 @@ def do_messaging_cell(args, features, vocab_embedding,
 
 		# Aggregate via adjacency matrix with normalisation (that does not include self-edges)
 		adj = tf.cast(features["kb_adjacency"], tf.float32)
-		degree = tf.reduce_sum(adj, -1, keep_dims=True)
+		degree = tf.reduce_sum(adj, -1, keepdims=True)
 		inv_degree = tf.reciprocal(degree)
 		node_mask = tf.expand_dims(tf.sequence_mask(features["kb_nodes_len"], args["kb_node_max_len"]), -1)
 		inv_degree = tf.where(node_mask, inv_degree, tf.zeros(tf.shape(inv_degree)))
@@ -150,7 +150,6 @@ def do_messaging_cell(args, features, vocab_embedding,
 				query=qry,
 				table=node_state,
 				)
-			print("out_read_signal", out_read_signal, node_state)
 			out_read_signals.append(out_read_signal)
 			for k,v in a_taps.items():
 				taps[f"mp_read{idx}_{k}"] = v

@@ -171,12 +171,6 @@ def predict(args, cmd_args):
 
 			if not cmd_args["correct_only"] or correct:
 				print_row(p)
-			
-
-	# print(f"\nConfusion matrix:")
-	# for k, v in confusion.most_common():
-	# 	print(f"{k}: {v}")
-
 
 
 if __name__ == "__main__":
