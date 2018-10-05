@@ -4,7 +4,7 @@ COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
 python -m macgraph.train \
 	--model-dir output/model/sa/exp/$COMMIT \
-	--input-dir input_data/processed/sa_small_10k \
+	--input-dir input_data/processed/sa_small_100k \
 	--max-decode-iterations 1 \
 	--control-heads 2 \
 	--disable-memory-cell \
