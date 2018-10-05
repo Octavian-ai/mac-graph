@@ -11,5 +11,4 @@ python -m macgraph.train \
 	--disable-read-cell \
 	--disable-input-bilstm \
 	--input-width 64 \
-	--control-dropout 0.2 \
 	$@
