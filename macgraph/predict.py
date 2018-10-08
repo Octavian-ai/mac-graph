@@ -138,8 +138,9 @@ def predict(args, cmd_args):
 
 				print(f"{i}: mp_write_signal: {row['mp_write_signal'][i]}")
 
-				print(
-					adj_pretty(row["kb_adjacency"], row["kb_nodes_len"], row["kb_nodes"], vocab))
+		if args["use_message_passing"]:
+			print("Adjacency:\n",
+				adj_pretty(row["kb_adjacency"], row["kb_nodes_len"], row["kb_nodes"], vocab))
 
 		hr()
 

@@ -109,7 +109,7 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 				if len(tap.shape) == 3:
 					tap = tf.transpose(tap, [1,0,2]) # => batch, iteration, data
 				if len(tap.shape) == 4:
-					tap = tf.transpose(tap, [2,0,1,3]) # => batch, iteration, control_head, data
+					tap = tf.transpose(tap, [1,0,2,3]) # => batch, iteration, control_head, data
 					
 				return tap
 

@@ -45,24 +45,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 
 
-	def __call__(self, inputs, in_state):
-		"""Run this RNN cell on inputs, starting from the given state.
+	def build_cell(self, inputs, in_state):
 		
-		Args:
-			inputs: `2-D` tensor with shape `[batch_size, input_size]`.
-			state: if `self.state_size` is an integer, this should be a `2-D Tensor`
-				with shape `[batch_size, self.state_size]`.	Otherwise, if
-				`self.state_size` is a tuple of integers, this should be a tuple
-				with shapes `[batch_size, s] for s in self.state_size`.
-			scope: VariableScope for the created subgraph; defaults to class name.
-		Returns:
-			A pair containing:
-			- Output: A `2-D` tensor with shape `[batch_size, self.output_size]`.
-			- New state: Either a single `2-D` tensor, or a tuple of tensors matching
-				the arity and shapes of `state`.
-		"""
-
-
 		with tf.variable_scope("mac_cell", reuse=tf.AUTO_REUSE):
 
 			in_control_state, in_memory_state, in_data_stack, in_mp_state = in_state
@@ -120,29 +104,60 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				out_data_stack, 
 				out_mp_state,
 			)
-			
-			# TODO: Move this tap manipulation upstream, 
-			#	have generic taps dict returned from the fns,
-			#	and make this just use get_taps to append the data
-			out_data  = [output, 
-				tf.cast(finished, tf.float32),
-				control_taps.get("attn", empty_attn),
-				control_taps.get("attn_raw", empty_attn),
-				tf.squeeze(read_taps.get("kb_node_attn", empty_attn), 2),
-				read_taps.get("kb_node_word_attn", empty_query),
-				tf.squeeze(read_taps.get("kb_edge_attn", empty_attn), 2),
-				read_taps.get("kb_edge_word_attn", empty_query),
-				read_taps.get("read_head_attn", empty_query),
-				read_taps.get("read_head_attn_focus", empty_query),
-				mp_taps.get("mp_read0_attn", empty_query),
-				mp_taps.get("mp_write_attn", empty_query),
-				out_mp_state,
-				mp_taps.get("mp_write_query", empty_query),
-				mp_taps.get("mp_write_signal", empty_query),
 
-			]
+			out_taps = {
+				"finished":					tf.cast(finished, tf.float32),
+				"question_word_attn": 		control_taps.get("attn", empty_attn),
+				"question_word_attn_raw": 	control_taps.get("attn_raw", empty_attn),
+				"kb_node_attn": 			tf.squeeze(read_taps.get("kb_node_attn", empty_attn), 2),
+				"kb_node_word_attn": 		read_taps.get("kb_node_word_attn", empty_query),
+				"kb_edge_attn": 			tf.squeeze(read_taps.get("kb_edge_attn", empty_attn), 2),
+				"kb_edge_word_attn": 		read_taps.get("kb_edge_word_attn", empty_query),
+				"read_head_attn": 			read_taps.get("read_head_attn", empty_query),
+				"read_head_attn_focus": 	read_taps.get("read_head_attn_focus", empty_query),
+				"mp_read_attn": 			mp_taps.get("mp_read0_attn", empty_query),
+				"mp_write_attn": 			mp_taps.get("mp_write_attn", empty_query),
+				"mp_node_state":			out_mp_state,
+				"mp_write_query":			mp_taps.get("mp_write_query", empty_query),
+				"mp_write_signal":			mp_taps.get("mp_write_signal", empty_query),
+			}
 
-			return out_data, out_state
+			return output, out_taps, out_state
+
+
+
+	def __call__(self, inputs, in_state):
+		'''Build this cell (part of implementing RNNCell)
+
+		This is a wrapper that marshalls our named taps, to 
+		make sure they end up where we expect and are present.
+		
+		Args:
+			inputs: `2-D` tensor with shape `[batch_size, input_size]`.
+			state: if `self.state_size` is an integer, this should be a `2-D Tensor`
+				with shape `[batch_size, self.state_size]`.	Otherwise, if
+				`self.state_size` is a tuple of integers, this should be a tuple
+				with shapes `[batch_size, s] for s in self.state_size`.
+			scope: VariableScope for the created subgraph; defaults to class name.
+		Returns:
+			A pair containing:
+			- Output: A `2-D` tensor with shape `[batch_size, self.output_size]`.
+			- New state: Either a single `2-D` tensor, or a tuple of tensors matching
+				the arity and shapes of `state`.
+		'''
+
+		output, out_taps, out_state = self.build_cell(inputs, in_state)
+
+		out_taps_keys = set(out_taps.keys())
+		expected_keys = set(self.get_taps().keys())
+
+		assert out_taps_keys <= expected_keys, f"Cell builder must return taps in get_taps(), missing {expected_keys - out_taps_keys}"
+
+		out_data = [output]
+		for k in self.get_taps().keys():
+			out_data.append(out_taps[k])
+
+		return out_data, out_state
 
 
 

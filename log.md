@@ -171,6 +171,8 @@ The successful station property model does no better than random guessing. I'm e
 - `33d76f9`: 95% @ 23k best ever (-experimental)
 - `bfd04cd` max gradient norm 0.4 allows for correctly sized vocab embedding variable. 97% @ 90k
 
+- `dd76eb6`: 100% acc @ 30k with message passing
+
 
 ### Combined station adjacency and properties
 
@@ -211,6 +213,9 @@ The successful station property model does no better than random guessing. I'm e
 - `63a8a8b` 99% on all tasks
 	- added dedicated control heads x2 for each read head
 	- `use_read_query_block` didn't seem to help
+
+### Station one apart
+- `468597b`: 100% accuracy with message passing
 
 ### Station shortest count
 
