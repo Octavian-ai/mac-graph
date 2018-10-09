@@ -8,7 +8,6 @@ python -m macgraph.train \
 	--max-decode-iterations 10 \
 	--control-heads 2 \
 	--disable-read-cell \
-	--disable-memory-cell \
 	--disable-input-bilstm \
 	--input-width 64 \
 	$@
