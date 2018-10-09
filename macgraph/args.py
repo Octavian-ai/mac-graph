@@ -144,7 +144,6 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--mp-self-dampening', 			type=float, default=0.3)
 	parser.add_argument('--disable-message-passing',    action='store_false', dest='use_message_passing')
 	parser.add_argument('--disable-message-passing-fn', action='store_false', dest='use_message_passing_fn')
-	
 
 	parser.add_argument('--output-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--output-layers',				type=int, default=1)
@@ -168,6 +167,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-summary-image', 		action='store_true', dest='use_summary_image')
 
 	parser.add_argument('--max-decode-iterations', 		type=int, default=1)
+	parser.add_argument('--finished-steps-loss-factor',	type=float, default= 0.001)
 	
 	args = vars(parser.parse_args(argv))
 

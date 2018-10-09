@@ -49,12 +49,14 @@ def model_fn(features, labels, mode, params):
 
 	question_tokens, question_state = encode_input(args, features, vocab_embedding)
 
-	logits, taps = execute_reasoning(args, 
+	logits, taps, finished_step = execute_reasoning(args, 
 		features=features, 
 		question_state=question_state,
 		labels=labels,
 		question_tokens=question_tokens, 
 		vocab_embedding=vocab_embedding)
+
+	finished_step = dynamic_assert_shape(finished_step, [features["d_batch_size"]], "finished_step")
 
 	# --------------------------------------------------------------------------
 	# Calc loss
@@ -62,7 +64,10 @@ def model_fn(features, labels, mode, params):
 
 	if mode in [tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL]:
 		crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
-		loss = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
+		loss_logit = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
+		loss_steps = finished_step
+
+		loss = loss_steps * args["finished_steps_loss_factor"] + loss_logit * (1-args["finished_steps_loss_factor"])
 
 	# --------------------------------------------------------------------------
 	# Optimize
