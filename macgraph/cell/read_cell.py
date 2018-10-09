@@ -112,7 +112,7 @@ def read_cell(args, features, vocab_embedding,
 				control_head_count = args["control_width"] // args["input_width"]
 				control_heads_per_read_head = control_head_count // head_total
 				assert args["control_width"] % args["input_width"] == 0, "If not sharing control heads between read heads, the control width must be integer multiple of input_width"
-				assert control_head_count % head_total == 0, "If not sharing control heads then number of control heads must be multiple of read heads"
+				assert control_head_count % head_total == 0, f"If not sharing control heads {control_head_count} then number of control heads must be multiple of read heads {head_total}"
 				control_heads = tf.reshape(in_control_state, [features["d_batch_size"], head_total, control_heads_per_read_head * args["input_width"]])
 
 		if args["use_read_question_state"] or len(in_signal)==0:
