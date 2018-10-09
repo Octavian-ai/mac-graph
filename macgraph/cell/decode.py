@@ -76,9 +76,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 		# Take the final reasoning step output
 		final_output = decoded_outputs.rnn_output[0][:,-1,:]
 
-		finished_step = tf.argmax(out_taps["finished"], axis=-1)
-		
-		return final_output, out_taps, finished_step
+		return final_output, out_taps
 
 
 
@@ -119,10 +117,8 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 			key: get_tap(idx+1, key)
 			for idx, key in enumerate(d_cell.get_taps().keys())
 		}
-
-		finished_step = tf.constant(args["max_decode_iterations"], tf.int32, [features["d_batch_size"]])
 		
-		return final_output, out_taps, finished_step
+		return final_output, out_taps
 
 
 def execute_reasoning(args, features, question_state, question_tokens, **kwargs):
@@ -148,7 +144,8 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 				tf.summary.image(k, expand_if_needed(v))
 
 	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["output_classes"]])
-	
+
+
 	return final_output, out_taps
 
 
