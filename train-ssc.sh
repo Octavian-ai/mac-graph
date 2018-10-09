@@ -7,7 +7,6 @@ python -m macgraph.train \
 	--input-dir input_data/processed/ssc_small_1m \
 	--max-decode-iterations 10 \
 	--control-heads 2 \
-	--disable-read-cell \
 	--disable-message-passing \
 	--disable-memory-cell \
 	--disable-input-bilstm \
