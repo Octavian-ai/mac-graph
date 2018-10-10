@@ -11,6 +11,7 @@ python -m macgraph.train \
 	--control-heads 2 \
 	--disable-read-cell \
 	--disable-input-bilstm \
-	--input-width 64 \
+	--input-width 128 \
+	--embed-width 128 \
 	--enable-lr-decay \
 	$@

@@ -173,6 +173,8 @@ The successful station property model does no better than random guessing. I'm e
 
 - `dd76eb6`: 100% acc @ 30k with message passing
 
+- `468597b`: 100% accuracy with message passing
+
 
 ### Combined station adjacency and properties
 
@@ -215,7 +217,7 @@ The successful station property model does no better than random guessing. I'm e
 	- `use_read_query_block` didn't seem to help
 
 ### Station one apart
-- `468597b`: 100% accuracy with message passing
+- `44563f0`: Message passing 99% accuracy @ 10k steps
 
 ### Station shortest count
 
