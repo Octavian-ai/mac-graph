@@ -219,11 +219,16 @@ The successful station property model does no better than random guessing. I'm e
 ### Station one apart
 - `44563f0`: Message passing 99% accuracy @ 10k steps
 
+### Station zero/one/two apart
+- `0bf8504`: Message passing 97.6% accuracy @ 4k steps
+
 ### Station shortest count
 
 - `9ecf10e` 
 	- Feeding memory into the read_cell was hampering performance
 	- Idea to use softmax selection of read input (and possibly activation) to allow specialisation of read heads
+
+
 
 
 ## Notes on training infrastructure

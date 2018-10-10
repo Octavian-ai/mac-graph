@@ -177,7 +177,11 @@ def predict(args, cmd_args):
 
 			confusion[emoji + " \texp:" + p["actual_label"] +" \tact:" + p["predicted_label"] + " \t" + p["type_string"]] += 1
 
-			if not cmd_args["correct_only"] or correct:
+			if cmd_args["failed_only"] and not correct:
+				print_row(p)
+			elif cmd_args["correct_only"] and correct:
+				print_row(p)
+			elif not cmd_args["failed_only"] and not cmd_args["correct_only"]:
 				print_row(p)
 
 
@@ -189,6 +193,8 @@ if __name__ == "__main__":
 	parser.add_argument("--filter-type-prefix",type=str,default=None)
 	parser.add_argument("--model-dir",type=str,required=True)
 	parser.add_argument("--correct-only",action='store_true')
+	parser.add_argument("--failed-only",action='store_true')
+
 
 	cmd_args = vars(parser.parse_args())
 
