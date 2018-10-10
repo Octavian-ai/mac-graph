@@ -98,7 +98,7 @@ def input_fn(args, mode, question=None, repeat=True):
 			tf_startswith(features["type_string"], args["filter_type_prefix"]))
 
 	if args["filter_output_class"] is not None:
-		classes_as_ints = [args["vocab"].inverse_lookup(i) for i in args["filter_output_class"]]
+		classes_as_ints = [args["vocab"].lookup(i) for i in args["filter_output_class"]]
 		d = d.filter(lambda features, labels: 
 			tf.reduce_any(tf.equal(features["label"], classes_as_ints))
 		)
