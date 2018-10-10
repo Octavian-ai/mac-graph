@@ -26,7 +26,7 @@ def model_fn(features, labels, mode, params):
 	predictions = None
 	eval_hooks = None
 
-	vocab = args["vocab"]
+	vocab = Vocab.load_from_args(args)
 
 	# --------------------------------------------------------------------------
 	# Shared variables

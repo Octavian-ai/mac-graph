@@ -93,9 +93,9 @@ def input_fn(args, mode, question=None, repeat=True):
 	if args["limit"] is not None:
 		d = d.take(args["limit"])
 
-	if args["filter_type_prefix"] is not None:
-		d = d.filter(lambda features, labels: 
-			tf_startswith(features["type_string"], args["filter_type_prefix"]))
+	# if args["filter_type_prefix"] is not None:
+	# 	d = d.filter(lambda features, labels: 
+	# 		tf_startswith(features["type_string"], args["filter_type_prefix"]))
 
 	# if args["filter_output_class"] is not None:
 	# 	classes_as_ints = [args["vocab"].inverse_lookup(i) for i in args["filter_output_class"]]
