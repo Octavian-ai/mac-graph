@@ -115,11 +115,10 @@ def do_messaging_cell(args, features, vocab_embedding,
 		node_state = agg
 		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
-		if use_self_reference:
+		if args["use_message_passing_self_ref"]:
 			# Add self-reference
 			self_reference_kernel = tf.get_variable("message_pass_kernel", [1, args["mp_state_width"], args["mp_state_width"]])
 			sr = tf.nn.conv1d(in_node_state, self_reference_kernel, 1, 'SAME', name="self_reference")
-			sr *= args["mp_self_dampening"]
 			node_state += sr
 
 		if args["use_message_passing_fn"]:
