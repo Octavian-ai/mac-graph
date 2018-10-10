@@ -149,7 +149,7 @@ def model_fn(features, labels, mode, params):
 			with tf.gfile.GFile(args["answer_classes_path"]) as file:
 				doc = yaml.load(file)
 				for answer_class in doc.keys():
-					if args["filter_output_class"] is None or answer_class is in args["filter_output_class"]:
+					if args["filter_output_class"] is None or answer_class in args["filter_output_class"]:
 						e = vocab.lookup(pretokenize_json(answer_class))
 						weights = tf.equal(labels, tf.cast(e, tf.int64))
 						eval_metric_ops["class_accuracy_"+str(answer_class)] = tf.metrics.accuracy(
