@@ -70,7 +70,7 @@ def build(args):
 		logger.debug(f"vocab: {vocab.table}")
 		print()
 	else:
-		vocab = Vocab.load(args)
+		vocab = Vocab.load_from_args(args)
 
 
 	question_types = Counter()

@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
 	args = get_args(extend_args)
 
-	vocab = Vocab.load(args)
+	vocab = Vocab.load_from_args(args)
 	count = 0
 	tf.enable_eager_execution()
 

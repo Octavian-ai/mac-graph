@@ -154,6 +154,7 @@ def do_messaging_cell(args, features, vocab_embedding,
 			out_read_signals.append(out_read_signal)
 			for k,v in a_taps.items():
 				taps[f"mp_read{idx}_{k}"] = v
+			taps[f"mp_read{idx}_signal"] = out_read_signal
 
 		node_state = dynamic_assert_shape(node_state, node_state_shape, "node_state")
 		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"

@@ -190,20 +190,25 @@ class Vocab(object):
 	
 
 	@classmethod
-	def load(cls, args):
+	def load(cls, path, size):
 
 		tokens = list()
 
-		with tf.gfile.GFile(args["vocab_path"]) as file:
+		with tf.gfile.GFile(path) as file:
 			for line in file.readlines():
 				tokens.append(line.replace("\n", ""))
 				
-				if len(tokens) == args["vocab_size"]:
+				if len(tokens) == size:
 					break
 
-		assert len(tokens) == len(set(tokens)), f"Duplicate lines in {args['vocab_path']}"
+		assert len(tokens) == len(set(tokens)), f"Duplicate lines in {path}"
 
 		return Vocab(tokens)
+
+
+	@classmethod
+	def load_from_args(cls, args):
+		return Vocab.load(args["vocab_path"], args["vocab_size"])
 
 
 

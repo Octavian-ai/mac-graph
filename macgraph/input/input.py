@@ -73,7 +73,7 @@ def cast_adjacency_to_bool(features, labels):
 	features["kb_adjacency"] = tf.cast(features["kb_adjacency"], tf.bool)
 	return features, labels
 
-def input_fn(args, mode, question=None, repeat=True):
+def input_fn(args, mode, vocab, question=None, repeat=True):
 
 	# --------------------------------------------------------------------------
 	# Read TFRecords
@@ -93,9 +93,17 @@ def input_fn(args, mode, question=None, repeat=True):
 	if args["limit"] is not None:
 		d = d.take(args["limit"])
 
-	if args["type_string_prefix"] is not None:
+	if args["filter_type_prefix"] is not None:
 		d = d.filter(lambda features, labels: 
-			tf_startswith(features["type_string"], args["type_string_prefix"]))
+			tf_startswith(features["type_string"], args["filter_type_prefix"]))
+
+	if args["filter_output_class"] is not None:
+		classes_as_ints = [vocab.inverse_lookup(i) for i in args["filter_output_class"]]
+		d = d.filter(lambda features, labels: 
+			tf.reduce_any(tf.equal(features["label"], classes_as_ints))
+		)
+
+
 
 	d = d.shuffle(args["batch_size"]*1000)
 
@@ -162,8 +170,8 @@ def input_fn(args, mode, question=None, repeat=True):
 
 
 
-def gen_input_fn(args, mode):
-	return lambda: input_fn(args, mode)
+def gen_input_fn(args, mode, vocab):
+	return lambda: input_fn(args, mode, vocab)
 
 
 

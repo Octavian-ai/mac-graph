@@ -49,6 +49,9 @@ def generate_args_derivatives(args):
 		r["kb_list"].append("kb_edge")
 
 
+	r["vocab"] = Vocab.load(r["vocab_path"], args["vocab_size"])
+
+
 	return r
 
 def get_args(extend=lambda parser:None, argv=None):
@@ -67,7 +70,8 @@ def get_args(extend=lambda parser:None, argv=None):
 
 	# Used in train / predict / build
 	parser.add_argument('--limit',						type=int, default=None, help="How many rows of input data to read")
-	parser.add_argument('--type-string-prefix',			type=str, default=None, help="Filter input data rows to only have this type string prefix")
+	parser.add_argument('--filter-type-prefix',			type=str, default=None, help="Filter input data rows to only have this type string prefix")
+	parser.add_argument('--filter-output-class',		action="append", help="Filter input data rows to only have this output class")
 
 	# --------------------------------------------------------------------------
 	# Data build

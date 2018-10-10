@@ -85,7 +85,7 @@ def predict(args, cmd_args):
 
 	# Actually do some work
 	predictions = estimator.predict(input_fn=gen_input_fn(args, "predict"))
-	vocab = Vocab.load(args)
+	vocab = Vocab.load_from_args(args)
 
 	def print_row(row):
 		if p["actual_label"] == p["predicted_label"]:
@@ -137,6 +137,7 @@ def predict(args, cmd_args):
 					print(f"{i}: {tap}: ",', '.join(color_text(db, row[tap][i])))
 
 				print(f"{i}: mp_write_signal: {row['mp_write_signal'][i]}")
+				print(f"{i}: mp_read0_signal:  {row['mp_read0_signal'][i]}")
 
 			if finished:
 				print("--FINISHED--")
