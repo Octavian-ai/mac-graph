@@ -50,8 +50,7 @@ def generate_args_derivatives(args):
 		r["kb_list"].append("kb_edge")
 
 
-	# r["vocab"] = Vocab.load(r["vocab_path"], args["vocab_size"])
-
+	r["vocab"] = Vocab.load(r["vocab_path"], args["vocab_size"])
 
 	return r
 
