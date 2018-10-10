@@ -75,14 +75,14 @@ def read_gqa(args):
 
 		for i in d:
 			if i is not None:
-				if args["type_string_prefix"] is None or i["question"]["type_string"].startswith(args["type_string_prefix"]):
+				if args["filter_type_prefix"] is None or i["question"]["type_string"].startswith(args["filter_type_prefix"]):
 					yield i
 					ctr += 1
 					if args["limit"] is not None and ctr >= args["limit"]:
 						logger.debug("Hit limit, stop")
 						return
 				else:
-					logger.debug(f"{i['question']['type_string']} does not match prefix {args['type_string_prefix']}")
+					logger.debug(f"{i['question']['type_string']} does not match prefix {args['filter_type_prefix']}")
 			else:
 				logger.debug("Skipping None yaml doc")
 

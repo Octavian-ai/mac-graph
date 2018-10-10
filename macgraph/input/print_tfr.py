@@ -47,8 +47,8 @@ if __name__ == "__main__":
 		count += 1
 
 		# Skip non matching prefixes
-		if args["type_string_prefix"] is not None:
-			if not r["type_string"].startswith(args["type_string_prefix"]):
+		if args["filter_type_prefix"] is not None:
+			if not r["type_string"].startswith(args["filter_type_prefix"]):
 				continue
 
 		types.add(r["type_string"])

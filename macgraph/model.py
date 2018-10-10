@@ -139,7 +139,7 @@ def model_fn(features, labels, mode, params):
 			with tf.gfile.GFile(args["question_types_path"]) as file:
 				doc = yaml.load(file)
 				for type_string in doc.keys():
-					if args["type_string_prefix"] is None or type_string.startswith(args["type_string_prefix"]):
+					if args["filter_type_prefix"] is None or type_string.startswith(args["filter_type_prefix"]):
 						eval_metric_ops["type_accuracy_"+type_string] = tf.metrics.accuracy(
 							labels=labels, 
 							predictions=predicted_labels, 
@@ -149,12 +149,13 @@ def model_fn(features, labels, mode, params):
 			with tf.gfile.GFile(args["answer_classes_path"]) as file:
 				doc = yaml.load(file)
 				for answer_class in doc.keys():
-					e = vocab.lookup(pretokenize_json(answer_class))
-					weights = tf.equal(labels, tf.cast(e, tf.int64))
-					eval_metric_ops["class_accuracy_"+str(answer_class)] = tf.metrics.accuracy(
-						labels=labels, 
-						predictions=predicted_labels, 
-						weights=weights)
+					if args["filter_output_class"] is None or answer_class is in args["filter_output_class"]:
+						e = vocab.lookup(pretokenize_json(answer_class))
+						weights = tf.equal(labels, tf.cast(e, tf.int64))
+						eval_metric_ops["class_accuracy_"+str(answer_class)] = tf.metrics.accuracy(
+							labels=labels, 
+							predictions=predicted_labels, 
+							weights=weights)
 
 		except tf.errors.NotFoundError as err:
 			print(err)

@@ -163,7 +163,7 @@ def predict(args, cmd_args):
 			break
 
 		decode_row(p)
-		if cmd_args["type_string_prefix"] is None or p["type_string"].startswith(cmd_args["type_string_prefix"]):
+		if cmd_args["filter_type_prefix"] is None or p["type_string"].startswith(cmd_args["filter_type_prefix"]):
 
 			output_classes[p["actual_label"]] += 1
 			predicted_classes[p["predicted_label"]] += 1

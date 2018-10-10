@@ -10,4 +10,6 @@ python -m macgraph.train \
 	--max-decode-iterations 2 \
 	--control-heads 2 \
 	--disable-read-cell \
+	--disable-input-lstm \
+	--input-width 64 \
 	$@
