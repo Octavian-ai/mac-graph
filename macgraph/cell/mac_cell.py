@@ -70,11 +70,19 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			else:
 				read = tf.fill([self.features["d_batch_size"], 1], 0.0)
 				read_taps = {}
-		
+
+
+			if self.args["use_message_passing"]:
+				mp_reads, out_mp_state, mp_taps = messaging_cell(self.args, self.features, self.vocab_embedding,
+					in_mp_state, out_control_state, self.question_state)
+			else:
+				out_mp_state = in_mp_state
+				mp_reads = [tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0)]
+				mp_taps = {}
 			
 			if self.args["use_memory_cell"]:
 				out_memory_state, tap_memory_forget = memory_cell(self.args, self.features,
-					in_memory_state, read, out_control_state)
+					in_memory_state, read, mp_reads, out_control_state)
 			else:
 				out_memory_state = in_memory_state
 				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)
@@ -85,13 +93,6 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			else:
 				out_data_stack = in_data_stack
 
-			if self.args["use_message_passing"]:
-				mp_reads, out_mp_state, mp_taps = messaging_cell(self.args, self.features, self.vocab_embedding,
-					in_mp_state, out_control_state, self.question_state)
-			else:
-				out_mp_state = in_mp_state
-				mp_reads = [tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0)]
-				mp_taps = {}
 			
 			if self.args["use_output_cell"]:
 				output, finished = output_cell(self.args, self.features,

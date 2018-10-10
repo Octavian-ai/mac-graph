@@ -14,5 +14,4 @@ python -m macgraph.train \
 	--disable-input-bilstm \
 	--input-width 64 \
 	--embed-width 64 \
-	--enable-lr-decay \
 	$@
