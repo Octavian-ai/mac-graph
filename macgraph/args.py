@@ -6,6 +6,7 @@ import pathlib
 import tensorflow as tf
 
 from .minception import mi_activation
+from .input import Vocab
 
 global_args = {}
 
