@@ -83,10 +83,11 @@ def model_fn(features, labels, mode, params):
 				decay_rate=1.1)
 
 		elif args["use_lr_decay"]:
+			# Doesn't start until 10k steps 
 			learning_rate = tf.train.exponential_decay(
 				args["learning_rate"], 
-				global_step,
-				decay_steps=10000, 
+				tf.max(0, global_step - 10 * 1000),
+				decay_steps=2000, 
 				decay_rate=0.9)
 
 		if args["use_summary_scalar"]:
@@ -96,7 +97,6 @@ def model_fn(features, labels, mode, params):
 
 			tf.summary.scalar("learning_rate", learning_rate, family="hyperparam")
 			tf.summary.scalar("current_step", global_step, family="hyperparam")
-			tf.summary.histogram("grad_norm", norms)
 			tf.summary.scalar("grad_norm", tf.reduce_max(norms), family="hyperparam")
 
 		optimizer = tf.train.AdamOptimizer(learning_rate)
