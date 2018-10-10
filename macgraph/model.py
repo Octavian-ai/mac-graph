@@ -86,7 +86,7 @@ def model_fn(features, labels, mode, params):
 			# Doesn't start until 10k steps 
 			learning_rate = tf.train.exponential_decay(
 				args["learning_rate"], 
-				tf.maximum(0, global_step - 10 * 1000),
+				tf.maximum(tf.cast(0, global_step.dtype), global_step - 10 * 1000),
 				decay_steps=2000, 
 				decay_rate=0.9)
 
