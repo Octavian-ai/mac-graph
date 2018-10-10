@@ -9,7 +9,7 @@ python -m macgraph.train \
 	--filter-output-class 1 \
 	--filter-output-class 2 \
 	--filter-output-class 3 \
-	--max-decode-iterations 5 \
+	--max-decode-iterations 8 \
 	--control-heads 2 \
 	--disable-read-cell \
 	--disable-input-bilstm \
