@@ -100,45 +100,47 @@ def do_messaging_cell(args, features, vocab_embedding,
 		node_state += write_signal
 		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
-		# Aggregate via adjacency matrix with normalisation (that does not include self-edges)
-		adj = tf.cast(features["kb_adjacency"], tf.float32)
-		degree = tf.reduce_sum(adj, -1, keepdims=True)
-		inv_degree = tf.reciprocal(degree)
-		node_mask = tf.expand_dims(tf.sequence_mask(features["kb_nodes_len"], args["kb_node_max_len"]), -1)
-		inv_degree = tf.where(node_mask, inv_degree, tf.zeros(tf.shape(inv_degree)))
-		inv_degree = tf.where(tf.greater(degree, 0), inv_degree, tf.zeros(tf.shape(inv_degree)))
-		inv_degree = tf.check_numerics(inv_degree, "inv_degree")
-		adj_norm = inv_degree * adj
-		adj_norm = tf.cast(adj_norm, node_state.dtype)
-		adj_norm = tf.check_numerics(adj_norm, "adj_norm")
-		agg = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
-		node_state = agg
-		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
+		if args["use_message_passing_fn"]:
+			# Calculate normalised adjacency
+			adj = tf.cast(features["kb_adjacency"], tf.float32)
+			degree = tf.reduce_sum(adj, -1, keepdims=True)
+			inv_degree = tf.reciprocal(degree)
+			node_mask = tf.expand_dims(tf.sequence_mask(features["kb_nodes_len"], args["kb_node_max_len"]), -1)
+			inv_degree = tf.where(node_mask, inv_degree, tf.zeros(tf.shape(inv_degree)))
+			inv_degree = tf.where(tf.greater(degree, 0), inv_degree, tf.zeros(tf.shape(inv_degree)))
+			inv_degree = tf.check_numerics(inv_degree, "inv_degree")
+			adj_norm = inv_degree * adj
+			adj_norm = tf.cast(adj_norm, node_state.dtype)
+			adj_norm = tf.check_numerics(adj_norm, "adj_norm")
+			
+			# Apply adjacency to send messages
+			agg = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
+			agg = dynamic_assert_shape(agg, node_state_shape, "adj_agg")
+
+			# Message passing function is a 1d conv [filter_width, in_channels, out_channels]
+			message_pass_kernel = tf.get_variable("message_pass_kernel", [1, args["mp_state_width"], args["mp_state_width"]])
+			taps["mp_pass_fn"] = message_pass_kernel
+
+			# Apply message pass function:
+			agg = tf.nn.conv1d(agg, message_pass_kernel, 1, 'SAME', name="message_pass")
+			
+			# Apply activation
+			agg = ACTIVATION_FNS[args["mp_activation"]](agg)
+			
+			node_state = agg
 
 		if args["use_message_passing_self_ref"]:
 			# Add self-reference
 			self_reference_kernel = tf.get_variable("message_pass_kernel", [1, args["mp_state_width"], args["mp_state_width"]])
 			sr = tf.nn.conv1d(in_node_state, self_reference_kernel, 1, 'SAME', name="self_reference")
+			sr = ACTIVATION_FNS[args["mp_activation"]](sr)
 			node_state += sr
 			taps["mp_self_fn"] = self_reference_kernel
 
-		if args["use_message_passing_fn"]:
-			# Message passing function is a 1d conv [filter_width, in_channels, out_channels]
-			message_pass_kernel = tf.get_variable("message_pass_kernel", [1, args["mp_state_width"], args["mp_state_width"]])
-			# Apply message pass function:
-			node_state = tf.nn.conv1d(node_state, message_pass_kernel, 1, 'SAME', name="message_pass")
-			# Apply activation
-			node_state = ACTIVATION_FNS[args["mp_activation"]](node_state)
-			assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
-			taps["mp_pass_fn"] = message_pass_kernel
-
-
-		# node_state = layer_normalize(node_state)
-		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
-
+		
 		taps["mp_node_state"] = node_state
 
-		# Output
+		# To do key-value attn the node_table and node_state must be same length
 		delta = tf.shape(node_state)[1] - tf.shape(node_table)[1]
 		padded_node_table = tf.pad(node_table, [ [0,0], [0,delta], [0,0] ]) # zero pad out
 
