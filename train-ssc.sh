@@ -12,4 +12,5 @@ python -m macgraph.train \
 	--disable-read-cell \
 	--disable-input-bilstm \
 	--input-width 64 \
+	--enable-lr-decay \
 	$@
