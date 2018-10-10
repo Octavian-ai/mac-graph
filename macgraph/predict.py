@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--n-rows",type=int,default=20)
-	parser.add_argument("--type-prefix",type=str,default=None)
+	parser.add_argument("--filter-type-prefix",type=str,default=None)
 	parser.add_argument("--model-dir",type=str,required=True)
 	parser.add_argument("--correct-only",action='store_true')
 
