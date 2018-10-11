@@ -14,6 +14,7 @@ python -m macgraph.train \
 	--disable-input-bilstm \
 	--input-width 64 \
 	--embed-width 64 \
-	--mp-state-width 4 \
-	--max-decode-iterations 4 \
+	--mp-state-width 8 \
+	--max-decode-iterations 8 \
+	--mp-activation relu \
 	$@
