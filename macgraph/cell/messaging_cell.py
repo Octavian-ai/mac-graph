@@ -119,17 +119,17 @@ def do_messaging_cell(args, features, vocab_embedding,
 
 		if args["use_message_passing_self_ref"]:
 			# Add self-reference
-			self_reference_kernel = tf.get_variable("message_pass_kernel", [1, args["mp_state_width"], args["mp_state_width"]])
+			self_reference_kernel = tf.get_variable("mp_self_reference_W", [1, args["mp_state_width"], args["mp_state_width"]])
 			sr = tf.nn.conv1d(in_node_state, self_reference_kernel, 1, 'SAME', name="self_reference")
 			node_state += sr
 			taps["mp_self_fn"] = self_reference_kernel
 
 
 
-		if args["use_message_passing_fn"]:
+		if args["use_message_passing_node_transform"]:
 			# Message passing function is a 1d conv [filter_width, in_channels, out_channels]
-			message_pass_kernel = tf.get_variable("message_pass_kernel", [1, args["mp_state_width"], args["mp_state_width"]])
-			message_pass_bias = tf.get_variable("message_pass_kernel", [args["mp_state_width"]])
+			message_pass_kernel = tf.get_variable("mp_node_W", [1, args["mp_state_width"], args["mp_state_width"]])
+			message_pass_bias = tf.get_variable("mp_node_b", [args["mp_state_width"]])
 
 			# Apply message pass function:
 			node_state = tf.nn.conv1d(node_state, message_pass_kernel, 1, 'SAME', name="message_pass")
