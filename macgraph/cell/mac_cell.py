@@ -53,12 +53,20 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 			in_control_state, in_memory_state, in_data_stack, in_mp_state = in_state
 
+			print("build_cell inputs", inputs)
+
+			in_iter_question_state = inputs[0]
+			in_iter_question_state = dynamic_assert_shape(in_iter_question_state, [self.features["d_batch_size"], self.args["control_width"]], "in_iter_question_state")
+			
+			in_iter_id = inputs[1]
+			in_iter_id = dynamic_assert_shape(in_iter_id, [self.features["d_batch_size"], self.args["max_decode_iterations"]], "in_iter_id")
+
 			empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)
 			empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
 
 			if self.args["use_control_cell"]:
 				out_control_state, control_taps = control_cell(self.args, self.features, 
-					inputs, in_control_state, self.question_state, self.question_tokens)
+					in_iter_question_state, in_control_state, self.question_state, self.question_tokens)
 			else:
 				out_control_state = in_control_state
 		
@@ -74,7 +82,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 			if self.args["use_message_passing"]:
 				mp_reads, out_mp_state, mp_taps = messaging_cell(self.args, self.features, self.vocab_embedding,
-					in_mp_state, out_control_state, self.question_state, out_memory_state)
+					in_mp_state, out_control_state, self.question_state, in_memory_state, in_iter_id)
 			else:
 				out_mp_state = in_mp_state
 				mp_reads = [tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0)]

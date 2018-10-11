@@ -34,16 +34,25 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 
 		finished_shape = tf.convert_to_tensor([features["d_batch_size"], 1])
 
+		def get_iteration_id(time):
+			return tf.tile(tf.expand_dims(tf.one_hot(time, args["max_decode_iterations"]), 0), [features["d_batch_size"], 1])
+
+		def get_input_for_time(time):
+			time = dynamic_assert_shape(time, [], "time")
+			return (tf.gather(inputs, time), get_iteration_id(time))
+
 		initialize_fn = lambda: (
 			tf.fill(value=False, dims=finished_shape), # finished
-			inputs[0],  # inputs
+			get_input_for_time(tf.constant(0)),  # inputs
 		)
 
 		sample_fn = lambda time, outputs, state: tf.constant(0) # sampled output
 
 		def next_inputs_fn(time, outputs, state, sample_ids):
 			finished = tf.cast(outputs[1], tf.bool)
-			next_inputs = tf.gather(inputs, time)
+			print("next_inputs_fn", time)
+			next_inputs = get_input_for_time(time)
+			print("next inputs", next_inputs)
 			next_state = state
 			return (finished, next_inputs, next_state)
 
@@ -123,10 +132,16 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 
 def execute_reasoning(args, features, question_state, question_tokens, **kwargs):
 
-	inputs = [
+	question_state_per_iteration = [
 		tf.layers.dense(question_state, args["control_width"], name=f"question_state_inputs_t{i}") 
 		for i in range(args["max_decode_iterations"])
 	]
+
+	iteration_id = tf.eye(args["max_decode_iterations"])
+
+	# inputs = tf.stack([question_state_per_iteration, iteration_id], axis=-1)
+	# print(inputs)
+	inputs = question_state_per_iteration
 
 	if args["use_position_encoding"]:
 		question_tokens = add_location_encoding_1d(question_tokens)

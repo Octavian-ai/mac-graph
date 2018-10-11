@@ -4,7 +4,7 @@ import tensorflow as tf
 from ..util import *
 from ..attention import *
 
-def control_cell(args, features, inputs, in_control_state, in_question_state, in_question_tokens):
+def control_cell(args, features, in_iter_question_state, in_control_state, in_question_state, in_question_tokens):
 	"""
 	Build a control cell
 
@@ -21,7 +21,7 @@ def control_cell(args, features, inputs, in_control_state, in_question_state, in
 		control_shape = [ features["d_batch_size"], args["control_width"] ]
 		in_control_state = dynamic_assert_shape(in_control_state, control_shape)
 		
-		all_input = tf.concat([in_question_state, in_control_state, inputs], -1, name="all_input")
+		all_input = tf.concat([in_question_state, in_control_state, in_iter_question_state], -1, name="all_input")
 
 		question_token_width = args["input_width"]
 
