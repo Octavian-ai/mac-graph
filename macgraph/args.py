@@ -139,11 +139,11 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--control-dropout',	        type=float, default=0.0, help="Dropout on the control unit")
 
 	parser.add_argument('--memory-width',	           	type=int, default=128,	help="The width of memory state")
-	parser.add_argument('--memory-transform-layers',	type=int, default=2, 	help="How many deep layers in memory transforms")
+	parser.add_argument('--memory-transform-layers',	type=int, default=1, 	help="How many deep layers in memory transforms")
 	parser.add_argument('--memory-forget-activation',	type=str, default="sigmoid", 	choices=ACTIVATION_FNS.keys())
-	parser.add_argument('--memory-activation',			type=str, default="relu", 		choices=ACTIVATION_FNS.keys())
+	parser.add_argument('--memory-activation',			type=str, default="tanh", 		choices=ACTIVATION_FNS.keys())
 
-	parser.add_argument('--mp-activation',				type=str, default="relu", 		choices=ACTIVATION_FNS.keys())
+	parser.add_argument('--mp-activation',				type=str, default="linear", 		choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--mp-state-width', 			type=int, default=1)
 	parser.add_argument('--disable-message-passing',    action='store_false', dest='use_message_passing')
 	parser.add_argument('--disable-message-passing-fn', action='store_false', dest='use_message_passing_fn')
