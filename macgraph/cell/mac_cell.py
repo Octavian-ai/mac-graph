@@ -53,8 +53,6 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 			in_control_state, in_memory_state, in_data_stack, in_mp_state = in_state
 
-			print("build_cell inputs", inputs)
-
 			in_iter_question_state = inputs[0]
 			in_iter_question_state = dynamic_assert_shape(in_iter_question_state, [self.features["d_batch_size"], self.args["control_width"]], "in_iter_question_state")
 			

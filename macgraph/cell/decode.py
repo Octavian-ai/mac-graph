@@ -50,9 +50,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 
 		def next_inputs_fn(time, outputs, state, sample_ids):
 			finished = tf.cast(outputs[1], tf.bool)
-			print("next_inputs_fn", time)
 			next_inputs = get_input_for_time(time)
-			print("next inputs", next_inputs)
 			next_state = state
 			return (finished, next_inputs, next_state)
 
