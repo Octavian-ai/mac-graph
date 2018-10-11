@@ -19,13 +19,15 @@ logger = logging.getLogger(__name__)
 def hr():
 	print(stylize("---------------", fg("blue")))
 
-DARK_GREY = 242
+DARK_GREY = 240
 WHITE = 255
 
 BG_BLACK = 232
 BG_DARK_GREY = 237
 
 ATTN_THRESHOLD = 0.3
+
+np.set_printoptions(precision=3)
 
 
 def color_text(text_array, levels, color_fg=True):
@@ -43,10 +45,10 @@ def color_vector(vec):
 	v_min = np.amin(vec)
 	delta = np.abs(v_max - v_min)
 	norm = (vec - v_min) / np.maximum(delta, 0.00001)
-	def to_color(n):
-		return color_text([str(n)], [ (n-v_min) / np.maximum(delta, 0.0001)])[0]
-	v = np.vectorize(to_color)
-	return str(v(vec))
+	def to_color(row):
+		return '[' + ', '.join(color_text([str(i) for i in row], (row-v_min) / np.maximum(delta, 0.0001))) + ']'
+	
+	return '\n'.join(to_color(row) for row in vec)
 
 def pad_str(s, target=3):
 	if len(s) < target:

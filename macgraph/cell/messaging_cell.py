@@ -124,11 +124,16 @@ def do_messaging_cell(args, features, vocab_embedding,
 			node_state += sr
 			taps["mp_self_fn"] = self_reference_kernel
 
+
+
 		if args["use_message_passing_fn"]:
 			# Message passing function is a 1d conv [filter_width, in_channels, out_channels]
 			message_pass_kernel = tf.get_variable("message_pass_kernel", [1, args["mp_state_width"], args["mp_state_width"]])
+			message_pass_bias = tf.get_variable("message_pass_kernel", [args["mp_state_width"]])
+
 			# Apply message pass function:
 			node_state = tf.nn.conv1d(node_state, message_pass_kernel, 1, 'SAME', name="message_pass")
+			node_state += message_pass_bias
 			# Apply activation
 			node_state = ACTIVATION_FNS[args["mp_activation"]](node_state)
 			assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
