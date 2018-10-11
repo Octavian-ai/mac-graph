@@ -7,7 +7,6 @@ from tensorflow.python import debug as tf_debug
 from .estimator import get_estimator
 from .input import gen_input_fn
 from .args import *
-from .predict import predict
 
 # Make TF be quiet
 import os
@@ -63,7 +62,6 @@ if __name__ == "__main__":
 
 	# DO IT!
 	train(args)
-	predict(args, args)
 
 
 

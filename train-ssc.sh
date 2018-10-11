@@ -11,6 +11,7 @@ python -m macgraph.train \
 	--filter-output-class 3 \
 	--max-decode-iterations 8 \
 	--control-heads 2 \
+	--disable-read-cell \
 	--disable-input-bilstm \
 	--input-width 64 \
 	--embed-width 64 \
