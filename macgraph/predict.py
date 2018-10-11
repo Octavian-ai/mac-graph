@@ -38,6 +38,14 @@ def color_text(text_array, levels, color_fg=True):
 		out.append(stylize(s, color))
 	return out
 
+def color_vector(vec):
+	v_max = np.amax(vec)
+	v_min = np.amin(vec)
+	delta = np.abs(v_max - v_min)
+	print(v_max, v_min, delta)
+	norm = (vec - v_min) / np.maximum(delta, 0.00001)
+	return ', '.join(color_text([str(i) for i in vec], norm))
+
 def pad_str(s, target=3):
 	if len(s) < target:
 		for i in range(target - len(s)):
@@ -137,7 +145,9 @@ def predict(args, cmd_args):
 					print(f"{i}: {tap}: ",', '.join(color_text(db, row[tap][i])))
 
 				print(f"{i}: mp_write_signal: {row['mp_write_signal'][i]}")
-				print(f"{i}: mp_read0_signal:  {row['mp_read0_signal'][i]}")
+				print(f"{i}: mp_read0_signal: {row['mp_read0_signal'][i]}")
+				print(f"{i}: mp_node_state:   {color_vector(np.squeeze(row['mp_node_state'][i][0:row['kb_nodes_len']]))}")
+
 
 			if finished:
 				print("--FINISHED--")

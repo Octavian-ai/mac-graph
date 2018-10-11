@@ -12,6 +12,7 @@ def memory_cell(args, features, in_memory_state, in_data_read, in_mp_reads, in_c
 		in_memory_state = dynamic_assert_shape(in_memory_state, memory_shape)
 		
 		in_all = [in_memory_state, in_iter_id]
+		
 		if args["use_read_cell"]:
 			in_all.append(in_data_read)
 
