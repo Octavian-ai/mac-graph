@@ -35,7 +35,7 @@ def layer_normalize(tensor):
 	return tensor
 
 
-def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_state, in_question_state):
+def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_state, in_question_state, in_memory_state):
 	'''
 	Operate a message passing cell
 	Each iteration it'll do one round of message passing
@@ -52,7 +52,7 @@ def messaging_cell(args, features, vocab_embedding, in_node_state, in_control_st
 
 	node_table, node_table_width, node_table_len = get_table_with_embedding(args, features, vocab_embedding, "kb_node")
 
-	in_signal = tf.concat([in_control_state], -1)
+	in_signal = tf.concat([in_control_state, in_memory_state], -1)
 
 	# Read/Write queries
 	in_write_query  = tf.layers.dense(in_signal, node_table_width)
