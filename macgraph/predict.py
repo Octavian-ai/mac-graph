@@ -42,9 +42,11 @@ def color_vector(vec):
 	v_max = np.amax(vec)
 	v_min = np.amin(vec)
 	delta = np.abs(v_max - v_min)
-	print(v_max, v_min, delta)
 	norm = (vec - v_min) / np.maximum(delta, 0.00001)
-	return ', '.join(color_text([str(i) for i in vec], norm))
+	def to_color(n):
+		return color_text([str(n)], [ (n-v_min) / np.maximum(delta, 0.0001)])[0]
+	v = np.vectorize(to_color)
+	return str(v(vec))
 
 def pad_str(s, target=3):
 	if len(s) < target:
@@ -146,7 +148,7 @@ def predict(args, cmd_args):
 
 				print(f"{i}: mp_write_signal: {row['mp_write_signal'][i]}")
 				print(f"{i}: mp_read0_signal: {row['mp_read0_signal'][i]}")
-				print(f"{i}: mp_node_state:   {color_vector(np.squeeze(row['mp_node_state'][i][0:row['kb_nodes_len']]))}")
+				print(f"{i}: mp_node_state:   {color_vector(row['mp_node_state'][i][0:row['kb_nodes_len']])}")
 
 
 			if finished:
