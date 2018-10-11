@@ -9,11 +9,11 @@ python -m macgraph.train \
 	--filter-output-class 1 \
 	--filter-output-class 2 \
 	--filter-output-class 3 \
-	--max-decode-iterations 8 \
-	--control-heads 2 \
+	--control-heads 1 \
 	--disable-read-cell \
 	--disable-input-bilstm \
 	--input-width 64 \
 	--embed-width 64 \
-	--mp-state-width 8 \
+	--mp-state-width 4 \
+	--max-decode-iterations 4 \
 	$@
