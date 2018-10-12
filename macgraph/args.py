@@ -94,7 +94,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--learning-rate',         		type=float, default=0.001)
 	parser.add_argument('--eval-every',					type=int,	default=3*60, help="Evaluate every X seconds")
 
-	parser.add_argument('--loss-factor-decode-len',		type=float,	default=0.1)
+	parser.add_argument('--loss-factor-decode-len',		type=float,	default=0.01)
 
 	# --------------------------------------------------------------------------
 	# Network topology
