@@ -26,7 +26,11 @@ def memory_cell(args, features, in_memory_state, in_data_read, in_mp_reads, in_c
 
 		new_memory_state = in_all
 		for i in range(args["memory_transform_layers"]):
-			new_memory_state = tf.layers.dense(new_memory_state, args["memory_width"], activation=act)
+			prev = new_memory_state
+			new_memory_state = tf.layers.dense(new_memory_state, args["memory_width"])
+			if new_memory_state.shape[-1] == prev.shape[-1]:
+				new_memory_state += prev
+			new_memory_state = act(new_memory_state)
 
 		forget_scalar = tf.layers.dense(in_all, 1, activation=forget_act)
 	

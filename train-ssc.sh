@@ -17,4 +17,5 @@ python -m macgraph.train \
 	--mp-state-width 8 \
 	--max-decode-iterations 8 \
 	--memory-activation linear \
+	--memory-transform-layers 2 \
 	$@
