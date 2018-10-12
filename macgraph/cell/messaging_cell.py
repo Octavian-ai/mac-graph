@@ -160,6 +160,8 @@ def do_messaging_cell(args, features, vocab_embedding,
 				table=node_state,
 				)
 			out_read_signals.append(out_read_signal)
+			out_read_signals.append(out_read_signal * in_iter_id)
+
 			for k,v in a_taps.items():
 				taps[f"mp_read{idx}_{k}"] = v
 			taps[f"mp_read{idx}_signal"] = out_read_signal

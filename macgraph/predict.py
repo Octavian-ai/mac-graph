@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def hr():
 	print(stylize("---------------", fg("blue")))
 
-DARK_GREY = 240
+DARK_GREY = 235
 WHITE = 255
 
 BG_BLACK = 232
@@ -52,12 +52,12 @@ def color_vector(vec, show_numbers=False):
 		if show_numbers:
 			return str(np.around(n, 4))
 		else:
-			"-" if n < -EPSILON else ("+" if n > EPSILON else "0")
+			return "-" if n < -EPSILON else ("+" if n > EPSILON else "0")
 
 	def to_color(row):
-		return '[' + ', '.join(color_text([format_element(i) for i in row], (row-v_min) / np.maximum(delta, EPSILON))) + ']'
+		return ''.join(color_text([format_element(i) for i in row], (row-v_min) / np.maximum(delta, EPSILON)))
 	
-	return '\n'.join(to_color(row) for row in vec)
+	return ' '.join(to_color(row) for row in vec)
 
 def pad_str(s, target=3):
 	if len(s) < target:
@@ -122,8 +122,6 @@ def predict(args, cmd_args):
 
 		for i in range(iterations):
 
-			print("Iteration", row["iter_id"][i])
-
 			finished = row['finished'][i]
 			# print (f"{i}: {'FINISHED' if finished else 'not finished'}")
 			
@@ -184,7 +182,7 @@ def predict(args, cmd_args):
 	confusion = Counter()
 
 	for count, p in enumerate(predictions):
-		if count > cmd_args["n_rows"]:
+		if count >= cmd_args["n_rows"]:
 			break
 
 		decode_row(p)
