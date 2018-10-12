@@ -90,7 +90,7 @@ def do_messaging_cell(args, features, vocab_embedding,
 		write_signal, _, a_taps = attention_write_by_key(
 			keys=node_table,
 			key_width=node_table_width,
-			keys_len=node_table_len,
+			# keys_len=node_table_len,
 			query=in_write_query,
 			value=in_write_signal,
 		)
@@ -156,7 +156,7 @@ def do_messaging_cell(args, features, vocab_embedding,
 		for idx, qry in enumerate(in_read_queries):
 			out_read_signal, _, a_taps = attention_key_value(
 				keys=padded_node_table,
-				keys_len=node_table_len,
+				# keys_len=node_table_len,
 				key_width=node_table_width,
 				query=qry,
 				table=node_state,
