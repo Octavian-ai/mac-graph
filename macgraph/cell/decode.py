@@ -79,6 +79,8 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 			key: decoded_outputs.rnn_output[idx+1]
 			for idx, key in enumerate(d_cell.get_taps().keys())
 		}
+
+		out_taps["decode_iterations"] = decoded_sequence_lengths
 		
 		# Take the final reasoning step output
 		final_output = decoded_outputs.rnn_output[0][:,-1,:]
