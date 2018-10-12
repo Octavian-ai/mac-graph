@@ -66,13 +66,10 @@ def model_fn(features, labels, mode, params):
 		# mask final outputs by finished signal
 		# outputs: [batch, step, logit]
 		# finished: [batch, step, 1]
-		print(outputs, taps["finished"], labels)
-		logits = outputs * taps["finished"]
-		# logits = dynamic_assert_shape(logits, [features["d_batch_size"], args["max_decode_iterations"], args["output_classes"]])
+		logits = tf.reduce_sum(outputs * tf.nn.softmax(taps["finished"], axis=1), axis=1)
+		# labels_per_iter = tf.tile(tf.expand_dims(labels,1), [1, tf.shape(outputs)[1]])
 
-		labels_per_iter = tf.tile(tf.expand_dims(labels,1), [1, tf.shape(outputs)[1]])
-
-		crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels_per_iter, logits=logits)
+		crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
 		loss_logit = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
 		loss_finished = -tf.reduce_sum(taps["finished"])
 		loss = loss_logit 
