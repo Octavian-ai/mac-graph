@@ -46,7 +46,7 @@ def color_vector(vec):
 	delta = np.abs(v_max - v_min)
 	norm = (vec - v_min) / np.maximum(delta, 0.00001)
 	def to_color(row):
-		return '[' + ', '.join(color_text([str(i) for i in row], (row-v_min) / np.maximum(delta, 0.0001))) + ']'
+		return '[' + ', '.join(color_text([str(np.around(i, 4)) for i in row], (row-v_min) / np.maximum(delta, 0.0001))) + ']'
 	
 	return '\n'.join(to_color(row) for row in vec)
 
