@@ -26,7 +26,7 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read, in_
 		v = tf.concat(in_all, -1)
 
 		for i in range(args["output_layers"]):
-			v = tf.layers.dense(v, args["output_classes"])
+			v = tf.layers.dense(v, args["output_classes"]+8)
 			v = ACTIVATION_FNS[args["output_activation"]](v)
 
 		output = tf.layers.dense(v, args["output_classes"])
