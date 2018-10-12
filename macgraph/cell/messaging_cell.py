@@ -58,7 +58,7 @@ def messaging_cell(args, features, vocab_embedding,
 
 	# Read/Write queries
 	in_write_query  = tf.layers.dense(in_signal, node_table_width)
-	in_write_signal = tf.layers.dense(in_signal, args["mp_state_width"], activation=tf.tanh)
+	in_write_signal = tf.layers.dense(in_signal, args["mp_state_width"])
 	in_read_query   = tf.layers.dense(in_signal, node_table_width)
 	
 	return do_messaging_cell(args, features, vocab_embedding, 
@@ -115,7 +115,7 @@ def do_messaging_cell(args, features, vocab_embedding,
 		adj_norm = inv_degree * adj
 		adj_norm = tf.cast(adj_norm, node_state.dtype)
 		adj_norm = tf.check_numerics(adj_norm, "adj_norm")
-		agg = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
+		agg = tf.einsum('bnw,bnm->bmw', node_state, adj)
 		node_state = agg
 		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
@@ -162,7 +162,6 @@ def do_messaging_cell(args, features, vocab_embedding,
 				table=node_state,
 				)
 			out_read_signals.append(out_read_signal)
-			out_read_signals.append(out_read_signal * in_iter_id)
 
 			for k,v in a_taps.items():
 				taps[f"mp_read{idx}_{k}"] = v
