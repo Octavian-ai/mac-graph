@@ -49,7 +49,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 		sample_fn = lambda time, outputs, state: tf.constant(0) # sampled output
 
 		def next_inputs_fn(time, outputs, state, sample_ids):
-			finished = tf.greater(outputs[1], 0.0)
+			finished = tf.greater(outputs[1], 0.9)
 			next_inputs = get_input_for_time(time+1)
 			next_state = state
 			return (finished, next_inputs, next_state)
@@ -83,9 +83,10 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 		out_taps["decode_iterations"] = decoded_sequence_lengths
 		
 		# Take the final reasoning step output
-		final_output = decoded_outputs.rnn_output[0][:,-1,:]
+		outputs = decoded_outputs.rnn_output[0]
+		final_output = outputs[:,-1,:]
 
-		return final_output, out_taps
+		return outputs, final_output, out_taps
 
 
 

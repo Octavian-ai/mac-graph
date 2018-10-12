@@ -49,7 +49,7 @@ def model_fn(features, labels, mode, params):
 
 	question_tokens, question_state = encode_input(args, features, vocab_embedding)
 
-	logits, taps = execute_reasoning(args, 
+	outputs, final_outputs, taps = execute_reasoning(args, 
 		features=features, 
 		question_state=question_state,
 		labels=labels,
@@ -62,6 +62,13 @@ def model_fn(features, labels, mode, params):
 	# --------------------------------------------------------------------------
 
 	if mode in [tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL]:
+
+		# mask final outputs by finished signal
+		# outputs: [batch, step, logit]
+		# finished: [batch, step, 1]
+		logits = outputs * taps["finished"]
+		logits = dynamic_shape_assert(logits, [features["d_batch_size"], args["max_decode_iterations"], args["output_classes"]])
+
 		crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
 		loss_logit = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
 		loss_finished = -tf.reduce_sum(taps["finished"])
@@ -113,7 +120,7 @@ def model_fn(features, labels, mode, params):
 
 	if mode in [tf.estimator.ModeKeys.PREDICT, tf.estimator.ModeKeys.EVAL]:
 
-		predicted_labels = tf.argmax(tf.nn.softmax(logits), axis=-1)
+		predicted_labels = tf.argmax(tf.nn.softmax(final_outputs), axis=-1)
 
 		predictions = {
 			"predicted_label": predicted_labels,
