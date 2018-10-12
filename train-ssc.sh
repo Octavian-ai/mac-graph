@@ -16,5 +16,5 @@ python -m macgraph.train \
 	--embed-width 64 \
 	--mp-state-width 8 \
 	--max-decode-iterations 8 \
-	--mp-activation tanh \
+	--mp-activation linear \
 	$@
