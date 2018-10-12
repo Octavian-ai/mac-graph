@@ -64,14 +64,16 @@ def messaging_cell(args, features, vocab_embedding,
 	return do_messaging_cell(args, features, vocab_embedding, 
 		in_node_state,
 		node_table, node_table_width, node_table_len,
-		in_write_query, in_write_signal, [in_read_query])
+		in_write_query, in_write_signal, [in_read_query],
+		in_iter_id)
 
 
 
 def do_messaging_cell(args, features, vocab_embedding, 
 	in_node_state, 
 	node_table, node_table_width, node_table_len,
-	in_write_query, in_write_signal, in_read_queries):
+	in_write_query, in_write_signal, in_read_queries,
+	in_iter_id):
 
 	with tf.name_scope("messaging_cell"):
 
