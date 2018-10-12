@@ -148,21 +148,12 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 		question_tokens = add_location_encoding_1d(question_tokens)
 
 	if args["use_dynamic_decode"]:
-		final_output, out_taps = dynamic_decode(args, features, inputs, question_state, question_tokens, **kwargs)
+		return dynamic_decode(args, features, inputs, question_state, question_tokens, **kwargs)
 	else:
-		final_output, out_taps = static_decode(args, features, inputs, question_state, question_tokens, **kwargs)
-
-	if args["use_summary_image"]:
-		tf.summary.image("question_tokens", tf.expand_dims(question_tokens,-1))
-
-		for k, v in out_taps.items():
-			if v is not None:
-				tf.summary.image(k, expand_if_needed(v))
-
-	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["output_classes"]])
+		return static_decode(args, features, inputs, question_state, question_tokens, **kwargs)
 
 
-	return final_output, out_taps
+	
 
 
 
