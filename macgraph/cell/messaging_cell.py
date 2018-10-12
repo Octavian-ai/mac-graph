@@ -115,7 +115,7 @@ def do_messaging_cell(args, features, vocab_embedding,
 		adj_norm = inv_degree * adj
 		adj_norm = tf.cast(adj_norm, node_state.dtype)
 		adj_norm = tf.check_numerics(adj_norm, "adj_norm")
-		agg = tf.einsum('bnw,bnm->bmw', node_state, adj)
+		agg = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
 		node_state = agg
 		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
