@@ -65,7 +65,8 @@ def model_fn(features, labels, mode, params):
 		crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
 		loss_logit = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
 		loss_decode_len = tf.reduce_mean(tf.cast(taps["decode_iterations"], tf.float32))
-		loss = loss_logit + loss_decode_len * tf.constant(args["loss_factor_decode_len"])
+		loss_finished = -tf.reduce_sum(taps["finished"])
+		loss = loss_logit + (loss_decode_len + loss_finished) * tf.constant(args["loss_factor_decode_len"])
 
 	# --------------------------------------------------------------------------
 	# Optimize
@@ -100,6 +101,8 @@ def model_fn(features, labels, mode, params):
 			tf.summary.scalar("current_step", global_step, family="hyperparam")
 			tf.summary.scalar("grad_norm", tf.reduce_max(norms), family="hyperparam")
 			tf.summary.scalar("decode_iterations", tf.reduce_mean(taps.get("decode_iterations", args["max_decode_iterations"])))
+			tf.summary.scalar("finished", tf.reduce_mean(taps.get("finished", 0.0)))
+
 
 		optimizer = tf.train.AdamOptimizer(learning_rate)
 		train_op, gradients = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
