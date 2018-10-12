@@ -114,7 +114,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			)
 
 			out_taps = {
-				"finished":					tf.cast(finished, tf.float32),
+				"finished":					finished,
 				"question_word_attn": 		control_taps.get("attn", empty_attn),
 				"question_word_attn_raw": 	control_taps.get("attn_raw", empty_attn),
 				"kb_node_attn": 			tf.squeeze(read_taps.get("kb_node_attn", empty_attn), 2),
