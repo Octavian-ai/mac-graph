@@ -123,7 +123,8 @@ def predict(args, cmd_args):
 		for i in range(iterations):
 
 			finished = row['finished'][i]
-			# print (f"{i}: {'FINISHED' if finished else 'not finished'}")
+			if finished:
+				print (f"{i}: FINISHED!!")
 			
 			if args["use_control_cell"]:
 				for control_head in row["question_word_attn"][i]:
