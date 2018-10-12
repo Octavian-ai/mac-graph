@@ -31,6 +31,6 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read, in_
 
 		output = tf.layers.dense(v, args["output_classes"])
 
-		finished = tf.layers.dense(v, 1, kernel_initializer=tf.zeros_initializer())
+		finished = tf.layers.dense(v, 1, kernel_initializer=tf.zeros_initializer(), activation=tf.tanh)
 
 		return output, finished

@@ -64,7 +64,6 @@ def model_fn(features, labels, mode, params):
 	if mode in [tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL]:
 		crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
 		loss_logit = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
-		loss_decode_len = tf.reduce_mean(tf.cast(taps["decode_iterations"], tf.float32))
 		loss_finished = -tf.reduce_sum(taps["finished"])
 		loss = loss_logit + (loss_decode_len + loss_finished) * tf.constant(args["loss_factor_decode_len"])
 
