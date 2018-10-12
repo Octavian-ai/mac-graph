@@ -174,7 +174,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-summary-image', 		action='store_true', dest='use_summary_image')
 
 	parser.add_argument('--max-decode-iterations', 		type=int, default=1)
-	parser.add_argument('--finished-steps-loss-factor',	type=float, default= 0.001)
+	parser.add_argument('--enable-early-stopping',		action='store_true', dest="use_early_stopping")
 	
 	args = vars(parser.parse_args(argv))
 

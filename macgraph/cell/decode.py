@@ -49,7 +49,10 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 		sample_fn = lambda time, outputs, state: tf.constant(0) # sampled output
 
 		def next_inputs_fn(time, outputs, state, sample_ids):
-			finished = tf.greater(outputs[1], 0.9)
+			if args["use_early_stopping"]:
+				finished = tf.greater(outputs[1], 0.9)
+			else:
+				finished = tf.constant(False, [features["d_batch_size"]])
 			next_inputs = get_input_for_time(time+1)
 			next_state = state
 			return (finished, next_inputs, next_state)
