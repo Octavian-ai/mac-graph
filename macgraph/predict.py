@@ -11,6 +11,8 @@ import os.path
 from .input.text_util import UNK_ID
 from .estimator import get_estimator
 from .input import *
+from .const import EPSILON
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -40,13 +42,20 @@ def color_text(text_array, levels, color_fg=True):
 		out.append(stylize(s, color))
 	return out
 
-def color_vector(vec):
+def color_vector(vec, show_numbers=False):
 	v_max = np.amax(vec)
 	v_min = np.amin(vec)
 	delta = np.abs(v_max - v_min)
 	norm = (vec - v_min) / np.maximum(delta, 0.00001)
+
+	def format_element(n):
+		if show_numbers:
+			return str(np.around(n, 4))
+		else:
+			"-" if n < -EPSILON else ("+" if n > EPSILON else "0")
+
 	def to_color(row):
-		return '[' + ', '.join(color_text([str(np.around(i, 4)) for i in row], (row-v_min) / np.maximum(delta, 0.0001))) + ']'
+		return '[' + ', '.join(color_text([format_element(i) for i in row], (row-v_min) / np.maximum(delta, EPSILON))) + ']'
 	
 	return '\n'.join(to_color(row) for row in vec)
 
@@ -112,6 +121,8 @@ def predict(args, cmd_args):
 		print(emoji, " ", answer_part)
 
 		for i in range(iterations):
+
+			print("Iteration", row["iter_id"][i])
 
 			finished = row['finished'][i]
 			# print (f"{i}: {'FINISHED' if finished else 'not finished'}")

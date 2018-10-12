@@ -42,7 +42,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			"mp_write_query":			self.args["kb_node_width"] * self.args["embed_width"],	
 			"mp_write_signal":			self.args["mp_state_width"],
 			"mp_read0_signal":			self.args["mp_state_width"],
-
+			"iter_id":					self.args["max_decode_iterations"],
 		}
 
 
@@ -51,7 +51,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		
 		with tf.variable_scope("mac_cell", reuse=tf.AUTO_REUSE):
 
-			in_control_state, in_memory_state, in_data_stack, in_mp_state = in_state
+			in_control_state, in_memory_state, in_mp_state = in_state
 
 			in_iter_question_state = inputs[0]
 			in_iter_question_state = dynamic_assert_shape(in_iter_question_state, [self.features["d_batch_size"], self.args["control_width"]], "in_iter_question_state")
@@ -93,11 +93,11 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				out_memory_state = in_memory_state
 				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)
 
-			if self.args["use_data_stack"]:
-				out_data_stack = write_cell(self.args, self.features, 
-					out_memory_state, read, out_control_state, in_data_stack)
-			else:
-				out_data_stack = in_data_stack
+			# if self.args["use_data_stack"]:
+			# 	out_data_stack = write_cell(self.args, self.features, 
+			# 		out_memory_state, read, out_control_state, in_data_stack)
+			# else:
+			# 	out_data_stack = in_data_stack
 
 			
 			if self.args["use_output_cell"]:
@@ -110,7 +110,6 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			out_state = (
 				out_control_state, 
 				out_memory_state, 
-				out_data_stack, 
 				out_mp_state,
 			)
 
@@ -130,7 +129,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				"mp_write_query":			mp_taps.get("mp_write_query", empty_query),
 				"mp_write_signal":			mp_taps.get("mp_write_signal", empty_query),
 				"mp_read0_signal":			mp_taps.get("mp_read0_signal", empty_query),
-
+				"iter_id":					in_iter_id,
 			}
 
 			return output, out_taps, out_state
@@ -180,7 +179,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		return (
 			self.args["control_width"], 
 			self.args["memory_width"], 
-			tf.TensorShape([self.args["data_stack_len"], self.args["data_stack_width"]]),
+			# tf.TensorShape([self.args["data_stack_len"], self.args["data_stack_width"]]),
 			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
 		)
 
