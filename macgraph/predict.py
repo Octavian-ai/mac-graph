@@ -116,15 +116,17 @@ def predict(args, cmd_args):
 			emoji = "❌"
 			answer_part = f"{stylize(row['predicted_label'], bg(1))}, expected {row['actual_label']}"
 
+		print("Finished:", color_vector(row['finished']))
+
 		iterations = len(row["question_word_attn"])
 
 		print(emoji, " ", answer_part)
 
 		for i in range(iterations):
 
-			finished = row['finished'][i]
-			if finished:
-				print (f"{i}: FINISHED!!")
+			# finished = row['finished'][i]
+			# if finished:
+			# 	print (f"{i}: Finished")
 			
 			if args["use_control_cell"]:
 				for control_head in row["question_word_attn"][i]:
@@ -163,9 +165,9 @@ def predict(args, cmd_args):
 				print(f"{i}: mp_node_state:   {color_vector(row['mp_node_state'][i][0:row['kb_nodes_len']])}")
 
 
-			if finished:
-				print("--FINISHED--")
-				break
+			# if finished:
+			# 	print("--FINISHED--")
+			# 	break
 
 		if args["use_message_passing"]:
 			print("Adjacency:\n",

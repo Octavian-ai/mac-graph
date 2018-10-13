@@ -63,9 +63,8 @@ def model_fn(features, labels, mode, params):
 
 	if mode in [tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL]:
 
-		# mask final outputs by finished signal
-		# outputs: [batch, step, logit]
-		# finished: [batch, step, 1]
+		# Perform attention across the RNN output steps mwahahahah
+		# this allows the network to adjust its own number of iterations
 		logits = tf.reduce_sum(outputs * tf.nn.softmax(taps["finished"], axis=1), axis=1)
 		# labels_per_iter = tf.tile(tf.expand_dims(labels,1), [1, tf.shape(outputs)[1]])
 
