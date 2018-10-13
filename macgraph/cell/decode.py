@@ -89,6 +89,8 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 		outputs = decoded_outputs.rnn_output[0]
 		final_output = outputs[:,-1,:]
 
+		out_taps["finished_sm"] = tf.nn.softmax(out_taps["finished"], axis=1)
+
 		return outputs, final_output, out_taps
 
 

@@ -30,7 +30,6 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read, in_
 			v = ACTIVATION_FNS[args["output_activation"]](v)
 
 		output = tf.layers.dense(v, args["output_classes"])
-
-		finished = tf.layers.dense(v, 1, bias_initializer=tf.ones_initializer())
+		finished = tf.layers.dense(v, 1)
 
 		return output, finished

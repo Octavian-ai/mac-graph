@@ -116,7 +116,7 @@ def predict(args, cmd_args):
 			emoji = "❌"
 			answer_part = f"{stylize(row['predicted_label'], bg(1))}, expected {row['actual_label']}"
 
-		print("Finished:", color_vector(row['finished']))
+		print("Finished:", color_vector(row['finished_sm']))
 
 		iterations = len(row["question_word_attn"])
 
@@ -145,11 +145,11 @@ def predict(args, cmd_args):
 				for idx0, noun in enumerate(args["kb_list"]):
 					if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
 						db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"] if kb_row[0] != UNK_ID]
-						print(f"{i}: " + noun+"_attn: ",', '.join(color_text(db, row[f"{noun}_attn"][i])))
+						print(f"{i}: " + noun+"_attn: ",' '.join(color_text(db, row[f"{noun}_attn"][i])))
 
 						for idx, attn in enumerate(row[f"{noun}_attn"][i]):
 							if attn > ATTN_THRESHOLD:
-								print(f"{i}: " +noun+"_word_attn: ",', '.join(color_text(
+								print(f"{i}: " +noun+"_word_attn: ",' '.join(color_text(
 									vocab.prediction_value_to_string(row[f"{noun}s"][idx], True),
 									row[f"{noun}_word_attn"][i],
 									)
@@ -158,7 +158,7 @@ def predict(args, cmd_args):
 				for tap in ["mp_read_attn", "mp_write_attn"]:
 					db = [vocab.prediction_value_to_string(kb_row[0:1]) for kb_row in row["kb_nodes"]]
 					db = db[0:row["kb_nodes_len"]]
-					print(f"{i}: {tap}: ",', '.join(color_text(db, row[tap][i])))
+					print(f"{i}: {tap}: ",' '.join(color_text(db, row[tap][i])))
 
 				print(f"{i}: mp_write_signal: {row['mp_write_signal'][i]}")
 				print(f"{i}: mp_read0_signal: {row['mp_read0_signal'][i]}")

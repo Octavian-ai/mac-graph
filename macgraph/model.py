@@ -65,7 +65,7 @@ def model_fn(features, labels, mode, params):
 
 		# Perform attention across the RNN output steps mwahahahah
 		# this allows the network to adjust its own number of iterations
-		logits = tf.reduce_sum(outputs * tf.nn.softmax(taps["finished"], axis=1), axis=1)
+		logits = tf.reduce_sum(outputs * taps["finished_sm"], axis=1)
 		# labels_per_iter = tf.tile(tf.expand_dims(labels,1), [1, tf.shape(outputs)[1]])
 
 		crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
@@ -85,9 +85,9 @@ def model_fn(features, labels, mode, params):
 
 		if args["use_lr_finder"]:
 			learning_rate = tf.train.exponential_decay(
-				1E-06, 
+				learning_rate/100.0, 
 				global_step,
-				decay_steps=1000, 
+				decay_steps=100, 
 				decay_rate=1.1)
 
 		elif args["use_lr_decay"]:
