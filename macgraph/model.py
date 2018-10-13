@@ -63,11 +63,8 @@ def model_fn(features, labels, mode, params):
 
 	if mode in [tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL]:
 
-		# Perform attention across the RNN output steps mwahahahah
-		# this allows the network to adjust its own number of iterations
-		logits = tf.reduce_sum(outputs * taps["finished_sm"], axis=1)
-		# labels_per_iter = tf.tile(tf.expand_dims(labels,1), [1, tf.shape(outputs)[1]])
-
+		logits = outputs[-1]
+		
 		crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
 		loss_logit = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
 		loss_finished = -tf.reduce_sum(taps["finished"])
