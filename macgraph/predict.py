@@ -122,9 +122,6 @@ def predict(args, cmd_args):
 
 		for i in range(iterations):
 
-			finished = row['finished'][i]
-			# print (f"{i}: {'FINISHED' if finished else 'not finished'}")
-			
 			if args["use_control_cell"]:
 				for control_head in row["question_word_attn"][i]:
 					print(f"{i}: " + ' '.join(color_text(row["src"], control_head)))
@@ -161,10 +158,6 @@ def predict(args, cmd_args):
 				print(f"{i}: mp_read0_signal: {row['mp_read0_signal'][i]}")
 				print(f"{i}: mp_node_state:   {color_vector(row['mp_node_state'][i][0:row['kb_nodes_len']])}")
 
-
-			if finished:
-				print("--FINISHED--")
-				break
 
 		if args["use_message_passing"]:
 			print("Adjacency:\n",
