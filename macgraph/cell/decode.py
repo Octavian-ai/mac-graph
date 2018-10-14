@@ -88,10 +88,9 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 		# Take the final reasoning step output
 		outputs = decoded_outputs.rnn_output[0]
 		final_output = outputs[:,-1,:]
-
 		out_taps["finished_sm"] = tf.nn.softmax(out_taps["finished"], axis=1)
 
-		return outputs, final_output, out_taps
+		return outputs, out_taps
 
 
 
@@ -109,7 +108,7 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 			with tf.variable_scope("decoder_cell", reuse=tf.AUTO_REUSE):
 				states.append(d_cell(inputs[i], states[-1][1]))
 
-		final_output = states[-1][0][0]
+		outputs = [states[i][0][0] for i in range(args["max_decode_iterations"])]
 
 		def get_tap(idx, key):
 			with tf.name_scope(f"get_tap_{key}"):
@@ -133,7 +132,7 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 			for idx, key in enumerate(d_cell.get_taps().keys())
 		}
 		
-		return final_output, out_taps
+		return outputs, out_taps
 
 
 def execute_reasoning(args, features, question_state, question_tokens, **kwargs):
