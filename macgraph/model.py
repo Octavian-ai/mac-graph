@@ -56,7 +56,7 @@ def model_fn(features, labels, mode, params):
 		question_tokens=question_tokens, 
 		vocab_embedding=vocab_embedding)
 
-	final_outputs = outputs[:,-1,:]
+	logits = outputs[:,-1,:]
 
 
 	# --------------------------------------------------------------------------
@@ -64,8 +64,6 @@ def model_fn(features, labels, mode, params):
 	# --------------------------------------------------------------------------
 
 	if mode in [tf.estimator.ModeKeys.TRAIN, tf.estimator.ModeKeys.EVAL]:
-
-		logits = final_outputs
 		crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
 		loss_logit = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
 		loss = loss_logit 
@@ -116,7 +114,7 @@ def model_fn(features, labels, mode, params):
 
 	if mode in [tf.estimator.ModeKeys.PREDICT, tf.estimator.ModeKeys.EVAL]:
 
-		predicted_labels = tf.argmax(tf.nn.softmax(final_outputs), axis=-1)
+		predicted_labels = tf.argmax(tf.nn.softmax(logits), axis=-1)
 
 		predictions = {
 			"predicted_label": predicted_labels,
