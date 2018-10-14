@@ -20,7 +20,7 @@ python -m macgraph.train \
 	--disable-input-bilstm \
 	--input-width 64 \
 	--embed-width 64 \
-	--mp-state-width 6 \
-	--max-decode-iterations 6 \
+	--mp-state-width 1 \
+	--max-decode-iterations 10 \
 	--disable-message-passing-node-transform \
 	$@
