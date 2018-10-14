@@ -125,6 +125,8 @@ def do_messaging_cell(args, features, vocab_embedding,
 			sr = tf.nn.conv1d(in_node_state, self_reference_kernel, 1, 'SAME', name="self_reference")
 			node_state += sr
 			taps["mp_self_fn"] = self_reference_kernel
+		else:
+			node_state += in_node_state
 
 
 

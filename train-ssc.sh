@@ -17,4 +17,5 @@ python -m macgraph.train \
 	--mp-state-width 6 \
 	--max-decode-iterations 6 \
 	--disable-message-passing-node-transform \
+	--disable-message-passing-self-ref \
 	$@
