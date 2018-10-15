@@ -17,4 +17,5 @@ python -m macgraph.train \
 	--mp-state-width 8 \
 	--max-decode-iterations 8 \
 	--disable-message-passing-node-transform \
+	--disable-memory-cell \
 	$@
