@@ -99,10 +99,12 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			# else:
 			# 	out_data_stack = in_data_stack
 
+			time_mask = tf.reduce_sum(in_iter_id[:,:-2])
+
 			
 			if self.args["use_output_cell"]:
 				output, finished = output_cell(self.args, self.features,
-					self.question_state, out_memory_state, read, out_control_state, mp_reads)	
+					self.question_state, out_memory_state, read*time_mask, out_control_state, mp_reads*time_mask)	
 			else:
 				output = tf.concat([read, mp_read], -1)
 				finished = tf.fill([features["d_batch_size"]], False)
