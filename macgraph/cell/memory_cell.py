@@ -32,8 +32,8 @@ def memory_cell(args, features, in_memory_state, in_data_read, in_mp_reads, in_c
 				new_memory_state += prev
 			new_memory_state = act(new_memory_state)
 
-		forget_scalar = tf.layers.dense(in_all, 1, activation=forget_act)
+		forget_signal = tf.layers.dense(in_all, args["memory_width"], activation=forget_act)
 	
-		out_memory_state = (new_memory_state * forget_scalar) + (in_memory_state * (1-forget_scalar))
+		out_memory_state = (new_memory_state * forget_signal) + (in_memory_state * (1-forget_signal))
 		out_memory_state = dynamic_assert_shape(out_memory_state, memory_shape)
-		return out_memory_state, forget_scalar
+		return out_memory_state, forget_signal
