@@ -93,18 +93,13 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				out_memory_state = in_memory_state
 				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)
 
-			# if self.args["use_data_stack"]:
-			# 	out_data_stack = write_cell(self.args, self.features, 
-			# 		out_memory_state, read, out_control_state, in_data_stack)
-			# else:
-			# 	out_data_stack = in_data_stack
 
-			# time_mask = tf.reduce_sum(in_iter_id[:,:-2])
+			time_mask = tf.reduce_sum(in_iter_id[:,:-2], axis=-1)
+			mp_reads_masked = [time_mask * i for i in mp_reads]
 
-			
 			if self.args["use_output_cell"]:
 				output, finished = output_cell(self.args, self.features,
-					self.question_state, out_memory_state, read, out_control_state, mp_reads)	
+					self.question_state, out_memory_state, read * time_mask, out_control_state, mp_reads_masked)	
 			else:
 				output = tf.concat([read, mp_read], -1)
 				finished = tf.fill([features["d_batch_size"]], False)
