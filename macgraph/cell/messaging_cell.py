@@ -6,6 +6,7 @@ from ..args import ACTIVATION_FNS
 from ..attention import *
 from ..input import get_table_with_embedding
 from ..const import EPSILON
+from ..util import *
 
 MP_State = tf.Tensor
 
@@ -18,7 +19,7 @@ use_message_passing_fn = False
 use_self_reference = False
 
 def layer_normalize(tensor):
-	'''Apologies if I've abused this term TBC'''
+	'''Apologies if I've abused this term'''
 
 	in_shape = tf.shape(tensor)
 	axes = list(range(1, len(tensor.shape)))
@@ -58,7 +59,7 @@ def messaging_cell(args, features, vocab_embedding,
 
 	# Read/Write queries
 	in_write_query  = tf.layers.dense(in_signal, node_table_width)
-	in_write_signal = tf.layers.dense(in_signal, args["mp_state_width"])
+	in_write_signal = layer_selu(in_signal, args["mp_state_width"])
 	in_read_query   = tf.layers.dense(in_signal, node_table_width)
 	
 	return do_messaging_cell(args, features, vocab_embedding, 
