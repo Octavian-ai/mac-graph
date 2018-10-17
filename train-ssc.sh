@@ -16,7 +16,6 @@ python -m macgraph.train \
 	--embed-width 64 \
 	--mp-state-width 5 \
 	--max-decode-iterations 5 \
-	--disable-message-passing-node-transform \
 	--output-layers 1 \
 	--output-activation selu \
 	$@

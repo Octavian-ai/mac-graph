@@ -133,7 +133,11 @@ def do_messaging_cell(args, features, vocab_embedding,
 
 		if args["use_message_passing_node_transform"]:
 			# Message passing function is a 1d conv [filter_width, in_channels, out_channels]
-			message_pass_kernel = tf.get_variable("mp_node_W", [1, args["mp_state_width"], args["mp_state_width"]])
+			message_pass_kernel = tf.get_variable(
+				"mp_node_W", 
+				[1, args["mp_state_width"], args["mp_state_width"]],
+				initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
+			
 			message_pass_bias = tf.get_variable("mp_node_b", [args["mp_state_width"]])
 
 			# Apply message pass function:
