@@ -23,6 +23,7 @@ ACTIVATION_FNS = {
 	"tanh_abs": lambda x: tf.concat([tf.tanh(x), absu(x)], axis=-1),
 	"linear": tf.identity,
 	"id": tf.identity,
+	"selu": tf.nn.selu,
 }
 
 def generate_args_derivatives(args):
@@ -141,7 +142,9 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--memory-width',	           	type=int, default=128,	help="The width of memory state")
 	parser.add_argument('--memory-transform-layers',	type=int, default=1, 	help="How many deep layers in memory transforms")
 	parser.add_argument('--memory-forget-activation',	type=str, default="sigmoid", 	choices=ACTIVATION_FNS.keys())
-	parser.add_argument('--memory-activation',			type=str, default="tanh", 		choices=ACTIVATION_FNS.keys())
+	# parser.add_argument('--memory-activation',			type=str, default="tanh", 		choices=ACTIVATION_FNS.keys())
+	parser.add_argument('--memory-dropout',				type=float, default=0.0)
+
 
 	parser.add_argument('--mp-activation',				type=str, default="linear", 		choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--mp-state-width', 			type=int, default=8)
