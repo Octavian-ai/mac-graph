@@ -83,7 +83,8 @@ def layer_selu(tensor, width, dropout=0.0, name=None):
 
 	r = tf.layers.dense(tensor, width, 
 		activation=tf.nn.selu,
-		initializer=tf.variance_scaling_initializer(factor=1.0, mode='FAN_IN'), name=name_dense)
+		kernel_initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0), 
+		name=name_dense)
 
 	if dropout > 0.0:
 		r = tf.contrib.nn.alpha_dropout(r, dropout, name=name_drop)

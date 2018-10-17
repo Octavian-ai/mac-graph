@@ -30,10 +30,19 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read, in_
 		finished = in_all
 
 		for i in range(args["output_layers"]):
-			# v = tf.layers.dense(v, args["output_classes"])
-			# v = ACTIVATION_FNS[args["output_activation"]](v)
-			v = layer_selu(v, args["output_classes"])
-			finished = layer_selu(v, in_all.shape[-1]/4)
+
+			if args["output_activation"] == "selu":
+
+				v = layer_selu(v, args["output_classes"])
+				finished = layer_selu(v, in_all.shape[-1].value/4)
+
+			else:
+				v = tf.layers.dense(v, args["output_classes"], 
+					activation=ACTIVATION_FNS[args["output_activation"]])
+
+				finished = tf.layers.dense(finished, in_all.shape[-1].value/4, 
+					activation=ACTIVATION_FNS[args["output_activation"]])
+		
 
 		finished = tf.greater(tf.layers.dense(finished, 1, kernel_initializer=tf.zeros_initializer()), 0.5)
 
