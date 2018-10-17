@@ -72,7 +72,7 @@ def minimize_clipped(optimizer, value, max_gradient_norm, var=None):
 	return op, grad_dict
 
 
-def selu_layer(tensor, width, dropout=0.0, name=None):
+def layer_selu(tensor, width, dropout=0.0, name=None):
 
 	if name is None:
 		name_dense = None
