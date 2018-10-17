@@ -151,7 +151,7 @@ def get_args(extend=lambda parser:None, argv=None):
 
 
 	parser.add_argument('--output-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
-	parser.add_argument('--output-layers',				type=int, default=1)
+	parser.add_argument('--output-layers',				type=int, default=3)
 	parser.add_argument('--output-classes',	       		type=int, default=128,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
 
 	parser.add_argument('--enable-data-stack', 			action='store_true',  dest='use_data_stack')

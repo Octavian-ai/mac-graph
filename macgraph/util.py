@@ -72,6 +72,25 @@ def minimize_clipped(optimizer, value, max_gradient_norm, var=None):
 	return op, grad_dict
 
 
+def selu_layer(tensor, width, dropout=0.0, name=None):
+
+	if name is None:
+		name_dense = None
+		name_drop = None
+	else:
+		name_dense = name + "_dense"
+		name_drop = name + "_drop"
+
+	r = tf.layers.dense(tensor, width, 
+		activation=tf.nn.selu,
+		initializer=tf.variance_scaling_initializer(factor=1.0, mode='FAN_IN'), name=name_dense)
+
+	if dropout > 0.0:
+		r = tf.contrib.nn.alpha_dropout(r, dropout, name=name_drop)
+
+	return r
+
+
 def deeep(tensor, width, depth=2, residual_depth=3, activation=tf.nn.tanh):
 	"""
 	Quick 'n' dirty "let's slap on some layers" function. 
