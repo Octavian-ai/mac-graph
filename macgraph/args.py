@@ -146,7 +146,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--memory-dropout',				type=float, default=0.0)
 
 
-	parser.add_argument('--mp-activation',				type=str, default="linear", 		choices=ACTIVATION_FNS.keys())
+	parser.add_argument('--mp-activation',				type=str, default="selu", 		choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--mp-state-width', 			type=int, default=8)
 	parser.add_argument('--disable-message-passing',    action='store_false', dest='use_message_passing')
 	parser.add_argument('--disable-message-passing-node-transform', action='store_false', dest='use_message_passing_node_transform')
