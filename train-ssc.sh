@@ -12,12 +12,12 @@ python -m macgraph.train \
 	--control-heads 2 \
 	--disable-read-cell \
 	--disable-input-bilstm \
-	--input-width 64 \
-	--embed-width 64 \
+	--input-width 32 \
+	--embed-width 32 \
 	--mp-state-width 5 \
 	--max-decode-iterations 5 \
 	--output-layers 1 \
 	--output-activation selu \
 	--disable-message-passing-node-transform \
-	--memory-transform-layers 2 \
+	--memory-transform-layers 1 \
 	$@
