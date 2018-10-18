@@ -18,4 +18,6 @@ python -m macgraph.train \
 	--max-decode-iterations 5 \
 	--output-layers 1 \
 	--output-activation selu \
+	--disable-message-passing-node-transform \
+	--memory-transform-layers 2 \
 	$@
