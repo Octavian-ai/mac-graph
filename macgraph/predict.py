@@ -42,7 +42,7 @@ def color_text(text_array, levels, color_fg=True):
 		out.append(stylize(s, color))
 	return out
 
-def color_vector(vec, show_numbers=False):
+def color_vector(vec, show_numbers=True):
 	v_max = np.amax(vec)
 	v_min = np.amin(vec)
 	delta = np.abs(v_max - v_min)
@@ -55,9 +55,9 @@ def color_vector(vec, show_numbers=False):
 			return "-" if n < -EPSILON else ("+" if n > EPSILON else "0")
 
 	def to_color(row):
-		return ''.join(color_text([format_element(i) for i in row], (row-v_min) / np.maximum(delta, EPSILON)))
+		return ' '.join(color_text([format_element(i) for i in row], (row-v_min) / np.maximum(delta, EPSILON)))
 	
-	return ' '.join(to_color(row) for row in vec)
+	return [to_color(row) for row in vec]
 
 def pad_str(s, target=3):
 	if len(s) < target:
@@ -156,7 +156,12 @@ def predict(args, cmd_args):
 
 				print(f"{i}: mp_write_signal: {row['mp_write_signal'][i]}")
 				print(f"{i}: mp_read0_signal: {row['mp_read0_signal'][i]}")
-				print(f"{i}: mp_node_state:   {color_vector(row['mp_node_state'][i][0:row['kb_nodes_len']])}")
+				mp_state = color_vector(row['mp_node_state'][i][0:row['kb_nodes_len']])
+				node_ids = [' node ' + pad_str(vocab.prediction_value_to_string(row[0])) for row in row['kb_nodes']]
+				s = [': '.join(i) for i in zip(node_ids, mp_state)]
+				mp_state_str = '\n'.join(s)
+				print(f"{i}: mp_node_state:")
+				print(mp_state_str)
 
 
 		if args["use_message_passing"]:
