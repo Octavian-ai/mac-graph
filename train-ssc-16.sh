@@ -15,4 +15,5 @@ python -m macgraph.train \
 	--output-layers 1 \
 	--output-activation selu \
 	--memory-transform-layers 1 \
+	--disable-memory-cell \
 	$@
