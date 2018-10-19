@@ -185,25 +185,27 @@ def predict(args, cmd_args):
 
 		decode_row(p)
 		if cmd_args["filter_type_prefix"] is None or p["type_string"].startswith(cmd_args["filter_type_prefix"]):
+			if cmd_args["filter_output_class"] is None or p["predicted_label"] == cmd_args["filter_output_class"]:
+				if cmd_args["filter_expected_class"] is None or p["actual_label"] == cmd_args["filter_expected_class"]:
+					
+					output_classes[p["actual_label"]] += 1
+					predicted_classes[p["predicted_label"]] += 1
 
-			output_classes[p["actual_label"]] += 1
-			predicted_classes[p["predicted_label"]] += 1
+					correct = p["actual_label"] == p["predicted_label"]
 
-			correct = p["actual_label"] == p["predicted_label"]
+					if correct:
+						emoji = "✅"
+					else:
+						emoji = "❌"
 
-			if correct:
-				emoji = "✅"
-			else:
-				emoji = "❌"
+					confusion[emoji + " \texp:" + p["actual_label"] +" \tact:" + p["predicted_label"] + " \t" + p["type_string"]] += 1
 
-			confusion[emoji + " \texp:" + p["actual_label"] +" \tact:" + p["predicted_label"] + " \t" + p["type_string"]] += 1
-
-			if cmd_args["failed_only"] and not correct:
-				print_row(p)
-			elif cmd_args["correct_only"] and correct:
-				print_row(p)
-			elif not cmd_args["failed_only"] and not cmd_args["correct_only"]:
-				print_row(p)
+					if cmd_args["failed_only"] and not correct:
+						print_row(p)
+					elif cmd_args["correct_only"] and correct:
+						print_row(p)
+					elif not cmd_args["failed_only"] and not cmd_args["correct_only"]:
+						print_row(p)
 
 
 if __name__ == "__main__":
@@ -212,6 +214,8 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--n-rows",type=int,default=20)
 	parser.add_argument("--filter-type-prefix",type=str,default=None)
+	parser.add_argument("--filter-output-class",type=str,default=None)
+	parser.add_argument("--filter-expected-class",type=str,default=None)
 	parser.add_argument("--model-dir",type=str,required=True)
 	parser.add_argument("--correct-only",action='store_true')
 	parser.add_argument("--failed-only",action='store_true')
