@@ -11,7 +11,7 @@ python -m macgraph.train \
 	--input-width 32 \
 	--embed-width 32 \
 	--mp-state-width 4 \
-	--max-decode-iterations 10 \
+	--max-decode-iterations 18 \
 	--output-layers 1 \
 	--output-activation selu \
 	--memory-transform-layers 1 \
