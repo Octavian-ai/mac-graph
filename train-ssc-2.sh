@@ -13,7 +13,7 @@ python -m macgraph.train \
 	--disable-input-bilstm \
 	--input-width 32 \
 	--embed-width 32 \
-	--mp-state-width 4 \
+	--mp-state-width 2 \
 	--max-decode-iterations 4 \
 	--output-layers 1 \
 	--output-activation selu \
