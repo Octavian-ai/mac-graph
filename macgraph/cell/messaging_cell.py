@@ -69,6 +69,8 @@ def messaging_cell(args, features, vocab_embedding,
 		in_iter_id)
 
 
+def mp_matmul(state, mat, name):
+	return tf.nn.conv1d(state, mat, 1, 'VALID', name=name)
 
 def do_messaging_cell(args, features, vocab_embedding, 
 	in_node_state, 
@@ -78,16 +80,18 @@ def do_messaging_cell(args, features, vocab_embedding,
 
 	with tf.name_scope("messaging_cell"):
 
-		node_state_shape = tf.shape(in_node_state)
-		node_state = in_node_state
-		# node_state = layer_normalize(in_node_state)
-
-		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 		taps = {}
 		taps["mp_write_query"] = in_write_query
 		taps["mp_write_signal"] = in_write_signal
 
-		# Add write signal:
+		node_state_shape = tf.shape(in_node_state)
+		node_state = in_node_state
+		
+
+		# --------------------------------------------------------------------------
+		# Write to graph
+		# --------------------------------------------------------------------------
+		
 		write_signal, _, a_taps = attention_write_by_key(
 			keys=node_table,
 			key_width=node_table_width,
@@ -105,6 +109,10 @@ def do_messaging_cell(args, features, vocab_embedding,
 		node_state += write_signal
 		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
+		# --------------------------------------------------------------------------
+		# Calculate adjacency 
+		# --------------------------------------------------------------------------
+
 		# Aggregate via adjacency matrix with normalisation (that does not include self-edges)
 		adj = tf.cast(features["kb_adjacency"], tf.float32)
 		degree = tf.reduce_sum(adj, -1, keepdims=True)
@@ -116,40 +124,63 @@ def do_messaging_cell(args, features, vocab_embedding,
 		adj_norm = inv_degree * adj
 		adj_norm = tf.cast(adj_norm, node_state.dtype)
 		adj_norm = tf.check_numerics(adj_norm, "adj_norm")
-		agg = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
-		node_state = agg
-		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
-
-		if args["use_message_passing_self_ref"]:
-			# Add self-reference
-			self_reference_kernel = tf.get_variable("mp_self_reference_W", [1, args["mp_state_width"], args["mp_state_width"]])
-			sr = tf.nn.conv1d(in_node_state, self_reference_kernel, 1, 'SAME', name="self_reference")
-			node_state += sr
-			taps["mp_self_fn"] = self_reference_kernel
-		else:
-			node_state += in_node_state
+		node_incoming = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
 
 
+		# --------------------------------------------------------------------------
+		# Perform propagation
+		# --------------------------------------------------------------------------
+		
 
-		if args["use_message_passing_node_transform"]:
-			# Message passing function is a 1d conv [filter_width, in_channels, out_channels]
-			message_pass_kernel = tf.get_variable(
-				"mp_node_W", 
-				[1, args["mp_state_width"], args["mp_state_width"]],
-				initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
-			
-			message_pass_bias = tf.get_variable("mp_node_b", [args["mp_state_width"]])
+		# Node value = gru(node_prev, node_incoming)
 
-			# Apply message pass function:
-			node_state = tf.nn.conv1d(node_state, message_pass_kernel, 1, 'SAME', name="message_pass")
-			node_state += message_pass_bias
-			# Apply activation
-			node_state = ACTIVATION_FNS[args["mp_activation"]](node_state)
-			assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
-			taps["mp_pass_fn"] = message_pass_kernel
+		old_and_new = tf.concat([node_state, node_incoming], axis=-1)
+
+		forget_w     = tf.get_variable("mp_forget_w",    [1, args["mp_state_width"]*2, args["mp_state_width"]])
+		reuse_w      = tf.get_variable("mp_reuse_w",     [1, args["mp_state_width"]*2, args["mp_state_width"]])
+		transform_w  = tf.get_variable("mp_transform_w", [1, args["mp_state_width"]*2, args["mp_state_width"]])
+
+		forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal'))
+		reuse_signal  = tf.nn.sigmoid(mp_matmul(old_and_new , reuse_w,  'reuse_signal'))
+
+		reuse_and_new = tf.concat([reuse_signal * node_state, node_incoming], axis=-1)
+		proposed_new_state = tf.nn.selu(mp_matmul(reuse_and_new, transform_w))
+
+		node_state = (forget_signal) * node_state + (1-forget_signal) * proposed_new_state
 
 
-		# node_state = layer_normalize(node_state)
+		# node_state = agg
+		# assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
+
+		# if args["use_message_passing_self_ref"]:
+		# 	# Add self-reference
+		# 	self_reference_kernel = tf.get_variable("mp_self_reference_W", [1, args["mp_state_width"], args["mp_state_width"]])
+		# 	sr = tf.nn.conv1d(in_node_state, self_reference_kernel, 1, 'SAME', name="self_reference")
+		# 	node_state += sr
+		# 	taps["mp_self_fn"] = self_reference_kernel
+		# else:
+		# 	node_state += in_node_state
+
+
+
+		# if args["use_message_passing_node_transform"]:
+		# 	# Message passing function is a 1d conv [filter_width, in_channels, out_channels]
+		# 	message_pass_kernel = tf.get_variable(
+		# 		"mp_node_W", 
+		# 		[1, args["mp_state_width"], args["mp_state_width"]],
+		# 		initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
+
+		# 	message_pass_bias = tf.get_variable("mp_node_b", [args["mp_state_width"]])
+
+		# 	# Apply message pass function:
+		# 	node_state = tf.nn.conv1d(node_state, message_pass_kernel, 1, 'SAME', name="message_pass")
+		# 	node_state += message_pass_bias
+		# 	# Apply activation
+		# 	node_state = ACTIVATION_FNS[args["mp_activation"]](node_state)
+		# 	assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
+		# 	taps["mp_pass_fn"] = message_pass_kernel
+
+
 		assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
 
 		taps["mp_node_state"] = node_state
