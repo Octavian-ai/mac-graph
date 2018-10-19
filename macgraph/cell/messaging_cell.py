@@ -140,13 +140,14 @@ def do_messaging_cell(args, features, vocab_embedding,
 		reuse_w      = tf.get_variable("mp_reuse_w",     [1, args["mp_state_width"]*2, args["mp_state_width"]])
 		transform_w  = tf.get_variable("mp_transform_w", [1, args["mp_state_width"]*2, args["mp_state_width"]])
 
+		# Initially likely to be zero
 		forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal'))
 		reuse_signal  = tf.nn.sigmoid(mp_matmul(old_and_new , reuse_w,  'reuse_signal'))
 
 		reuse_and_new = tf.concat([reuse_signal * node_state, node_incoming], axis=-1)
-		proposed_new_state = tf.nn.selu(mp_matmul(reuse_and_new, transform_w))
+		proposed_new_state = tf.nn.selu(mp_matmul(reuse_and_new, transform_w, 'proposed_new_state'))
 
-		node_state = (forget_signal) * node_state + (1-forget_signal) * proposed_new_state
+		node_state = (1-forget_signal) * node_state + (forget_signal) * proposed_new_state
 
 
 		# node_state = agg
