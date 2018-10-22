@@ -29,9 +29,9 @@ The core codebase implements graph question answering (GQA), using [CLEVR-graph]
 			<td>99% accuracy after 20k training steps</td>
 		</tr>
 		<tr>
-			<td>Stations one apart</td>
-			<td><strong>In progress</strong></td>
-			<td></td>
+			<td>Stations N apart</td>
+			<td><strong>Semi-complete</strong></td>
+			<td>98% accuracy up to ~9 apart after 25k training steps</td>
     	</tr>
     	<tr>
 			<td>Station with property adjacent</td>

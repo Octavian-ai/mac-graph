@@ -147,14 +147,14 @@ def get_args(extend=lambda parser:None, argv=None):
 
 
 	parser.add_argument('--mp-activation',				type=str, default="selu", 		choices=ACTIVATION_FNS.keys())
-	parser.add_argument('--mp-state-width', 			type=int, default=8)
+	parser.add_argument('--mp-state-width', 			type=int, default=4)
 	parser.add_argument('--disable-message-passing',    action='store_false', dest='use_message_passing')
 	parser.add_argument('--disable-message-passing-node-transform', action='store_false', dest='use_message_passing_node_transform')
 	parser.add_argument('--disable-message-passing-self-ref', action='store_false', dest='use_message_passing_self_ref')
 
 
-	parser.add_argument('--output-activation',			type=str, default="mi", choices=ACTIVATION_FNS.keys())
-	parser.add_argument('--output-layers',				type=int, default=3)
+	parser.add_argument('--output-activation',			type=str, default="selu", choices=ACTIVATION_FNS.keys())
+	parser.add_argument('--output-layers',				type=int, default=1)
 	parser.add_argument('--output-classes',	       		type=int, default=128,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
 
 	parser.add_argument('--enable-data-stack', 			action='store_true',  dest='use_data_stack')
