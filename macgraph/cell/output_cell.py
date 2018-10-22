@@ -6,7 +6,7 @@ from ..args import ACTIVATION_FNS
 from ..util import *
 
 
-def output_cell(args, features, in_question_state, in_memory_state, in_read, in_control_state, in_mp_reads):
+def output_cell(args, features, in_question_state, in_memory_state, in_read, in_control_state, in_mp_reads, in_iter_question_state):
 
 	with tf.name_scope("output_cell"):
 
@@ -26,8 +26,12 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read, in_
 
 		in_all = tf.concat(in_all, -1)
 
-		v = in_all
-		finished = in_all
+		in_all_time = tf.matmul(in_all, in_iter_question_state, transpose_b=True)
+		in_all_time = dynamic_assert_shape(in_all_time, [features["d_batch_size"], in_all.shape[-1], args["max_decode_iterations"]], "in_all_time")
+		in_all_time = tf.reshape(in_all_time, [features["d_batch_size"], in_all.shape[-1] * args["max_decode_iterations"]])
+
+		v = in_all_time
+		finished = in_all_time
 
 		for i in range(args["output_layers"]):
 
@@ -42,7 +46,7 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read, in_
 
 				finished = tf.layers.dense(finished, in_all.shape[-1].value/4, 
 					activation=ACTIVATION_FNS[args["output_activation"]])
-		
+
 
 		finished = tf.greater(tf.layers.dense(finished, 1, kernel_initializer=tf.zeros_initializer()), 0.5)
 
