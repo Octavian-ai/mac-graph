@@ -108,7 +108,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--input-width',             	type=int, 	default=128)
 	parser.add_argument('--disable-input-residual', 	action='store_false', dest='use_input_residual')
 	parser.add_argument('--disable-input-bilstm', 		action='store_false', dest='use_input_bilstm')
-
+	parser.add_argument('--disable-input-adjacency', 	action='store_false', dest='use_input_adjacency')
 
 	parser.add_argument('--embed-width',	       		type=int, default=64,   help="The width of token embeddings")
 	

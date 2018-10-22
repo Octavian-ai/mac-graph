@@ -27,6 +27,13 @@ def parse_single_example(i):
 		})
 
 def reshape_example(args, i):
+
+	def reshape_adj(tensor):
+		if args["use_input_adjacency"]:
+			return tf.reshape(tensor, [args["kb_node_max_len"], args["kb_node_max_len"]])
+		else:
+			return tensor
+
 	return ({
 		# Text input
 		"src": 				i["src"],
@@ -37,7 +44,7 @@ def reshape_example(args, i):
 		"kb_nodes_len":		i["kb_nodes_len"],
 		"kb_edges": 		tf.reshape(i["kb_edges"], [-1, args["kb_edge_width"]]),
 		"kb_edges_len":		i["kb_edges_len"],
-		"kb_adjacency":		tf.reshape(i["kb_adjacency"], [args["kb_node_max_len"], args["kb_node_max_len"]]),
+		"kb_adjacency":		reshape_adj(i["kb_adjacency"]),
 
 		# Prediction stats
 		"label":			i["label"], 
@@ -54,20 +61,6 @@ def make_edges_bidirectional(features, labels):
 	return features, labels
 
 
-def reshape_adjacency(features, labels):
-	a = features["kb_adjacency"]
-
-	nsq = features["kb_nodes_len"] * features["kb_nodes_len"]
-	a = a[:, 0: ]
-	a = tf.reshape(a, [
-		features["d_batch_size"], 
-		features["kb_nodes_len"], 
-		features["kb_nodes_len"]  
-	])
-
-	features["kb_adjacency"] = a
-
-	return features, labels
 
 def cast_adjacency_to_bool(features, labels):
 	features["kb_adjacency"] = tf.cast(features["kb_adjacency"], tf.bool)
@@ -108,6 +101,11 @@ def input_fn(args, mode, question=None, repeat=True):
 	zero_64 = tf.cast(0, tf.int64) 
 	unk_64  = tf.cast(UNK_ID, tf.int64)
 
+	if args["use_input_adjacency"]:
+		kb_adjacency_shape = tf.TensorShape([args["kb_node_max_len"], args["kb_node_max_len"]])
+	else:
+		kb_adjacency_shape = tf.TensorShape([])
+
 	d = d.padded_batch(
 		args["batch_size"],
 		# The first three entries are the source and target line rows;
@@ -122,7 +120,7 @@ def input_fn(args, mode, question=None, repeat=True):
 				"kb_nodes_len": 	tf.TensorShape([]), 
 				"kb_edges": 		tf.TensorShape([None, args["kb_edge_width"]]),
 				"kb_edges_len": 	tf.TensorShape([]), 
-				"kb_adjacency": 	tf.TensorShape([args["kb_node_max_len"], args["kb_node_max_len"]]),
+				"kb_adjacency": 	kb_adjacency_shape,
 
 				"label": 			tf.TensorShape([]), 
 				"type_string": 		tf.TensorShape([None]),

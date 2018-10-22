@@ -6,4 +6,5 @@ python -m macgraph.train \
 	--model-dir output/model/se/$COMMIT \
 	--input-dir input_data/processed/se_50k_small \
 	--max-decode-iterations 1 \
+	--disable-input-adjacency \
 	$@
