@@ -6,7 +6,7 @@ from ..args import ACTIVATION_FNS
 from ..util import *
 
 
-def output_cell(args, features, in_question_state, in_memory_state, in_read, in_control_state, in_mp_reads, in_iter_question_state):
+def output_cell(args, features, in_question_state, in_memory_state, in_read, in_control_state, in_mp_reads, in_iter_id):
 
 	with tf.name_scope("output_cell"):
 
@@ -26,8 +26,10 @@ def output_cell(args, features, in_question_state, in_memory_state, in_read, in_
 
 		in_all = tf.concat(in_all, -1)
 
-		in_all_time = tf.matmul(in_all, in_iter_question_state, transpose_b=True)
-		in_all_time = dynamic_assert_shape(in_all_time, [features["d_batch_size"], in_all.shape[-1], args["max_decode_iterations"]], "in_all_time")
+		in_all_time = tf.matmul(
+			tf.expand_dims(in_all, -1), 
+			tf.expand_dims(in_iter_id, -1), transpose_b=True)
+		in_all_time = dynamic_assert_shape(in_all_time, [features["d_batch_size"], tf.shape(in_all)[-1], args["max_decode_iterations"]], "in_all_time")
 		in_all_time = tf.reshape(in_all_time, [features["d_batch_size"], in_all.shape[-1] * args["max_decode_iterations"]])
 
 		v = in_all_time
