@@ -35,18 +35,13 @@ The core codebase implements graph question answering (GQA), using [CLEVR-graph]
     	</tr>
     	<tr>
 			<td>Station existence</td>
-			<td><strong>Semi-complete</strong></td>
+			<td><strong>Complete</strong></td>
 			<td>99.9% accuracy after 30k training steps</td>
     	</tr>
     	<tr>
 			<td>Station with property adjacent</td>
-			<td><strong>TBC</strong></td>
-			<td></td>
-    	</tr>
-		<tr>
-			<td>Count length of shortest path between nodes</td>
-			<td><strong>TBC</strong></td>
-			<td></td>
+			<td><strong>Complete</strong></td>
+			<td>98.8% accuracy after 30k training steps `164ddc2`</td>
     	</tr>
 	</tbody>
 </table>
