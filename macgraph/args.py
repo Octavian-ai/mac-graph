@@ -2,6 +2,7 @@
 import argparse
 import os.path
 import yaml
+import subprocess
 import pathlib
 import tensorflow as tf
 
@@ -31,15 +32,30 @@ def generate_args_derivatives(args):
 	r = {}
 	r["modes"] = ["eval", "train", "predict"]
 
+	if args["gqa_path"] is None:
+		r["gqa_path"] = os.path.join(args["gqa_dir"], args["name"]) + ".yaml"
+	else:
+		r["gqa_path"] = args["gqa_path"]
+	
+	if args["input_dir"] is None:
+		r["input_dir"] = os.path.join(args["input_dir_prefix"], args["name"])
+	else:
+		r["input_dir"] = args["input_dir"]
+
+	if args["model_dir"] is None:
+		r["model_dir"] = os.path.join(args["model_dir_prefix"], args["name"], args["model_version"])
+	else:
+		r["model_dir"] = args["model_dir"]
+
 	# Expand input dirs
 	for i in [*r["modes"], "all"]:
-		r[i+"_input_path"] = os.path.join(args["input_dir"], i+"_input.tfrecords")
+		r[i+"_input_path"] = os.path.join(r["input_dir"], i+"_input.tfrecords")
 
-	r["vocab_path"] = os.path.join(args["input_dir"], "vocab.txt")
-	r["config_path"] = os.path.join(args["model_dir"], "config.yaml")
-	r["question_types_path"] = os.path.join(args["input_dir"], "types.yaml")
-	r["answer_classes_path"] = os.path.join(args["input_dir"], "answer_classes.yaml")
-	r["answer_classes_types_path"] = os.path.join(args["input_dir"], "answer_classes_types.yaml")
+	r["vocab_path"] = os.path.join(r["input_dir"], "vocab.txt")
+	r["config_path"] = os.path.join(r["model_dir"], "config.yaml")
+	r["question_types_path"] = os.path.join(r["input_dir"], "types.yaml")
+	r["answer_classes_path"] = os.path.join(r["input_dir"], "answer_classes.yaml")
+	r["answer_classes_types_path"] = os.path.join(r["input_dir"], "answer_classes_types.yaml")
 
 	if args["control_width"] is None:
 		r["control_width"] = args["input_width"] * args["control_heads"]
@@ -58,6 +74,15 @@ def generate_args_derivatives(args):
 
 	return r
 
+def get_git_hash():
+    result = subprocess.run(
+        ['git', '--no-pager', 'log', "--pretty=format:%h", '-n', '1'],
+        stdout=subprocess.PIPE,
+        check=True,
+        universal_newlines=True
+    )
+    return result.stdout
+
 def get_args(extend=lambda parser:None, argv=None):
 
 	parser = argparse.ArgumentParser()
@@ -69,8 +94,14 @@ def get_args(extend=lambda parser:None, argv=None):
 
 	parser.add_argument('--log-level',  				type=str, default='INFO')
 	parser.add_argument('--output-dir', 				type=str, default="./output")
-	parser.add_argument('--input-dir',  				type=str, default="./input_data/processed/default")
-	parser.add_argument('--model-dir',      			type=str, default="./output/model/default")
+	parser.add_argument('--name',						type=str, default="default", help="Name of dataset")
+	parser.add_argument('--input-dir',					type=str, default=None)
+	parser.add_argument('--input-dir-prefix',  			type=str, default="./input_data/processed")
+	
+	parser.add_argument('--model-dir',					type=str, default=None)
+	parser.add_argument('--model-version',      		type=str, default=get_git_hash(), help="Model will be saved to a directory with this name, to assist with repeatable experiments")	
+	parser.add_argument('--model-dir-prefix',      		type=str, default="./output/model")
+	
 
 	# Used in train / predict / build
 	parser.add_argument('--limit',						type=int, default=None, help="How many rows of input data to read")

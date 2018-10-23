@@ -213,7 +213,7 @@ class Vocab(object):
 
 
 	@classmethod
-	def build(cls, args, gqa_to_tokens):
+	def build(cls, args, gqa_to_tokens, limit=None):
 		hits = Counter()
 
 		def add(tokens:List[str]):
@@ -221,7 +221,7 @@ class Vocab(object):
 				if token not in ["", " ", "\n"]:
 					hits[token] += 1
 
-		for i in tqdm(read_gqa(args), total=args["limit"]):
+		for i in tqdm(read_gqa(args, limit=limit), total=limit):
 			add(gqa_to_tokens(i))
 
 		tokens = list()

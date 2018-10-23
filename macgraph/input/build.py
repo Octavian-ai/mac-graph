@@ -64,8 +64,8 @@ def build(args):
 		pass
 
 	if not args["skip_vocab"]:
-		logger.info("Build vocab")
-		vocab = Vocab.build(args, lambda i:gqa_to_tokens(args, i))
+		logger.info(f"Build vocab {args['vocab_path']} ")
+		vocab = Vocab.build(args, lambda i:gqa_to_tokens(args, i), limit=args["vocab_build_limit"])
 		logger.info(f"Wrote {len(vocab)} vocab entries")
 		logger.debug(f"vocab: {vocab.table}")
 		print()
@@ -76,7 +76,7 @@ def build(args):
 	question_types = Counter()
 	output_classes = Counter()
 
-	logger.info("Generate TFRecords")
+	logger.info(f"Generate TFRecords {args['input_dir']}")
 	with Partitioner(args) as p:
 		with TwoLevelBalancer(lambda d: d["answer"], lambda d: d["question"]["type_string"], p, min_none(args["balance_batch"], args["limit"])) as balancer:
 			for doc in tqdm(read_gqa(args), total=args["limit"]):

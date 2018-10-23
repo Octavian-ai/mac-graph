@@ -67,7 +67,12 @@ def tf_startswith(tensor, prefix, axis=None):
 # File readers and writers
 # --------------------------------------------------------------------------
 
-def read_gqa(args):
+def read_gqa(args, limit=None):
+
+	if limit is None:
+		limit = args["limit"]
+
+
 	with tf.gfile.GFile(args["gqa_path"], 'r') as in_file:
 		d = yaml.safe_load_all(in_file)
 
@@ -78,7 +83,7 @@ def read_gqa(args):
 				if args["filter_type_prefix"] is None or i["question"]["type_string"].startswith(args["filter_type_prefix"]):
 					yield i
 					ctr += 1
-					if args["limit"] is not None and ctr >= args["limit"]:
+					if limit is not None and ctr >= limit:
 						logger.debug("Hit limit, stop")
 						return
 				else:
