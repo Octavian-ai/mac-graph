@@ -32,11 +32,12 @@ def generate_args_derivatives(args):
 	r = {}
 	r["modes"] = ["eval", "train", "predict"]
 
-	if args["gqa_path"] is None:
-		r["gqa_path"] = os.path.join(args["gqa_dir"], args["name"]) + ".yaml"
-	else:
-		r["gqa_path"] = args["gqa_path"]
-	
+	if "gqa_path" in args:
+		if args["gqa_path"] is None:
+			r["gqa_path"] = os.path.join(args["gqa_dir"], args["name"]) + ".yaml"
+		else:
+			r["gqa_path"] = args["gqa_path"]
+		
 	if args["input_dir"] is None:
 		r["input_dir"] = os.path.join(args["input_dir_prefix"], args["name"])
 	else:

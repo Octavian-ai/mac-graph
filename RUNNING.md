@@ -16,7 +16,7 @@ $ pipenv shell
 
 You can watch the model predict values from the hold-back data:
 ```shell
-$ python -m macgraph.predict
+$ python -m macgraph.predict --name my_dataset --model-version 0ds9f0s
 
 predicted_label: shabby
 actual_label: derilict
@@ -56,12 +56,12 @@ The underlying data (a Graph-Question-Answer YAML from CLEVR-graph) must be pre-
 First [generate](https://github.com/Octavian-ai/clevr-graph) a `gqa.yaml` with the command:
 ```shell
 clevr-graph$ python -m gqa.generate --count 50000 --int-names
-cp data/gqa-some-id.yaml ../mac-graph/input_data/raw/gqa.yaml
+cp data/gqa-some-id.yaml ../mac-graph/input_data/raw/my_dataset.yaml
 ```
 Then build (that is, pre-process into a vocab table and tfrecords) the data:
 
 ```shell
-mac-graph$ python -m macgraph.input.build --gqa-path input_data/raw/gqa.yaml
+mac-graph$ python -m macgraph.input.build --name my_dataset
 ```
 
 #### Arguments to build
@@ -76,7 +76,7 @@ Let's build a model. (Note, this requires training data from the previous sectio
 General advice is to have at least 40,000 training records (e.g. build from 50,000 GQA triples)
 
 ```shell
-python -m macgraph.train
+python -m macgraph.train --name my_dataset
 ```
 
 Running too slow? Fan spinning too much? Use [FloydHub](https://docs.floydhub.com/guides/basics/install/) with this magic button:
