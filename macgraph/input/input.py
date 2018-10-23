@@ -104,7 +104,7 @@ def input_fn(args, mode, question=None, repeat=True):
 	if args["use_input_adjacency"]:
 		kb_adjacency_shape = tf.TensorShape([args["kb_node_max_len"], args["kb_node_max_len"]])
 	else:
-		kb_adjacency_shape = tf.TensorShape([])
+		kb_adjacency_shape = tf.TensorShape([None])
 
 	d = d.padded_batch(
 		args["batch_size"],

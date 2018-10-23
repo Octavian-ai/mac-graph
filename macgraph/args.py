@@ -51,7 +51,10 @@ def generate_args_derivatives(args):
 		r["kb_list"].append("kb_edge")
 
 
-	r["vocab"] = Vocab.load(r["vocab_path"], args["vocab_size"])
+	try:
+		r["vocab"] = Vocab.load(r["vocab_path"], args["vocab_size"])
+	except tf.errors.NotFoundError:
+		pass
 
 	return r
 

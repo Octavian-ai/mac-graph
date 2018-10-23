@@ -36,7 +36,7 @@ The core codebase implements graph question answering (GQA), using [CLEVR-graph]
     	<tr>
 			<td>Station existence</td>
 			<td><strong>Semi-complete</strong></td>
-			<td>97% accuracy after 15k training steps</td>
+			<td>99.9% accuracy after 30k training steps</td>
     	</tr>
     	<tr>
 			<td>Station with property adjacent</td>

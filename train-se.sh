@@ -7,4 +7,5 @@ python -m macgraph.train \
 	--input-dir input_data/processed/se_50k_small \
 	--max-decode-iterations 1 \
 	--disable-input-adjacency \
+	--disable-message-passing \
 	$@

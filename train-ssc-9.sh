@@ -22,7 +22,4 @@ python -m macgraph.train \
 	--embed-width 32 \
 	--mp-state-width 4 \
 	--max-decode-iterations 10 \
-	--output-layers 1 \
-	--output-activation selu \
-	--memory-transform-layers 1 \
 	$@
