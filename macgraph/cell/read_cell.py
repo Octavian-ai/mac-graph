@@ -80,28 +80,27 @@ def read_cell(args, features, vocab_embedding,
 	"""
 
 	
-	def read_cell_query():
-		taps = {}
-		memory_shape = [features["d_batch_size"], -1, args["input_width"]]
+	def read_cell_query(name):
+		with tf.name_scope(name):
+			taps = {}
+			memory_shape = [features["d_batch_size"], -1, args["input_width"]]
 
-		attention_query = tf.concat([in_iter_id, in_question_state], -1)
+			attention_query = tf.concat([in_iter_id, in_question_state], -1)
 
-		control_signal, _, c_taps = attention(in_question_tokens, attention_query)
-		memory_signal, _, m_taps = attention(tf.reshape(in_memory_state, memory_shape), attention_query)
+			control_signal, _, c_taps = attention(in_question_tokens, attention_query)
+			memory_signal, _, m_taps = attention(tf.reshape(in_memory_state, memory_shape), attention_query)
 
-		query_signal, q_tap = attention_by_index(attention_query, tf.stack([control_signal, memory_signal], 1))
+			query_signal, q_tap = attention_by_index(attention_query, tf.stack([control_signal, memory_signal], 1))
 
-		for k, v in c_taps.items():
-			taps["control_" + k] = v
+			for k, v in c_taps.items():
+				taps["control_" + k] = v
 
-		for k, v in m_taps.items():
-			taps["memory_" + k] = v
+			for k, v in m_taps.items():
+				taps["memory_" + k] = v
 
-		taps["switch_attn"] = q_tap
+			taps["switch_attn"] = q_tap
 
-		return query_signal, taps
-
-
+			return query_signal, taps
 
 
 	with tf.name_scope("read_cell"):
