@@ -90,7 +90,7 @@ def adj_pretty(mtx, kb_nodes_len, kb_nodes, vocab):
 	return output
 
 
-read_control_parts = ["token", "memory"]
+read_control_parts = ["token_index", "token_content", "memory"]
 
 
 def predict(args, cmd_args):
@@ -121,7 +121,7 @@ def predict(args, cmd_args):
 
 		iterations = len(row["question_word_attn"])
 
-		print(emoji, " ", answer_part)
+		print(emoji, " ", answer_part, " - ", ''.join(row['src']).replace('<space>', ' '))
 
 		for i in range(iterations):
 
@@ -152,7 +152,7 @@ def predict(args, cmd_args):
 							for idx, part_noun in enumerate(read_control_parts):
 								if row[f"{noun}{head_i}_switch_attn"][i][0] > ATTN_THRESHOLD:
 
-									if part_noun == "token":
+									if part_noun.startswith("token"):
 										db = row["src"]
 									elif part_noun == "memory":
 										db = list(range(args["memory_width"]//args["input_width"]))
