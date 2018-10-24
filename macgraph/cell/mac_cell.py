@@ -30,12 +30,22 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			"finished":					1,
 			"question_word_attn": 		self.args["control_heads"] * self.features["d_src_len"],
 			"question_word_attn_raw": 	self.args["control_heads"] * self.features["d_src_len"],
-			"kb_node_attn": 			self.args["kb_node_width"] * self.args["embed_width"],
-			"kb_node_word_attn": 		self.args["kb_node_width"],
-			"kb_edge_attn": 			self.args["kb_edge_width"] * self.args["embed_width"], 
-			"kb_edge_word_attn": 		self.args["kb_edge_width"], 
+			
+			"kb_node0_attn": 			self.args["kb_node_width"] * self.args["embed_width"],
+			"kb_node0_control_attn": 	self.features["d_src_len"],
+			"kb_node0_memory_attn": 	self.args["memory_width"] // self.args["input_width"],
+			"kb_node0_switch_attn": 	2,
+			"kb_node0_word_attn": 		self.args["kb_node_width"],
+			
+			"kb_edge0_attn": 			self.args["kb_edge_width"] * self.args["embed_width"], 
+			"kb_edge0_control_attn": 	self.features["d_src_len"],
+			"kb_edge0_memory_attn": 	self.args["memory_width"] // self.args["input_width"],
+			"kb_edge0_switch_attn": 	2,
+			"kb_edge0_word_attn": 		self.args["kb_edge_width"], 
+			
 			"read_head_attn": 			2 * self.args["read_heads"],
 			"read_head_attn_focus": 	2 * self.args["read_heads"],
+			
 			"mp_read_attn": 			self.args["kb_node_max_len"],
 			"mp_write_attn": 			self.args["kb_node_max_len"],
 			"mp_node_state":			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
@@ -118,12 +128,22 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				"finished":					tf.cast(finished, tf.float32),
 				"question_word_attn": 		control_taps.get("attn", empty_attn),
 				"question_word_attn_raw": 	control_taps.get("attn_raw", empty_attn),
-				"kb_node_attn": 			tf.squeeze(read_taps.get("kb_node_attn", empty_attn), 2),
-				"kb_node_word_attn": 		read_taps.get("kb_node_word_attn", empty_query),
-				"kb_edge_attn": 			tf.squeeze(read_taps.get("kb_edge_attn", empty_attn), 2),
-				"kb_edge_word_attn": 		read_taps.get("kb_edge_word_attn", empty_query),
+
+				"kb_node0_attn": 			tf.squeeze(read_taps.get("kb_node0_attn", empty_attn), 2),
+				"kb_node0_control_attn": 	tf.squeeze(read_taps.get("kb_node0_control_attn", empty_attn), 2),
+				"kb_node0_memory_attn": 	tf.squeeze(read_taps.get("kb_node0_memory_attn", empty_attn), 2),
+				"kb_node0_switch_attn": 	read_taps.get("kb_node0_switch_attn", empty_attn),
+				"kb_node0_word_attn": 		read_taps.get("kb_node0_word_attn", empty_query),
+				
+				"kb_edge0_attn": 			tf.squeeze(read_taps.get("kb_edge0_attn", empty_attn), 2),
+				"kb_edge0_control_attn": 	tf.squeeze(read_taps.get("kb_edge0_control_attn", empty_attn), 2),
+				"kb_edge0_memory_attn": 	tf.squeeze(read_taps.get("kb_edge0_memory_attn", empty_attn), 2),
+				"kb_edge0_switch_attn": 	read_taps.get("kb_edge0_switch_attn", empty_attn),
+				"kb_edge0_word_attn": 		read_taps.get("kb_edge0_word_attn", empty_query),
+
 				"read_head_attn": 			read_taps.get("read_head_attn", empty_query),
 				"read_head_attn_focus": 	read_taps.get("read_head_attn_focus", empty_query),
+				
 				"mp_read_attn": 			mp_taps.get("mp_read0_attn", empty_query),
 				"mp_write_attn": 			mp_taps.get("mp_write_attn", empty_query),
 				"mp_node_state":			out_mp_state,

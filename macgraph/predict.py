@@ -90,6 +90,9 @@ def adj_pretty(mtx, kb_nodes_len, kb_nodes, vocab):
 	return output
 
 
+read_control_parts = ["token", "memory"]
+
+
 def predict(args, cmd_args):
 	estimator = get_estimator(args)
 
@@ -122,9 +125,12 @@ def predict(args, cmd_args):
 
 		for i in range(iterations):
 
+			def visualize_question_attn(attn):
+				return ' '.join(color_text(row["src"], attn))
+
 			if args["use_control_cell"]:
 				for control_head in row["question_word_attn"][i]:
-					print(f"{i}: " + ' '.join(color_text(row["src"], control_head)))
+					print(f"{i}: " + visualize_question_attn(control_head))
 
 				# print(f"{i}: question_word_attn_raw: ", row["question_word_attn_raw"][i])
 				# print(f"{i}: question_word_attn: ",     row["question_word_attn"][i])
@@ -137,17 +143,35 @@ def predict(args, cmd_args):
 				# print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
 
 				for idx0, noun in enumerate(args["kb_list"]):
-					if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
-						db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"] if kb_row[0] != UNK_ID]
-						print(f"{i}: " + noun+"_attn: ",', '.join(color_text(db, row[f"{noun}_attn"][i])))
+					for head_i in range(args["read_heads"]):
+						if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
+							
+							print(f"{i}: {noun}{head_i}_switch: ", 
+								' '.join(color_text(read_control_parts, row[f"{noun}{head_i}_switch_attn"][i])))
 
-						for idx, attn in enumerate(row[f"{noun}_attn"][i]):
-							if attn > ATTN_THRESHOLD:
-								print(f"{i}: " +noun+"_word_attn: ",', '.join(color_text(
-									vocab.prediction_value_to_string(row[f"{noun}s"][idx], True),
-									row[f"{noun}_word_attn"][i],
-									)
-								))
+							for idx, part_noun in enumerate(read_control_parts):
+								if row[f"{noun}{head_i}_switch_attn"][i][0] > ATTN_THRESHOLD:
+
+									if part_noun == "token":
+										db = row["src"]
+									elif part_noun == "memory":
+										db = list(range(args["memory_width"]//args["input_width"]))
+
+									v = ' '.join(color_text(db, row[f"{noun}{head_i}_{part_noun}_attn"][i]))
+									print(f"{i}: {noun}{head_i}_{part_noun}_attn: {v}")
+
+
+							db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"] if kb_row[0] != UNK_ID]
+							print(f"{i}: {noun}{head_i}_attn: ",', '.join(color_text(db, row[f"{noun}{head_i}_attn"][i])))
+
+							for idx, attn in enumerate(row[f"{noun}{head_i}_attn"][i]):
+								if attn > ATTN_THRESHOLD:
+									print(f"{i}: {noun}{head_i}_word_attn: ",', '.join(color_text(
+										vocab.prediction_value_to_string(row[f"{noun}s"][idx], True),
+										row[f"{noun}{head_i}_word_attn"][i],
+										)
+									))
+
 			if args["use_message_passing"]:
 				for tap in ["mp_read_attn", "mp_write_attn"]:
 					db = [vocab.prediction_value_to_string(kb_row[0:1]) for kb_row in row["kb_nodes"]]

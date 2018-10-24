@@ -79,24 +79,23 @@ def read_cell(args, features, vocab_embedding,
 
 	"""
 
+	attention_master_signal = tf.concat([in_iter_id, in_question_state], -1)
 	
 	def read_cell_query(name):
 		with tf.name_scope(name):
 			taps = {}
-			memory_shape = [features["d_batch_size"], -1, args["input_width"]]
 
-			attention_query = tf.concat([in_iter_id, in_question_state], -1)
-
-			control_query = tf.layers.dense(attention_query, args["input_width"])
-			control_signal, _, c_taps = attention(in_question_tokens, control_query, key_width=args["input_width"])
+			token_query = tf.layers.dense(attention_master_signal, args["input_width"])
+			token_signal, _, c_taps = attention(in_question_tokens, token_query, key_width=args["input_width"])
 			
-			memory_query = tf.layers.dense(attention_query, args["input_width"])
+			memory_shape = [features["d_batch_size"], args["memory_width"] // args["input_width"], args["input_width"]]
+			memory_query = tf.layers.dense(attention_master_signal, args["input_width"])
 			memory_signal, _, m_taps  = attention(tf.reshape(in_memory_state, memory_shape), memory_query, key_width=args["input_width"])
 
-			query_signal, q_tap = attention_by_index(attention_query, tf.stack([control_signal, memory_signal], 1))
+			query_signal, q_tap = attention_by_index(attention_master_signal, tf.stack([token_signal, memory_signal], 1))
 
 			for k, v in c_taps.items():
-				taps["control_" + k] = v
+				taps["token_" + k] = v
 
 			for k, v in m_taps.items():
 				taps["memory_" + k] = v
@@ -124,36 +123,36 @@ def read_cell(args, features, vocab_embedding,
 		# Read data
 		# --------------------------------------------------------------------------
 
-		in_signal = []
+		# in_signal = []
 
-		# Commented out because it was hampering progress
-		if in_memory_state is not None and args["use_memory_cell"]:
-			in_signal.append(in_memory_state)
+		# # Commented out because it was hampering progress
+		# if in_memory_state is not None and args["use_memory_cell"]:
+		# 	in_signal.append(in_memory_state)
 
-		# We may run the network with no control cell
-		if in_control_state is not None and args["use_control_cell"]:
-			if args["use_read_control_share"]:
-				in_signal.append(in_control_state)
-			else:
-				control_head_count = args["control_width"] // args["input_width"]
-				control_heads_per_read_head = control_head_count // head_total
-				assert args["control_width"] % args["input_width"] == 0, "If not sharing control heads between read heads, the control width must be integer multiple of input_width"
-				assert control_head_count % head_total == 0, f"If not sharing control heads {control_head_count} then number of control heads must be multiple of read heads {head_total}"
-				control_heads = tf.reshape(in_control_state, [features["d_batch_size"], head_total, control_heads_per_read_head * args["input_width"]])
+		# # We may run the network with no control cell
+		# if in_control_state is not None and args["use_control_cell"]:
+		# 	if args["use_read_control_share"]:
+		# 		in_signal.append(in_control_state)
+		# 	else:
+		# 		control_head_count = args["control_width"] // args["input_width"]
+		# 		control_heads_per_read_head = control_head_count // head_total
+		# 		assert args["control_width"] % args["input_width"] == 0, "If not sharing control heads between read heads, the control width must be integer multiple of input_width"
+		# 		assert control_head_count % head_total == 0, f"If not sharing control heads {control_head_count} then number of control heads must be multiple of read heads {head_total}"
+		# 		control_heads = tf.reshape(in_control_state, [features["d_batch_size"], head_total, control_heads_per_read_head * args["input_width"]])
 
-		if args["use_read_question_state"] or len(in_signal)==0:
-			in_signal.append(in_question_state)
+		# if args["use_read_question_state"] or len(in_signal)==0:
+		# 	in_signal.append(in_question_state)
 
-		head_i = 0
+		# head_i = 0
 
 		for j in range(args["read_heads"]):
 			for i in args["kb_list"]:
 
-				if args["use_read_control_share"]:
-					in_signal_to_head = tf.concat(in_signal, -1)
-				else:
-					control_head_slice = control_heads[:,head_i,:]
-					in_signal_to_head = tf.concat(in_signal + [control_head_slice], -1)
+				# if args["use_read_control_share"]:
+				# 	in_signal_to_head = tf.concat(in_signal, -1)
+				# else:
+				# 	control_head_slice = control_heads[:,head_i,:]
+				# 	in_signal_to_head = tf.concat(in_signal + [control_head_slice], -1)
 
 				read_query, rcq_taps = read_cell_query(i + str(j))
 
@@ -168,15 +167,15 @@ def read_cell(args, features, vocab_embedding,
 					noun=i
 				)
 				for k,v in read_table_taps.items():
-					taps[i+"_"+k] = v
+					taps[i + str(j) + "_" + k] = v
 
 				attn_focus.append(score_raw_total)
 
 				read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
 				
 				if args["use_read_extract"]:
-					d, taps[i+ str(j) + "_word_attn"] = attention_by_index(in_signal_to_head, read_words, i+"_word_attn")
-					d = tf.concat([d, in_signal_to_head], -1)
+					d, taps[i + str(j) + "_word_attn"] = attention_by_index(attention_master_signal, read_words, i+"_word_attn")
+					d = tf.concat([d, attention_master_signal], -1)
 					d = tf.layers.dense(d, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
 					reads.append(d)
 				else:
