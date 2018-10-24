@@ -213,15 +213,17 @@ def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, na
 
 
 
-def attention_by_index(control, head_stack, name:str="attention_by_index"):
+def attention_by_index(table, control,  name:str="attention_by_index"):
 	'''
-	Essentially a weighted sum over the second-last dimension of head_stack, 
+	Essentially a weighted sum over the second-last dimension of table, 
 	using a dense softmax of control for the weights
+
+	Requires table to have fixed seq_len
 
 
 	Shapes:
 		* control [batch, word_size]
-		* head_stack [batch, seq_len, word_size]
+		* table [batch, seq_len, word_size]
 
 	Returns [batch, word_size]		
 
@@ -229,15 +231,16 @@ def attention_by_index(control, head_stack, name:str="attention_by_index"):
 
 	with tf.name_scope(name):
 
-		word_size = tf.shape(head_stack)[-1]
-		seq_len = head_stack.shape[-2]
+		word_size = tf.shape(table)[-1]
+		seq_len = table.shape[-2]
+
 		output_shape = [tf.shape(control)[0], word_size]
 
 		assert seq_len is not None, "Seq len must be defined"
 		
 		query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
 		
-		weighted_stack = head_stack * tf.expand_dims(query, -1)
+		weighted_stack = table * tf.expand_dims(query, -1)
 		weighted_sum = tf.reduce_sum(weighted_stack, -2)
 
 		output = weighted_sum

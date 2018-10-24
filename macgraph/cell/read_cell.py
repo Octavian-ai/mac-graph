@@ -76,7 +76,7 @@ def read_cell(args, features, vocab_embedding,
 			for k, v in c_taps.items():
 				taps["token_content_" + k] = v
 
-			token_index_signal, _, c_taps = attention_by_index(attention_master_signal, in_question_tokens)
+			token_index_signal, _, c_taps = attention_by_index(in_question_tokens, attention_master_signal,)
 			sources.append(token_index_signal)
 			for k, v in c_taps.items():
 				taps["token_index_" + k] = v
@@ -90,7 +90,7 @@ def read_cell(args, features, vocab_embedding,
 				for k, v in m_taps.items():
 					taps["memory_" + k] = v
 
-			query_signal, q_tap = attention_by_index(attention_master_signal, tf.stack(sources, 1))
+			query_signal, q_tap = attention_by_index(tf.stack(sources, 1), attention_master_signal)
 			taps["switch_attn"] = q_tap
 
 			return query_signal, taps
@@ -164,7 +164,7 @@ def read_cell(args, features, vocab_embedding,
 
 				read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])	
 			
-				d, taps[i + str(j) + "_word_attn"] = attention_by_index(attention_master_signal, read_words, i+"_word_attn")
+				d, taps[i + str(j) + "_word_attn"] = attention_by_index(read_words, attention_master_signal, name=i+"_word_attn")
 				d = tf.concat([d, attention_master_signal], -1)
 				d = tf.layers.dense(d, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
 				reads.append(d)
@@ -173,7 +173,7 @@ def read_cell(args, features, vocab_embedding,
 				# head_i += 1
 	
 		reads = tf.stack(reads, axis=1)
-		read_word, taps["read_head_attn"] = attention_by_index(attention_master_signal, reads, "read_head_attn")
+		read_word, taps["read_head_attn"] = attention_by_index(reads, attention_master_signal, name="read_head_attn")
 	
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
