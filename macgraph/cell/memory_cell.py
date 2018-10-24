@@ -20,19 +20,15 @@ def memory_cell(args, features, in_memory_state, in_data_read, in_mp_reads, in_c
 			in_all.extend(in_mp_reads)
 
 		in_all = tf.concat(in_all, -1)
-
-		forget_act = ACTIVATION_FNS[args["memory_forget_activation"]]
-		# act = ACTIVATION_FNS[args["memory_activation"]]
-
+		
 		new_memory_state = in_all
 		for i in range(args["memory_transform_layers"]):
 			prev = new_memory_state
 			new_memory_state = layer_selu(new_memory_state, args["memory_width"], dropout=args["memory_dropout"])
-			# new_memory_state = tf.layers.dense(new_memory_state, args["memory_width"])
 			if new_memory_state.shape[-1] == prev.shape[-1]:
 				new_memory_state += prev
-			# new_memory_state = act(new_memory_state)
 
+		forget_act = ACTIVATION_FNS[args["memory_forget_activation"]]
 		forget_signal = tf.layers.dense(in_all, args["memory_width"], activation=forget_act)
 	
 		out_memory_state = (new_memory_state * forget_signal) + (in_memory_state * (1-forget_signal))
