@@ -181,7 +181,7 @@ def read_cell(args, features, vocab_embedding,
 				else:
 					reads.append(read_words)
 
-				head_i += 1
+				# head_i += 1
 
 		if args["use_read_extract"]:
 			reads = tf.stack(reads, axis=1)
