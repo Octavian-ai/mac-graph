@@ -82,7 +82,10 @@ def read_cell(args, features, vocab_embedding,
 
 			token_index_signal, query = attention_by_index(in_question_tokens_padded, attention_master_signal)
 			sources.append(token_index_signal)
-			taps["token_index_attn"] = query
+			taps["token_index_attn"] = tf.expand_dims(query, 2)
+
+			step_const_signal = tf.dense(in_iter_id, args["input_width"])
+			sources.append(step_const_signal)
 			
 			if args["use_memory_cell"]:
 				memory_shape = [features["d_batch_size"], args["memory_width"] // args["input_width"], args["input_width"]]

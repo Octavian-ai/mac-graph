@@ -90,7 +90,7 @@ def adj_pretty(mtx, kb_nodes_len, kb_nodes, vocab):
 	return output
 
 
-read_control_parts = ["token_index", "token_content", "memory"]
+read_control_parts = ["token_content", "token_index", "step_const", "memory"]
 
 
 def predict(args, cmd_args):
