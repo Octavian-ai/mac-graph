@@ -76,10 +76,13 @@ def read_cell(args, features, vocab_embedding,
 			for k, v in c_taps.items():
 				taps["token_content_" + k] = v
 
-			token_index_signal, _, c_taps = attention_by_index(in_question_tokens, attention_master_signal,)
+			padding = [[0,0], [0, args["max_seq_len"] - tf.shape(in_question_tokens)[1]], [0,0]] # batch, seq_len, token
+			in_question_tokens_padded = tf.pad(in_question_tokens, padding)
+			in_question_tokens_padded.set_shape([None, args["max_seq_len"], None])
+
+			token_index_signal, query = attention_by_index(in_question_tokens_padded, attention_master_signal)
 			sources.append(token_index_signal)
-			for k, v in c_taps.items():
-				taps["token_index_" + k] = v
+			taps["token_index_attn"] = query
 			
 			if args["use_memory_cell"]:
 				memory_shape = [features["d_batch_size"], args["memory_width"] // args["input_width"], args["input_width"]]

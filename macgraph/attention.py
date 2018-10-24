@@ -213,7 +213,7 @@ def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, na
 
 
 
-def attention_by_index(table, control,  name:str="attention_by_index"):
+def attention_by_index(table, control, name:str="attention_by_index"):
 	'''
 	Essentially a weighted sum over the second-last dimension of table, 
 	using a dense softmax of control for the weights
