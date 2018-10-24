@@ -77,6 +77,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 					in_iter_question_state, in_control_state, self.question_state, self.question_tokens)
 			else:
 				out_control_state = in_control_state
+				control_taps = {}
 		
 			if self.args["use_read_cell"]:
 				read, read_taps = read_cell(
