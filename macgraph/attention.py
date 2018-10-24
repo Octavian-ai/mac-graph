@@ -165,7 +165,7 @@ def attention_compute_scores(keys:tf.Tensor, query:tf.Tensor, key_width:int=None
 		keys_shape = [batch_size, seq_len, key_width]
 		
 		query = dynamic_assert_shape(query, q_shape, "query")
-		keys = dynamic_assert_shape(keys, keys_shape, "keys") # Somewhat tautalagous
+		keys = dynamic_assert_shape(keys, keys_shape, "keys") # Somewhat tautologious
 
 		# --------------------------------------------------------------------------
 		# Run model

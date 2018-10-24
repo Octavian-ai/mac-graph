@@ -87,8 +87,11 @@ def read_cell(args, features, vocab_embedding,
 
 			attention_query = tf.concat([in_iter_id, in_question_state], -1)
 
-			control_signal, _, c_taps = attention(in_question_tokens, attention_query)
-			memory_signal, _, m_taps = attention(tf.reshape(in_memory_state, memory_shape), attention_query)
+			control_query = tf.layers.dense(attention_query, args["control_width"])
+			control_signal, _, c_taps = attention(in_question_tokens, control_query, key_width=args["control_width"])
+			
+			memory_query = tf.layers.dense(attention_query, args["input_width"])
+			memory_signal, _, m_taps  = attention(tf.reshape(in_memory_state, memory_shape), memory_query, key_width=args["input_width"])
 
 			query_signal, q_tap = attention_by_index(attention_query, tf.stack([control_signal, memory_signal], 1))
 
