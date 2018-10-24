@@ -171,26 +171,19 @@ def read_cell(args, features, vocab_embedding,
 
 				attn_focus.append(score_raw_total)
 
-				read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])
+				read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])	
+			
+				d, taps[i + str(j) + "_word_attn"] = attention_by_index(attention_master_signal, read_words, i+"_word_attn")
+				d = tf.concat([d, attention_master_signal], -1)
+				d = tf.layers.dense(d, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
+				reads.append(d)
 				
-				if args["use_read_extract"]:
-					d, taps[i + str(j) + "_word_attn"] = attention_by_index(attention_master_signal, read_words, i+"_word_attn")
-					d = tf.concat([d, attention_master_signal], -1)
-					d = tf.layers.dense(d, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
-					reads.append(d)
-				else:
-					reads.append(read_words)
 
 				# head_i += 1
-
-		if args["use_read_extract"]:
-			reads = tf.stack(reads, axis=1)
-			reads, taps["read_head_attn"] = attention_by_index(in_question_state, reads, "read_head_attn")
-			# reads = tf.concat(reads, -1)
-		else:
-			reads = tf.concat(reads, -2)
-			reads = tf.reshape(reads, [features["d_batch_size"], reads.shape[-1]*reads.shape[-2]])
-
+	
+		reads = tf.stack(reads, axis=1)
+		read_word, taps["read_head_attn"] = attention_by_index(attention_master_signal, reads, "read_head_attn")
+	
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
@@ -198,7 +191,7 @@ def read_cell(args, features, vocab_embedding,
 		taps["read_head_attn_focus"] = tf.concat(attn_focus, -1)
 
 		# Residual skip connection
-		out_data = tf.concat([reads] + in_signal + attn_focus, -1)
+		out_data = tf.concat([read_word, attention_master_signal] + attn_focus, -1)
 		
 		for i in range(args["read_layers"]):
 			out_data = tf.layers.dense(out_data, args["read_width"])
