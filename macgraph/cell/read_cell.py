@@ -17,24 +17,7 @@ def read_from_table(args, features, in_signal, noun, table, width, keys_len=None
 		table = tf.concat([table, ind_col], axis=2)
 		width += args["read_indicator_cols"]
 
-	if args["use_read_query_block"]:
-		# Perform word copy op at the block level, should be easier to train
-		assert in_signal.shape[-1] is not None, "input signal width must be known"
-		assert in_signal.shape[-1] % args["embed_width"] == 0, "in_signal size must be mulitple of embed_width"
-		assert width % args["embed_width"] == 0, f"table width {width} must be multiple of embed_width {args['embed_width']}"
-
-		n_input_blocks = in_signal.shape[-1] // args["embed_width"]
-		in_signal_blocked = tf.reshape(in_signal, [features["d_batch_size"], n_input_blocks, args["embed_width"]])
-		n_query_blocks = width // args["embed_width"]
-
-		query_proj_w = tf.get_variable(noun+"_query_proj_w", [n_query_blocks, n_input_blocks])
-		query_proj_b = tf.get_variable(noun+"_query_proj_b", [n_query_blocks, args["embed_width"]])
-		query = tf.einsum('bie,qi->bqe', in_signal_blocked, query_proj_w)
-		# query = tf.matmul(in_signal_blocked, query_proj_w)
-		query += query_proj_b
-		query = tf.reshape(query, [features["d_batch_size"], n_query_blocks * args["embed_width"]])
-	else:
-		query = tf.layers.dense(in_signal, width)
+	query = tf.layers.dense(in_signal, width)
 
 	output, total_raw_score, taps = attention(table, query,
 		key_width=width, 
