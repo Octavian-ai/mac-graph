@@ -54,7 +54,9 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 
 
 def read_cell(args, features, vocab_embedding, 
-	in_memory_state, in_control_state, in_question_tokens, in_question_state, in_iter_id):
+	in_memory_state, in_control_state, in_prev_outputs,
+	in_question_tokens, in_question_state, 
+	in_iter_id):
 	"""
 	A read cell
 

@@ -69,6 +69,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			in_iter_id = inputs[1]
 			in_iter_id = dynamic_assert_shape(in_iter_id, [self.features["d_batch_size"], self.args["max_decode_iterations"]], "in_iter_id")
 
+			in_prev_outputs = inputs[2]
+
 			empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)
 			empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
 
@@ -82,8 +84,9 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			if self.args["use_read_cell"]:
 				read, read_taps = read_cell(
 					self.args, self.features, self.vocab_embedding,
-					in_memory_state, out_control_state, 
-					self.question_tokens, self.question_state, in_iter_id)
+					in_memory_state, out_control_state, in_prev_outputs,
+					self.question_tokens, self.question_state, 
+					in_iter_id)
 			else:
 				read = tf.fill([self.features["d_batch_size"], 1], 0.0)
 				read_taps = {}
