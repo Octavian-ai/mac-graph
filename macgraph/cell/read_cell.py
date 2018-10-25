@@ -69,14 +69,16 @@ def read_cell(args, features, vocab_embedding,
 	def read_cell_query(name):
 		with tf.name_scope(name):
 			taps = {}
-
 			sources = []
 
+			def add_taps(prefix, extra_taps):
+				for k, v in extra_taps.items():
+					taps[prefix + "_" + k] = v
+
 			token_query = tf.layers.dense(attention_master_signal, args["input_width"])
-			token_signal, _, c_taps = attention(in_question_tokens, token_query, key_width=args["input_width"])
+			token_signal, _, x_taps = attention(in_question_tokens, token_query)
 			sources.append(token_signal)
-			for k, v in c_taps.items():
-				taps["token_content_" + k] = v
+			add_taps("token_content", x_taps)
 
 			padding = [[0,0], [0, args["max_seq_len"] - tf.shape(in_question_tokens)[1]], [0,0]] # batch, seq_len, token
 			in_question_tokens_padded = tf.pad(in_question_tokens, padding)
@@ -92,11 +94,15 @@ def read_cell(args, features, vocab_embedding,
 			if args["use_memory_cell"]:
 				memory_shape = [features["d_batch_size"], args["memory_width"] // args["input_width"], args["input_width"]]
 				memory_query = tf.layers.dense(attention_master_signal, args["input_width"])
-				memory_signal, _, m_taps  = attention(tf.reshape(in_memory_state, memory_shape), memory_query, key_width=args["input_width"])
+				memory_signal, _, x_taps  = attention(tf.reshape(in_memory_state, memory_shape), memory_query)
 
 				sources.append(memory_signal)
-				for k, v in m_taps.items():
-					taps["memory_" + k] = v
+				add_taps("memory", x_taps)
+
+			prev_output_query = tf.layers.dense(attention_master_signal, args["output_classes"])
+			prev_output_signal, _, _taps = attention(in_prev_outputs, prev_output_query)
+			sources.append(prev_output_signal)
+			add_taps("prev_output", x_taps)
 
 			query_signal, q_tap = attention_by_index(tf.stack(sources, 1), attention_master_signal)
 			taps["switch_attn"] = q_tap
