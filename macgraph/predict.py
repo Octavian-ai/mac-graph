@@ -12,6 +12,7 @@ from .input.text_util import UNK_ID
 from .estimator import get_estimator
 from .input import *
 from .const import EPSILON
+from .args import get_git_hash
 
 
 import logging
@@ -150,7 +151,10 @@ def predict(args, cmd_args):
 								' '.join(color_text(read_control_parts, row[f"{noun}{head_i}_switch_attn"][i])))
 
 							for idx, part_noun in enumerate(read_control_parts):
-								if row[f"{noun}{head_i}_switch_attn"][i][0] > ATTN_THRESHOLD:
+								if row[f"{noun}{head_i}_switch_attn"][i][idx] > ATTN_THRESHOLD:
+
+									if part_noun == "step_const":
+										next
 
 									if part_noun.startswith("token"):
 										db = row["src"]
@@ -240,12 +244,18 @@ if __name__ == "__main__":
 	parser.add_argument("--filter-type-prefix",type=str,default=None)
 	parser.add_argument("--filter-output-class",type=str,default=None)
 	parser.add_argument("--filter-expected-class",type=str,default=None)
-	parser.add_argument("--model-dir",type=str,required=True)
+	parser.add_argument("--model-dir",type=str,default=None)
+	parser.add_argument("--model-dir-prefix",type=str,default="output/model")
+	parser.add_argument('--name',type=str, default="default", help="Name of dataset")
+	parser.add_argument("--model-version",type=str,default=get_git_hash())
+
 	parser.add_argument("--correct-only",action='store_true')
 	parser.add_argument("--failed-only",action='store_true')
 
-
 	cmd_args = vars(parser.parse_args())
+
+	if cmd_args["model_dir"] is None:
+		cmd_args["model_dir"] = os.path.join(cmd_args["model_dir_prefix"], cmd_args["name"], cmd_args["model_version"])
 
 	with tf.gfile.GFile(os.path.join(cmd_args["model_dir"], "config.yaml"), "r") as file:
 		frozen_args = yaml.load(file)
