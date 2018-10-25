@@ -131,6 +131,14 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--eval-every',					type=int,	default=3*60, help="Evaluate every X seconds")
 
 	# --------------------------------------------------------------------------
+	# Decode
+	# --------------------------------------------------------------------------
+	
+	parser.add_argument('--max-decode-iterations', 		type=int, default=1)
+	parser.add_argument('--finished-steps-loss-factor',	type=float, default= 0.001)
+	parser.add_argument('--enable-dynamic-decode', 		action='store_true', dest="use_dynamic_decode")
+
+	# --------------------------------------------------------------------------
 	# Network topology
 	# --------------------------------------------------------------------------
 
@@ -189,14 +197,11 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--output-layers',				type=int, default=1)
 	parser.add_argument('--output-classes',	       		type=int, default=128,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
 
-	parser.add_argument('--enable-data-stack', 			action='store_true',  dest='use_data_stack')
-	parser.add_argument('--enable-attn-score-dense', 	action='store_true',  dest='use_attn_score_dense')
 	parser.add_argument('--enable-position-encoding', 	action='store_true',  dest='use_position_encoding')
 	parser.add_argument('--disable-control-cell', 		action='store_false', dest="use_control_cell")
 	parser.add_argument('--disable-output-cell', 		action='store_false', dest="use_output_cell")
 	parser.add_argument('--disable-memory-cell', 		action='store_false', dest="use_memory_cell")
 	parser.add_argument('--disable-output-read', 		action='store_false', dest="use_output_read")
-	parser.add_argument('--disable-dynamic-decode', 	action='store_false', dest="use_dynamic_decode")
 	parser.add_argument('--enable-question-state', 		action='store_true',  dest="use_question_state")
 	parser.add_argument('--enable-lr-finder', 			action='store_true',  dest="use_lr_finder")
 	parser.add_argument('--enable-lr-decay', 			action='store_true',  dest="use_lr_decay")
@@ -205,9 +210,6 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-comet', 				action='store_true',  dest="use_comet")
 	parser.add_argument('--disable-summary-scalar', 	action='store_false', dest='use_summary_scalar')
 	parser.add_argument('--enable-summary-image', 		action='store_true', dest='use_summary_image')
-
-	parser.add_argument('--max-decode-iterations', 		type=int, default=1)
-	parser.add_argument('--finished-steps-loss-factor',	type=float, default= 0.001)
 	
 	args = vars(parser.parse_args(argv))
 
