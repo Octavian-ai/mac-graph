@@ -126,6 +126,8 @@ def predict(args, cmd_args):
 
 		for i in range(iterations):
 
+			print("iter_id", row["iter_id"][i])
+
 			def visualize_question_attn(attn):
 				return ' '.join(color_text(row["src"], attn))
 

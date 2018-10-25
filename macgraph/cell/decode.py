@@ -51,7 +51,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 
 		def next_inputs_fn(time, outputs, state, sample_ids):
 			finished = tf.cast(outputs[1], tf.bool)
-			next_inputs = get_input_for_time(time+1)
+			next_inputs = get_input_for_time(time)
 			next_state = state
 			return (finished, next_inputs, next_state)
 
@@ -134,17 +134,15 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 
 	question_state_per_iteration = [
 		tf.layers.dense(question_state, args["control_width"], name=f"question_state_inputs_t{i}") 
-		for i in range(args["max_decode_iterations"]+1)
+		for i in range(args["max_decode_iterations"])
 	]
 
-	d_eye = tf.eye(args["max_decode_iterations"]+1)
+	d_eye = tf.eye(args["max_decode_iterations"])
 
 	iteration_id = [
 		tf.tile(tf.expand_dims(d_eye[i], 0), [features["d_batch_size"], 1])
-		for i in range(args["max_decode_iterations"]+1)
+		for i in range(args["max_decode_iterations"])
 	]
-
-	print("iteration_id", iteration_id)
 
 	inputs = [question_state_per_iteration, iteration_id]
 
