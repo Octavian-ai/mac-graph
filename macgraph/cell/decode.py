@@ -34,12 +34,13 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 
 		finished_shape = tf.convert_to_tensor([features["d_batch_size"], 1])
 
-		def get_iteration_id(time):
-			return tf.tile(tf.expand_dims(tf.one_hot(time, args["max_decode_iterations"]), 0), [features["d_batch_size"], 1])
+		# def get_iteration_id(time):
+			# return tf.tile(tf.expand_dims(tf.one_hot(time, args["max_decode_iterations"]), 0), [features["d_batch_size"], 1])
 
 		def get_input_for_time(time):
-			time = dynamic_assert_shape(time, [], "time")
-			return (tf.gather(inputs, time), get_iteration_id(time))
+			return [tf.gather(item, time) for item in inputs]
+			# time = dynamic_assert_shape(time, [], "time")
+			# return (tf.gather(inputs, time), get_iteration_id(time))
 
 		initialize_fn = lambda: (
 			tf.fill(value=False, dims=finished_shape), # finished
@@ -99,7 +100,8 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 		states = [(None, d_cell_initial)]
 		for i in range(args["max_decode_iterations"]):
 			with tf.variable_scope("decoder_cell", reuse=tf.AUTO_REUSE):
-				states.append(d_cell(inputs[i], states[-1][1]))
+				inputs_slice = [item[i] for item in inputs]
+				states.append(d_cell(inputs_slice, states[-1][1]))
 
 		final_output = states[-1][0][0]
 
@@ -135,11 +137,16 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 		for i in range(args["max_decode_iterations"]+1)
 	]
 
-	iteration_id = tf.eye(args["max_decode_iterations"])
+	d_eye = tf.eye(args["max_decode_iterations"]+1)
 
-	# inputs = tf.stack([question_state_per_iteration, iteration_id], axis=-1)
-	# print(inputs)
-	inputs = question_state_per_iteration
+	iteration_id = [
+		tf.tile(tf.expand_dims(d_eye[i], 0), [features["d_batch_size"], 1])
+		for i in range(args["max_decode_iterations"]+1)
+	]
+
+	print("iteration_id", iteration_id)
+
+	inputs = [question_state_per_iteration, iteration_id]
 
 	if args["use_position_encoding"]:
 		question_tokens = add_location_encoding_1d(question_tokens)
