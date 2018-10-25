@@ -99,7 +99,6 @@ def read_cell(args, features, vocab_embedding,
 				sources.append(memory_signal)
 				add_taps("memory", x_taps)
 
-			print("in_prev_outputs", in_prev_outputs)
 			prev_output_query = tf.layers.dense(attention_master_signal, args["output_classes"])
 			prev_output_signal, _, _taps = attention(in_prev_outputs, prev_output_query)
 			sources.append(prev_output_signal)

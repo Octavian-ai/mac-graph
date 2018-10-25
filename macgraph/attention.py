@@ -115,7 +115,7 @@ def attention_key_value(keys:tf.Tensor, table:tf.Tensor, query:tf.Tensor, key_wi
 		- taps {"attn", "attn_raw"}
 	"""
 
-	assert len(table.shape) == 3, "table should be shape [batch, seq_len, value_width]"
+	assert len(table.shape) == 3, f"table should be shape [batch, seq_len, value_width] but is len(shape) {len(table.shape)}"
 	batch_size = tf.shape(table)[0]
 	seq_len = tf.shape(table)[1]
 	value_width = tf.shape(table)[2]

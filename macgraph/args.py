@@ -61,6 +61,9 @@ def generate_args_derivatives(args):
 	if args["control_width"] is None:
 		r["control_width"] = args["input_width"] * args["control_heads"]
 
+	if not args["use_input_bilstm"]:
+		r["input_width"] = args["embed_width"]
+
 	r["kb_list"] = []
 	if args["use_kb_node"]:
 		r["kb_list"].append("kb_node")

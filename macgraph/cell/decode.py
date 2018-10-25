@@ -95,14 +95,16 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 
 		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
 		d_cell_initial = d_cell.zero_state(dtype=tf.float32, batch_size=features["d_batch_size"])
+		d_cell_empty_output = [tf.zeros([features["d_batch_size"], args["output_classes"]])]
 
 		# Hard-coded unroll of the reasoning network for simplicity
-		states = [(None, d_cell_initial)]
+		states = [(d_cell_empty_output, d_cell_initial)]
 		for i in range(args["max_decode_iterations"]):
 			with tf.variable_scope("decoder_cell", reuse=tf.AUTO_REUSE):
 				inputs_slice = [item[i] for item in inputs]
-				prev_outputs = [item[0][0] for item in states[1:]]
-
+				prev_outputs = [item[0][0] for item in states]
+				prev_outputs = tf.stack(prev_outputs, axis=1)
+				
 				inputs_for_iteration = [*inputs_slice, prev_outputs]
 				prev_state = states[-1][1]
 
@@ -112,7 +114,7 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 
 		def get_tap(idx, key):
 			with tf.name_scope(f"get_tap_{key}"):
-				tap = [i[0][idx] for i in states if i[0] is not None]
+				tap = [i[0][idx] for i in states if i[0] is not None and idx in i[0]]
 				for i in tap:
 					if i is None:
 						return None
