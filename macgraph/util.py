@@ -95,7 +95,7 @@ def layer_dense(tensor, width, activation_str):
 
 	if activation_str == "selu":
 		return layer_selu(tensor, width)
-	else
+	else:
 		return tf.layers.dense(tensor, width, activation=ACTIVATION_FNS[activation_str])
 
 
