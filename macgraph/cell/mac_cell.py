@@ -125,7 +125,13 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				output, finished = output_cell(self.args, self.features,
 					self.question_state, out_memory_state, read_masked, out_control_state, mp_reads_masked, in_iter_id)	
 			else:
-				output = tf.concat([read, mp_read], -1)
+				o = []
+				if self.args["use_message_passing"]:
+					o.append(mp_read)
+				if self.args["use_read_cell"]:
+					o.append(read)
+
+				output = tf.concat(o, -1)
 				finished = tf.fill([features["d_batch_size"]], False)
 
 			out_state = (
