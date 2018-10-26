@@ -132,7 +132,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 					o.append(read)
 
 				output = tf.concat(o, -1)
-				finished = tf.fill([features["d_batch_size"]], False)
+				finished = tf.fill([self.features["d_batch_size"]], False)
 
 			out_state = (
 				out_control_state, 
