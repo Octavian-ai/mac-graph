@@ -4,8 +4,7 @@ import tensorflow as tf
 from ..util import *
 from ..attention import *
 from ..input import UNK_ID, get_table_with_embedding
-from ..minception import *
-from ..args import ACTIVATION_FNS
+from ..layers import *
 
 read_control_parts = ["token_content", "token_index", "step_const", "memory", "prev_output"]
 
