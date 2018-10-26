@@ -102,7 +102,7 @@ def read_cell(args, features, vocab_embedding,
 				sources.append(memory_signal)
 				add_taps("memory", x_taps)
 
-			prev_output_query = tf.layers.dense(attention_master_signal, args["output_classes"])
+			prev_output_query = tf.layers.dense(attention_master_signal, args["output_width"])
 			in_prev_outputs_padded = tf.pad(in_prev_outputs, [[0,0],[0, args["max_decode_iterations"] - tf.shape(in_prev_outputs)[1]],[0,0]])
 			prev_output_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
 			sources.append(prev_output_signal)
@@ -154,12 +154,12 @@ def read_cell(args, features, vocab_embedding,
 			
 				d, taps[i + str(j) + "_word_attn"] = attention_by_index(read_words, attention_master_signal, name=i+"_word_attn")
 				d = tf.concat([d, attention_master_signal], -1)
-				d = tf.layers.dense(d, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
+				d = layer_dense(d, args["read_width"], args["read_activation"])
 				reads.append(d)
 
 		
 		in_prev_outputs_padded = tf.pad(in_prev_outputs, [[0,0],[0, args["max_decode_iterations"] - tf.shape(in_prev_outputs)[1]],[0,0]])
-		prev_output_query = tf.layers.dense(attention_master_signal, args["output_classes"])
+		prev_output_query = tf.layers.dense(attention_master_signal, args["output_width"])
 		prev_output_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
 		reads.append(tf.layers.dense(prev_output_signal, reads[0].shape[-1]))
 
@@ -176,8 +176,7 @@ def read_cell(args, features, vocab_embedding,
 		out_data = tf.concat([read_word, attention_master_signal] + attn_focus, -1)
 		
 		for i in range(args["read_layers"]):
-			out_data = tf.layers.dense(out_data, args["read_width"])
-			out_data = ACTIVATION_FNS[args["read_activation"]](out_data)
+			out_data = layer_dense(out_data, args["read_width"], args["read_activation"])
 			
 			if args["read_dropout"] > 0:
 				out_data = tf.nn.dropout(out_data, 1.0-args["read_dropout"])

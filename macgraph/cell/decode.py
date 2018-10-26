@@ -95,7 +95,7 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 
 		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
 		d_cell_initial = d_cell.zero_state(dtype=tf.float32, batch_size=features["d_batch_size"])
-		d_cell_empty_output = [tf.zeros([features["d_batch_size"], args["output_classes"]])]
+		d_cell_empty_output = [tf.zeros([features["d_batch_size"], args["output_width"]])]
 
 		# Hard-coded unroll of the reasoning network for simplicity
 		states = [(d_cell_empty_output, d_cell_initial)]
@@ -172,7 +172,7 @@ def execute_reasoning(args, features, question_state, question_tokens, **kwargs)
 			if v is not None:
 				tf.summary.image(k, expand_if_needed(v))
 
-	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["output_classes"]])
+	final_output = dynamic_assert_shape(final_output, [features["d_batch_size"], args["output_width"]])
 
 
 	return final_output, out_taps

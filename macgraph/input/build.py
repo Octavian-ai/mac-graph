@@ -30,8 +30,8 @@ def generate_record(args, vocab, doc):
 	if label == UNK_ID:
 		raise ValueError(f"We're only including questions that have in-vocab answers ({doc['answer']})")
 
-	if label >= args["output_classes"]:
-		raise ValueError(f"Label {label} greater than answer classes {args['output_classes']}")
+	if label >= args["output_width"]:
+		raise ValueError(f"Label {label} greater than answer classes {args['output_width']}")
 
 	nodes, edges, adjacency = graph_to_table(args, vocab, doc["graph"])
 

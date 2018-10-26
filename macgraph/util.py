@@ -1,7 +1,7 @@
 
 import tensorflow as tf
 import math
-
+from .args import ACTIVATION_FNS
 
 def tf_assert_almost_equal(x, y, delta=0.001, **kwargs):
 	return tf.assert_less(tf.abs(x-y), delta, **kwargs)
@@ -90,6 +90,13 @@ def layer_selu(tensor, width, dropout=0.0, name=None):
 		r = tf.contrib.nn.alpha_dropout(r, dropout, name=name_drop)
 
 	return r
+
+def layer_dense(tensor, width, activation_str):
+
+	if activation_str == "selu":
+		return layer_selu(tensor, width)
+	else
+		return tf.layers.dense(tensor, width, activation=ACTIVATION_FNS[activation_str])
 
 
 def deeep(tensor, width, depth=2, residual_depth=3, activation=tf.nn.tanh):

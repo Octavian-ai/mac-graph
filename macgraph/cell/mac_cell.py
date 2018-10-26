@@ -131,7 +131,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				if self.args["use_read_cell"]:
 					o.append(read)
 
-				output = tf.concat(o, -1)
+				output = tf.layers.dense(tf.concat(o, -1), self.args["output_width"])
 				finished = tf.fill([self.features["d_batch_size"]], False)
 
 			out_state = (
@@ -223,7 +223,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 	@property
 	def output_size(self):
 		return [
-			self.args["output_classes"], 
+			self.args["output_width"], 
 		] + list(self.get_taps().values())
 
 

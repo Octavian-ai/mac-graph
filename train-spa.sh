@@ -1,7 +1,7 @@
 #!/bin/bash
 
 python -m macgraph.train --name spa-10k \
-	--max-decode-iterations 3 \
+	--max-decode-iterations 8 \
 	--disable-input-bilstm \
 	--embed-width 128 \
 	--disable-message-passing \
@@ -9,3 +9,5 @@ python -m macgraph.train --name spa-10k \
 	--enable-independent-iterations \
 	--disable-kb-node \
 	--disable-output-cell \
+	--output-width 128 \
+	--read-cell-activation selu \
