@@ -141,7 +141,7 @@ def predict(args, cmd_args):
 			if args["use_read_cell"]:
 
 				if len(args["kb_list"]) > 0:
-					read_head_part = ' '.join(color_text(args["kb_list"], row["read_head_attn"][i]))
+					read_head_part = ' '.join(color_text(args["kb_list"] + ["prev_output"], row["read_head_attn"][i]))
 					print(f"{i}: read_head_attn: ",read_head_part)
 				# print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
 

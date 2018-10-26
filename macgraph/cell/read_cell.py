@@ -132,36 +132,8 @@ def read_cell(args, features, vocab_embedding,
 		# Read data
 		# --------------------------------------------------------------------------
 
-		# in_signal = []
-
-		# # Commented out because it was hampering progress
-		# if in_memory_state is not None and args["use_memory_cell"]:
-		# 	in_signal.append(in_memory_state)
-
-		# # We may run the network with no control cell
-		# if in_control_state is not None and args["use_control_cell"]:
-		# 	if args["use_read_control_share"]:
-		# 		in_signal.append(in_control_state)
-		# 	else:
-		# 		control_head_count = args["control_width"] // args["input_width"]
-		# 		control_heads_per_read_head = control_head_count // head_total
-		# 		assert args["control_width"] % args["input_width"] == 0, "If not sharing control heads between read heads, the control width must be integer multiple of input_width"
-		# 		assert control_head_count % head_total == 0, f"If not sharing control heads {control_head_count} then number of control heads must be multiple of read heads {head_total}"
-		# 		control_heads = tf.reshape(in_control_state, [features["d_batch_size"], head_total, control_heads_per_read_head * args["input_width"]])
-
-		# if args["use_read_question_state"] or len(in_signal)==0:
-		# 	in_signal.append(in_question_state)
-
-		# head_i = 0
-
 		for j in range(args["read_heads"]):
 			for i in args["kb_list"]:
-
-				# if args["use_read_control_share"]:
-				# 	in_signal_to_head = tf.concat(in_signal, -1)
-				# else:
-				# 	control_head_slice = control_heads[:,head_i,:]
-				# 	in_signal_to_head = tf.concat(in_signal + [control_head_slice], -1)
 
 				read_query, rcq_taps = read_cell_query(i + str(j))
 
@@ -187,6 +159,12 @@ def read_cell(args, features, vocab_embedding,
 				
 
 				# head_i += 1
+
+		
+		in_prev_outputs_padded = tf.pad(in_prev_outputs, [[0,0],[0, args["max_decode_iterations"] - tf.shape(in_prev_outputs)[1]],[0,0]])
+		prev_output_query = tf.layers.dense(attention_master_signal, args["output_classes"])
+		prev_output_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
+		reads.append(prev_output_signal)
 	
 		reads = tf.stack(reads, axis=1)
 		read_word, taps["read_head_attn"] = attention_by_index(reads, attention_master_signal, name="read_head_attn")
