@@ -3,6 +3,7 @@ import tensorflow as tf
 
 from ..util import *
 from ..args import ACTIVATION_FNS
+from ..layers import *
 
 def memory_cell(args, features, in_memory_state, in_data_read, in_mp_reads, in_control_state, in_iter_id):
 

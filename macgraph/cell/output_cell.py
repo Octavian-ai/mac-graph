@@ -4,7 +4,7 @@ import tensorflow as tf
 from ..minception import *
 from ..args import ACTIVATION_FNS
 from ..util import *
-
+from ..layers import *
 
 def output_cell(args, features, in_question_state, in_memory_state, in_read, in_control_state, in_mp_reads, in_iter_id):
 

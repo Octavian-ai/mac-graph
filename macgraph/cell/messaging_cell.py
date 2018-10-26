@@ -7,6 +7,7 @@ from ..attention import *
 from ..input import get_table_with_embedding
 from ..const import EPSILON
 from ..util import *
+from ..layers import *
 
 MP_State = tf.Tensor
 
