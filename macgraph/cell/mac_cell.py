@@ -50,6 +50,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 					t[f"{i}{j}_token_content_attn"] = self.features["d_src_len"]
 					t[f"{i}{j}_token_index_attn"  ] = self.features["d_src_len"]
 					t[f"{i}{j}_memory_attn" 	  ] = self.args["memory_width"] // self.args["input_width"]
+					t[f"{i}{j}_prev_output_attn"  ] = self.args["max_decode_iterations"]
 					t[f"{i}{j}_switch_attn" 	  ] = 2
 					t[f"{i}{j}_word_attn" 		  ] = self.args[f"{i}_width"]
 
@@ -148,8 +149,12 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			if self.args["use_read_cell"]:
 				for i in self.args["kb_list"]:
 					for j in range(self.args["read_heads"]):
-						for k in ["attn", "token_content_attn", "token_index_attn", "memory_attn"]:
-							out_taps[f"{i}{j}_{k}"       ] = tf.squeeze(read_taps.get(f"{i}{j}_{k}", empty_attn), 2)
+
+						kk = [k+"_attn" for k in read_control_parts]
+						kk.remove("step_const_attn") # not a thing
+
+						for k in ["attn", *kk]:
+							out_taps[f"{i}{j}_{k}"    ] = tf.squeeze(read_taps.get(f"{i}{j}_{k}", empty_attn), 2)
 						out_taps[f"{i}{j}_switch_attn"] = read_taps.get(f"{i}{j}_switch_attn", empty_attn)
 						out_taps[f"{i}{j}_word_attn"  ] = read_taps.get(f"{i}{j}_word_attn", empty_query)
 
@@ -182,7 +187,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		out_taps_keys = set(out_taps.keys())
 		expected_keys = set(self.get_taps().keys())
 
-		assert out_taps_keys <= expected_keys, f"Cell builder must return taps in get_taps(), missing {expected_keys - out_taps_keys}"
+		assert out_taps_keys <= expected_keys, f"Cell builder must return taps in get_taps(), missing {out_taps_keys - expected_keys}"
 
 		out_data = [output]
 		for k in self.get_taps().keys():

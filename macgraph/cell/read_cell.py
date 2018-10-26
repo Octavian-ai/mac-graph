@@ -7,6 +7,9 @@ from ..input import UNK_ID, get_table_with_embedding
 from ..minception import *
 from ..args import ACTIVATION_FNS
 
+read_control_parts = ["token_content", "token_index", "step_const", "memory", "prev_output"]
+
+
 # TODO: Make indicator row data be special token
 
 def read_from_table(args, features, in_signal, noun, table, width, keys_len=None):
@@ -100,7 +103,8 @@ def read_cell(args, features, vocab_embedding,
 				add_taps("memory", x_taps)
 
 			prev_output_query = tf.layers.dense(attention_master_signal, args["output_classes"])
-			prev_output_signal, _, _taps = attention(in_prev_outputs, prev_output_query)
+			in_prev_outputs_padded = tf.pad(in_prev_outputs, [[0,0],[0, args["max_decode_iterations"] - tf.shape(in_prev_outputs)[1]],[0,0]])
+			prev_output_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
 			sources.append(prev_output_signal)
 			add_taps("prev_output", x_taps)
 
@@ -161,9 +165,6 @@ def read_cell(args, features, vocab_embedding,
 
 				read_query, rcq_taps = read_cell_query(i + str(j))
 
-				for k,v in rcq_taps.items():
-					taps[i + str(j) + "_" + k] = v
-
 				read, table, score_raw_total, read_table_taps = read_from_table_with_embedding(
 					args, 
 					features, 
@@ -171,7 +172,8 @@ def read_cell(args, features, vocab_embedding,
 					read_query, 
 					noun=i
 				)
-				for k,v in read_table_taps.items():
+
+				for k,v in {**read_table_taps, **rcq_taps}.items():
 					taps[i + str(j) + "_" + k] = v
 
 				attn_focus.append(score_raw_total)

@@ -13,6 +13,7 @@ from .estimator import get_estimator
 from .input import *
 from .const import EPSILON
 from .args import get_git_hash
+from .cell import read_control_parts
 
 
 import logging
@@ -91,7 +92,6 @@ def adj_pretty(mtx, kb_nodes_len, kb_nodes, vocab):
 	return output
 
 
-read_control_parts = ["token_content", "token_index", "step_const", "memory", "prev_output"]
 
 
 def predict(args, cmd_args):
@@ -157,11 +157,12 @@ def predict(args, cmd_args):
 
 									if part_noun == "step_const":
 										next
-
 									if part_noun.startswith("token"):
 										db = row["src"]
 									elif part_noun == "memory":
 										db = list(range(args["memory_width"]//args["input_width"]))
+									elif part_noun == "prev_output":
+										db = list(range(i+1))
 
 									v = ' '.join(color_text(db, row[f"{noun}{head_i}_{part_noun}_attn"][i]))
 									print(f"{i}: {noun}{head_i}_{part_noun}_attn: {v}")

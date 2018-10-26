@@ -114,10 +114,14 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 
 		def get_tap(idx, key):
 			with tf.name_scope(f"get_tap_{key}"):
-				tap = [i[0][idx] for i in states if i[0] is not None and idx in i[0]]
+				tap = [i[0][idx] for i in states[1:] if i[0] is not None]
+
 				for i in tap:
 					if i is None:
 						return None
+
+				if len(tap) == 0:
+					return None
 
 				tap = tf.convert_to_tensor(tap)
 
