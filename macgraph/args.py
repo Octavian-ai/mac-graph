@@ -140,6 +140,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--max-decode-iterations', 		type=int, default=1)
 	parser.add_argument('--finished-steps-loss-factor',	type=float, default= 0.001)
 	parser.add_argument('--enable-dynamic-decode', 		action='store_true', dest="use_dynamic_decode")
+	parser.add_argument('--enable-independent-iterations', action='store_true', dest="use_independent_iterations")
 
 	# --------------------------------------------------------------------------
 	# Network topology

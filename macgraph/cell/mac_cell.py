@@ -59,8 +59,13 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 
 	def build_cell(self, inputs, in_state):
+
+		if args["use_independent_iterations"]:
+			reuse=False
+		else:
+			reuse=tf.AUTO_REUSE
 		
-		with tf.variable_scope("mac_cell", reuse=tf.AUTO_REUSE):
+		with tf.variable_scope("mac_cell", reuse=reuse):
 
 			in_control_state, in_memory_state, in_mp_state = in_state
 
