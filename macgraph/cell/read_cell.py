@@ -156,15 +156,12 @@ def read_cell(args, features, vocab_embedding,
 				d = tf.concat([d, attention_master_signal], -1)
 				d = tf.layers.dense(d, args["read_width"], activation=ACTIVATION_FNS[args["read_activation"]])
 				reads.append(d)
-				
-
-				# head_i += 1
 
 		
 		in_prev_outputs_padded = tf.pad(in_prev_outputs, [[0,0],[0, args["max_decode_iterations"] - tf.shape(in_prev_outputs)[1]],[0,0]])
 		prev_output_query = tf.layers.dense(attention_master_signal, args["output_classes"])
 		prev_output_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
-		reads.append(prev_output_signal)
+		reads.append(tf.dense(prev_output_signal, args["read_width"]))
 	
 		reads = tf.stack(reads, axis=1)
 		read_word, taps["read_head_attn"] = attention_by_index(reads, attention_master_signal, name="read_head_attn")
