@@ -57,7 +57,6 @@ if __name__ == "__main__":
 
 	# Info about the experiment, for the record
 	train_size = sum(1 for _ in tf.python_io.tf_record_iterator(args["train_input_path"]))
-	logger.info(args)
 	logger.info(f"Training on {train_size} records")
 
 	# DO IT!

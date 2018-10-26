@@ -7,3 +7,5 @@ python -m macgraph.train --name spa-10k \
 	--disable-message-passing \
 	--disable-control-cell \
 	--enable-independent-iterations \
+	--disable-kb-node \
+	--disable-output-cell \
