@@ -6,3 +6,4 @@ python -m macgraph.train --name spa-10k \
 	--embed-width 128 \
 	--disable-message-passing \
 	--disable-control-cell \
+	--disable-kb-node 
