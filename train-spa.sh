@@ -10,4 +10,4 @@ python -m macgraph.train --name spa-10k \
 	--disable-kb-node \
 	--disable-output-cell \
 	--output-width 128 \
-	--read-cell-activation selu \
+	--read-activation selu \
