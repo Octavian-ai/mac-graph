@@ -1,7 +1,6 @@
 
 import tensorflow as tf
 import math
-from .args import ACTIVATION_FNS
 
 def tf_assert_almost_equal(x, y, delta=0.001, **kwargs):
 	return tf.assert_less(tf.abs(x-y), delta, **kwargs)
