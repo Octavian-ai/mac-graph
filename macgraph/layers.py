@@ -22,12 +22,17 @@ def layer_selu(tensor, width, dropout=0.0, name=None):
 
 	return r
 
-def layer_dense(tensor, width, activation_str):
+def layer_dense(tensor, width, activation_str, dropout=0.0, name=None):
 
 	if activation_str == "selu":
-		return layer_selu(tensor, width)
+		return layer_selu(tensor, width, dropout, name)
 	else:
-		return tf.layers.dense(tensor, width, activation=ACTIVATION_FNS[activation_str])
+		v =  tf.layers.dense(tensor, width, activation=ACTIVATION_FNS[activation_str], name=name)
+
+		if dropout > 0:
+			v = tf.nn.dropout(v, 1.0-dropout)
+
+		return v
 
 
 def deeep(tensor, width, depth=2, residual_depth=3, activation=tf.nn.tanh):
