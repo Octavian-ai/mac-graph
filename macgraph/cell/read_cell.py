@@ -160,6 +160,7 @@ def read_cell(args, features, vocab_embedding,
 		read_width = reads[0].shape[-1]
 
 		in_prev_outputs_padded = tf.pad(in_prev_outputs, [[0,0],[0, args["max_decode_iterations"] - tf.shape(in_prev_outputs)[1]],[0,0]])
+		in_prev_outputs_padded.set_shape([None, args["max_decode_iterations"], None])
 		prev_output_query = tf.layers.dense(attention_master_signal, args["output_width"])
 		prev_output_content_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
 		reads.append(tf.layers.dense(prev_output_content_signal, read_width))
@@ -178,10 +179,12 @@ def read_cell(args, features, vocab_embedding,
 
 		# Residual skip connection
 		out_data = tf.concat([read_word, attention_master_signal] + attn_focus, -1)
+		out_data = tf.dense.layers(out_data, args["read_width"]) # shape for residual
 		
 		for i in range(args["read_layers"]):
+			prev_layer = out_data
 			out_data = layer_dense(out_data, args["read_width"], args["read_activation"], dropout=args["read_dropout"])
-			
+			out_data += prev_layer
 
 		return out_data, taps
 
