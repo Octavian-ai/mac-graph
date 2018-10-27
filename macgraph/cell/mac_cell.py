@@ -132,7 +132,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 					o.append(read)
 
 				output = tf.layers.dense(tf.concat(o, -1), self.args["output_width"])
-				finished = tf.fill([self.features["d_batch_size"]], False)
+				finished = tf.fill([self.features["d_batch_size"], 1], False)
 
 			out_state = (
 				out_control_state, 
