@@ -166,7 +166,7 @@ def read_cell(args, features, vocab_embedding,
 		reads.append(tf.layers.dense(prev_output_content_signal, read_width))
 
 		prev_output_index_signal, query = attention_by_index(in_prev_outputs_padded, attention_master_signal)
-		reads.append(tf.layers.dense(prev_output_signal, read_width))
+		reads.append(tf.layers.dense(prev_output_index_signal, read_width))
 
 		reads = tf.stack(reads, axis=1)
 		read_word, taps["read_head_attn"] = attention_by_index(reads, attention_master_signal, name="read_head_attn")
