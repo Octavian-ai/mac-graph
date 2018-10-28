@@ -179,7 +179,7 @@ def read_cell(args, features, vocab_embedding,
 
 		# Residual skip connection
 		out_data = tf.concat([read_word, attention_master_signal] + attn_focus, -1)
-		out_data = tf.dense.layers(out_data, args["read_width"]) # shape for residual
+		out_data = tf.layers.dense(out_data, args["read_width"]) # shape for residual
 		
 		for i in range(args["read_layers"]):
 			prev_layer = out_data

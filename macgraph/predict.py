@@ -122,7 +122,7 @@ def predict(args, cmd_args):
 
 		iterations = len(row["question_word_attn"])
 
-		print(emoji, " ", answer_part, " - ", ''.join(row['src']).replace('<space>', ' '))
+		print(emoji, " ", answer_part, " - ", ''.join(row['src']).replace('<space>', ' ').replace('<eos>', ''))
 
 		for i in range(iterations):
 
@@ -148,6 +148,10 @@ def predict(args, cmd_args):
 				for idx0, noun in enumerate(args["kb_list"]):
 					for head_i in range(args["read_heads"]):
 						if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
+
+							# need to make this data driven
+							if not args["use_memory_cell"]:
+								read_control_parts.remove("memory")
 							
 							print(f"{i}: {noun}{head_i}_switch: ", 
 								' '.join(color_text(read_control_parts, row[f"{noun}{head_i}_switch_attn"][i])))
