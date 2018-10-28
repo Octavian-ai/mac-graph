@@ -90,7 +90,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			if self.args["use_read_cell"]:
 				reads = []
 				read_taps = {}
-				for head_index in range(args["read_heads"]):
+				for head_index in range(self.args["read_heads"]):
 					read, read_taps_ = read_cell(
 						self.args, self.features, self.vocab_embedding,
 						in_memory_state, out_control_state, in_prev_outputs,
