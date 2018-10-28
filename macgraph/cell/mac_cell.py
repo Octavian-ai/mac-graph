@@ -98,7 +98,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 						in_iter_id)
 
 					reads.append(read)
-					read_taps = {**read_taps, read_taps_}
+					read_taps = {**read_taps, **read_taps_}
 			else:
 				reads = [tf.fill([self.features["d_batch_size"], 1], 0.0)]
 				read_taps = {}
