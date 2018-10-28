@@ -31,9 +31,6 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			"question_word_attn": 		self.args["control_heads"] * self.features["d_src_len"],
 			"question_word_attn_raw": 	self.args["control_heads"] * self.features["d_src_len"],
 			
-			"read_head_attn": 			2 * self.args["read_heads"],
-			"read_head_attn_focus": 	2 * self.args["read_heads"],
-			
 			"mp_read_attn": 			self.args["kb_node_max_len"],
 			"mp_write_attn": 			self.args["kb_node_max_len"],
 			"mp_node_state":			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
@@ -44,8 +41,12 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		}
 
 		if self.args["use_read_cell"]:
-			for i in self.args["kb_list"]:
-				for j in range(self.args["read_heads"]):
+			for j in range(self.args["read_heads"]):
+				for i in self.args["kb_list"]:
+
+					t[f"read{j}_head_attn"        ] = 2 + len(self.args["kb_list"])
+					t[f"read{j}_head_attn_focus"  ] = 2 + len(self.args["kb_list"])
+				
 					t[f"{i}{j}_attn" 			  ] = self.args[f"{i}_width"] * self.args["embed_width"]
 					t[f"{i}{j}_token_content_attn"] = self.features["d_src_len"]
 					t[f"{i}{j}_token_index_attn"  ] = self.features["d_src_len"]
@@ -91,7 +92,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				reads = []
 				read_taps = {}
 				for head_index in range(self.args["read_heads"]):
-					read, read_taps_ = read_cell(
+					read, read_taps_ = read_cell(head_index,
 						self.args, self.features, self.vocab_embedding,
 						in_memory_state, out_control_state, in_prev_outputs,
 						self.question_tokens, self.question_state, 
@@ -143,9 +144,6 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				"finished":					tf.cast(finished, tf.float32),
 				"question_word_attn": 		control_taps.get("attn", empty_attn),
 				"question_word_attn_raw": 	control_taps.get("attn_raw", empty_attn),
-
-				"read_head_attn": 			read_taps.get("read_head_attn", empty_query),
-				"read_head_attn_focus": 	read_taps.get("read_head_attn_focus", empty_query),
 				
 				"mp_read_attn": 			mp_taps.get("mp_read0_attn", empty_query),
 				"mp_write_attn": 			mp_taps.get("mp_write_attn", empty_query),
@@ -157,12 +155,15 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			}
 
 			if self.args["use_read_cell"]:
-				for i in self.args["kb_list"]:
-					for j in range(self.args["read_heads"]):
+				kk = [k+"_attn" for k in read_control_parts]
+				kk.remove("step_const_attn") # not a thing
 
-						kk = [k+"_attn" for k in read_control_parts]
-						kk.remove("step_const_attn") # not a thing
+				for j in range(self.args["read_heads"]):
 
+					out_taps[f"read{j}_head_attn"      ] = read_taps.get(f"read{j}_head_attn", empty_query),
+					out_taps[f"read{j}_head_attn_focus"] = read_taps.get(f"read{j}_head_attn_focus", empty_query),
+
+					for i in self.args["kb_list"]:
 						for k in ["attn", *kk]:
 							out_taps[f"{i}{j}_{k}"    ] = tf.squeeze(read_taps.get(f"{i}{j}_{k}", empty_attn), 2)
 						out_taps[f"{i}{j}_switch_attn"] = read_taps.get(f"{i}{j}_switch_attn", empty_attn)

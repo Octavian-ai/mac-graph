@@ -140,22 +140,22 @@ def predict(args, cmd_args):
 			
 			if args["use_read_cell"]:
 
-				read_switch_parts = []
 				for head_i in range(args["read_heads"]):
+
+					read_switch_parts = []
 					for idx0, noun in enumerate(args["kb_list"]):
 						read_switch_parts.append(f"{noun}{head_i}")
 
-				read_switch_parts.extend(["prev_output_content", "prev_output_index"])
+					read_switch_parts.extend(["prev_output_content", "prev_output_index"])
 
-				if len(args["kb_list"]) > 0:
-					read_head_part = ' '.join(color_text(read_switch_parts, row["read_head_attn"][i]))
-					print(f"{i}: read_head_attn: ", read_head_part)
-				# print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
-
-				for head_i in range(args["read_heads"]):
+					if len(args["kb_list"]) > 0:
+						read_head_part = ' '.join(color_text(read_switch_parts, row[f"read{head_i}_head_attn"][i]))
+						print(f"{i}: read{head_i}_head_attn: {read_head_part}")
+				
+				
 					for idx0, noun in enumerate(args["kb_list"]):
 
-						if row["read_head_attn"][i][ head_i * args["read_heads"] + idx0 ] > ATTN_THRESHOLD:
+						if row[f"read{head_i}_head_attn"][i][idx0] > ATTN_THRESHOLD:
 
 							# need to make this data driven
 							if not args["use_memory_cell"]:

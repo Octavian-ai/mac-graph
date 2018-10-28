@@ -55,8 +55,8 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 			keys_len=keys_len)
 
 
-def read_cell(head_index,
-	args, features, vocab_embedding, 
+def read_cell(head_index:int,
+	args:dict, features:dict, vocab_embedding, 
 	in_memory_state, in_control_state, in_prev_outputs,
 	in_question_tokens, in_question_state, 
 	in_iter_id):
@@ -165,7 +165,8 @@ def read_cell(head_index,
 
 		reads = tf.stack(reads, axis=1)
 		read_word, taps[f"read{head_index}_head_attn"] = attention_by_index(reads, attention_master_signal, name=f"read{head_index}_head_attn")
-	
+		print(taps[f"read{head_index}_head_attn"])
+
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
 		# --------------------------------------------------------------------------

@@ -6,7 +6,6 @@ python -m macgraph.train --name spa-10k \
 	--embed-width 128 \
 	--disable-message-passing \
 	--disable-control-cell \
-	--enable-independent-iterations \
 	--disable-kb-node \
 	--output-width 128 \
 	--read-activation selu \
