@@ -29,7 +29,7 @@ WHITE = 255
 BG_BLACK = 232
 BG_DARK_GREY = 237
 
-ATTN_THRESHOLD = 0.3
+ATTN_THRESHOLD = 0.25
 
 np.set_printoptions(precision=3)
 
@@ -140,14 +140,22 @@ def predict(args, cmd_args):
 			
 			if args["use_read_cell"]:
 
+				read_switch_parts = []
+				for head_i in range(args["read_heads"]):
+					for idx0, noun in enumerate(args["kb_list"]):
+						read_switch_parts.append(f"{noun}{head_i}")
+
+				read_switch_parts.extend(["prev_output_content", "prev_output_index"])
+
 				if len(args["kb_list"]) > 0:
-					read_head_part = ' '.join(color_text(args["kb_list"] + ["prev_output_content", "prev_output_index"], row["read_head_attn"][i]))
-					print(f"{i}: read_head_attn: ",read_head_part)
+					read_head_part = ' '.join(color_text(read_switch_parts, row["read_head_attn"][i]))
+					print(f"{i}: read_head_attn: ", read_head_part)
 				# print(f"{i}: read_attn_focus: ", row["read_head_attn_focus"][i])
 
-				for idx0, noun in enumerate(args["kb_list"]):
-					for head_i in range(args["read_heads"]):
-						if row["read_head_attn"][i][idx0] > ATTN_THRESHOLD:
+				for head_i in range(args["read_heads"]):
+					for idx0, noun in enumerate(args["kb_list"]):
+
+						if row["read_head_attn"][i][ head_i * args["read_heads"] + idx0 ] > ATTN_THRESHOLD:
 
 							# need to make this data driven
 							if not args["use_memory_cell"]:
