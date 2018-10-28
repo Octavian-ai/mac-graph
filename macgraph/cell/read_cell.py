@@ -55,7 +55,8 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 			keys_len=keys_len)
 
 
-def read_cell(args, features, vocab_embedding, 
+def read_cell(head_index,
+	args, features, vocab_embedding, 
 	in_memory_state, in_control_state, in_prev_outputs,
 	in_question_tokens, in_question_state, 
 	in_iter_id):
@@ -122,39 +123,33 @@ def read_cell(args, features, vocab_embedding,
 		reads = []
 		attn_focus = []
 
-		head_total = args["read_heads"] * len(args["kb_list"])
-
-		if head_total == 0:
-			return tf.fill([features["d_batch_size"], 1], 0.0), {}
-
 		# --------------------------------------------------------------------------
 		# Read data
 		# --------------------------------------------------------------------------
 
-		for j in range(args["read_heads"]):
-			for i in args["kb_list"]:
+		for i in args["kb_list"]:
 
-				read_query, rcq_taps = read_cell_query(i + str(j))
+			read_query, rcq_taps = read_cell_query(i + str(head_index))
 
-				read, table, score_raw_total, read_table_taps = read_from_table_with_embedding(
-					args, 
-					features, 
-					vocab_embedding, 
-					read_query, 
-					noun=i
-				)
+			read, table, score_raw_total, read_table_taps = read_from_table_with_embedding(
+				args, 
+				features, 
+				vocab_embedding, 
+				read_query, 
+				noun=i
+			)
 
-				for k,v in {**read_table_taps, **rcq_taps}.items():
-					taps[i + str(j) + "_" + k] = v
+			for k,v in {**read_table_taps, **rcq_taps}.items():
+				taps[i + str(head_index) + "_" + k] = v
 
-				attn_focus.append(score_raw_total)
+			attn_focus.append(score_raw_total)
 
-				read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])	
-			
-				d, taps[i + str(j) + "_word_attn"] = attention_by_index(read_words, attention_master_signal, name=i+"_word_attn")
-				d = tf.concat([d, attention_master_signal], -1)
-				d = layer_dense(d, args["read_width"], args["read_activation"])
-				reads.append(d)
+			read_words = tf.reshape(read, [features["d_batch_size"], args[i+"_width"], args["embed_width"]])	
+		
+			d, taps[i + str(head_index) + "_word_attn"] = attention_by_index(read_words, attention_master_signal, name=i+"_word_attn")
+			d = tf.concat([d, attention_master_signal], -1)
+			d = layer_dense(d, args["read_width"], args["read_activation"])
+			reads.append(d)
 
 		
 		read_width = reads[0].shape[-1]
@@ -169,13 +164,13 @@ def read_cell(args, features, vocab_embedding,
 		reads.append(tf.layers.dense(prev_output_index_signal, read_width))
 
 		reads = tf.stack(reads, axis=1)
-		read_word, taps["read_head_attn"] = attention_by_index(reads, attention_master_signal, name="read_head_attn")
+		read_word, taps[f"read{head_index}_head_attn"] = attention_by_index(reads, attention_master_signal, name=f"read{head_index}_head_attn")
 	
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
 		
-		taps["read_head_attn_focus"] = tf.concat(attn_focus, -1)
+		taps[f"read{head_index}_head_attn_focus"] = tf.concat(attn_focus, -1)
 
 		# Residual skip connection
 		out_data = tf.concat([read_word, attention_master_signal] + attn_focus, -1)

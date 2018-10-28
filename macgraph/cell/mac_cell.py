@@ -88,13 +88,19 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				control_taps = {}
 		
 			if self.args["use_read_cell"]:
-				read, read_taps = read_cell(
-					self.args, self.features, self.vocab_embedding,
-					in_memory_state, out_control_state, in_prev_outputs,
-					self.question_tokens, self.question_state, 
-					in_iter_id)
+				reads = []
+				read_taps = {}
+				for head_index in range(args["read_heads"]):
+					read, read_taps_ = read_cell(
+						self.args, self.features, self.vocab_embedding,
+						in_memory_state, out_control_state, in_prev_outputs,
+						self.question_tokens, self.question_state, 
+						in_iter_id)
+
+					reads.append(read)
+					read_taps = {**read_taps, read_taps_}
 			else:
-				read = tf.fill([self.features["d_batch_size"], 1], 0.0)
+				reads = [tf.fill([self.features["d_batch_size"], 1], 0.0)]
 				read_taps = {}
 
 
@@ -108,28 +114,21 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			
 			if self.args["use_memory_cell"]:
 				out_memory_state, tap_memory_forget = memory_cell(self.args, self.features,
-					in_memory_state, read, mp_reads, out_control_state, in_iter_id)
+					in_memory_state, reads, mp_reads, out_control_state, in_iter_id)
 			else:
 				out_memory_state = in_memory_state
 				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)
 
-			if False:
-				time_mask = tf.reduce_sum(in_iter_id[:,:-2], axis=-1, keepdims=True)
-				mp_reads_masked = [time_mask * i for i in mp_reads]
-				read_masked = time_mask * read
-			else:
-				mp_reads_masked = mp_reads
-				read_masked = read
 				
 			if self.args["use_output_cell"]:
 				output, finished = output_cell(self.args, self.features,
-					self.question_state, out_memory_state, read_masked, out_control_state, mp_reads_masked, in_iter_id)	
+					self.question_state, out_memory_state, reads, out_control_state, mp_reads, in_iter_id)	
 			else:
 				o = []
 				if self.args["use_message_passing"]:
 					o.append(mp_read)
 				if self.args["use_read_cell"]:
-					o.append(read)
+					o.extend(reads)
 
 				output = tf.layers.dense(tf.concat(o, -1), self.args["output_width"])
 				finished = tf.fill([self.features["d_batch_size"], 1], False)
