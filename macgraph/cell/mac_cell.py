@@ -42,11 +42,14 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 		if self.args["use_read_cell"]:
 			for j in range(self.args["read_heads"]):
+
+				t[f"read{j}_head_attn"        ] = 2 + len(self.args["kb_list"])
+				t[f"read{j}_head_attn_focus"  ] = 2 + len(self.args["kb_list"])
+				t[f"read{j}_po_content_attn"  ] = self.args["max_decode_iterations"]
+				t[f"read{j}_po_index_attn"    ] = self.args["max_decode_iterations"]
+
 				for i in self.args["kb_list"]:
 
-					t[f"read{j}_head_attn"        ] = 2 + len(self.args["kb_list"])
-					t[f"read{j}_head_attn_focus"  ] = 2 + len(self.args["kb_list"])
-				
 					t[f"{i}{j}_attn" 			  ] = self.args[f"{i}_width"] * self.args["embed_width"]
 					t[f"{i}{j}_token_content_attn"] = self.features["d_src_len"]
 					t[f"{i}{j}_token_index_attn"  ] = self.features["d_src_len"]
@@ -160,8 +163,9 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 				for j in range(self.args["read_heads"]):
 
-					out_taps[f"read{j}_head_attn"      ] = read_taps.get(f"read{j}_head_attn", empty_query),
-					out_taps[f"read{j}_head_attn_focus"] = read_taps.get(f"read{j}_head_attn_focus", empty_query),
+					for i in [f"read{j}_head_attn", f"read{j}_head_attn_focus", 
+							  f"read{j}_po_content_attn", f"read{j}_po_index_attn"]:
+						out_taps[i] = read_taps[i]
 
 					for i in self.args["kb_list"]:
 						for k in ["attn", *kk]:

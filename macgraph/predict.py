@@ -154,7 +154,6 @@ def predict(args, cmd_args):
 				
 				
 					for idx0, noun in enumerate(args["kb_list"]):
-
 						if row[f"read{head_i}_head_attn"][i][idx0] > ATTN_THRESHOLD:
 
 							# need to make this data driven
@@ -173,7 +172,7 @@ def predict(args, cmd_args):
 										db = row["src"]
 									elif part_noun == "memory":
 										db = list(range(args["memory_width"]//args["input_width"]))
-									elif part_noun == "prev_output":
+									elif part_noun.startswith("prev_output"):
 										db = list(range(i+1))
 
 									v = ' '.join(color_text(db, row[f"{noun}{head_i}_{part_noun}_attn"][i]))
@@ -190,6 +189,17 @@ def predict(args, cmd_args):
 										row[f"{noun}{head_i}_word_attn"][i],
 										)
 									))
+
+					for idx_, noun in enumerate(["po_content", "po_index"]):
+						idx = idx_ + len(args["kb_list"])
+						if row[f"read{head_i}_head_attn"][i][idx] > ATTN_THRESHOLD:
+							v = f"read{head_i}_{noun}_attn"
+							db = list(range(args["max_decode_iterations"]))
+							print(f"{i}: {v}: ",', '.join(color_text(db, row[v][i])))
+
+
+
+
 
 			if args["use_message_passing"]:
 				for tap in ["mp_read_attn", "mp_write_attn"]:

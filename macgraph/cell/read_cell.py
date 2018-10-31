@@ -159,13 +159,14 @@ def read_cell(head_index:int,
 		prev_output_query = tf.layers.dense(attention_master_signal, args["output_width"])
 		prev_output_content_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
 		reads.append(tf.layers.dense(prev_output_content_signal, read_width))
+		taps[f"read{head_index}_po_content_attn"] = x_taps["attn"]
 
 		prev_output_index_signal, query = attention_by_index(in_prev_outputs_padded, attention_master_signal)
 		reads.append(tf.layers.dense(prev_output_index_signal, read_width))
+		taps[f"read{head_index}_po_index_attn"] = query
 
 		reads = tf.stack(reads, axis=1)
 		read_word, taps[f"read{head_index}_head_attn"] = attention_by_index(reads, attention_master_signal, name=f"read{head_index}_head_attn")
-		print(taps[f"read{head_index}_head_attn"])
 
 		# --------------------------------------------------------------------------
 		# Prepare and shape results
