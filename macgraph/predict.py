@@ -13,15 +13,18 @@ from .estimator import get_estimator
 from .input import *
 from .const import EPSILON
 from .args import get_git_hash
-from .cell import read_control_parts
+from .cell import read_control_parts as read_control_parts_global
 
 
 import logging
 logger = logging.getLogger(__name__)
 
 # Block annoying warnings
-def hr():
-	print(stylize("---------------", fg("blue")))
+def hr(bold=False):
+	if bold:
+		print(stylize("--------------------------", fg("yellow")))
+	else:
+		print(stylize("---------------", fg("blue")))
 
 DARK_GREY = 235
 WHITE = 255
@@ -112,6 +115,11 @@ def predict(args, cmd_args):
 	predictions = estimator.predict(input_fn=gen_input_fn(args, "predict"))
 	vocab = Vocab.load_from_args(args)
 
+	# need to make this data driven
+	read_control_parts = list(read_control_parts_global) # copy
+	if not args["use_memory_cell"]:
+		read_control_parts.remove("memory")
+
 	def print_row(row):
 		if p["actual_label"] == p["predicted_label"]:
 			emoji = "✅"
@@ -126,7 +134,7 @@ def predict(args, cmd_args):
 
 		for i in range(iterations):
 
-			print("iter_id", row["iter_id"][i])
+			# print("iter_id", row["iter_id"][i])
 
 			def visualize_question_attn(attn):
 				return ' '.join(color_text(row["src"], attn))
@@ -156,10 +164,6 @@ def predict(args, cmd_args):
 					for idx0, noun in enumerate(args["kb_list"]):
 						if row[f"read{head_i}_head_attn"][i][idx0] > ATTN_THRESHOLD:
 
-							# need to make this data driven
-							if not args["use_memory_cell"]:
-								read_control_parts.remove("memory")
-							
 							print(f"{i}: {noun}{head_i}_switch: ", 
 								' '.join(color_text(read_control_parts, row[f"{noun}{head_i}_switch_attn"][i])))
 
@@ -167,6 +171,7 @@ def predict(args, cmd_args):
 								if row[f"{noun}{head_i}_switch_attn"][i][idx] > ATTN_THRESHOLD:
 
 									if part_noun == "step_const":
+										print("skip")
 										next
 									if part_noun.startswith("token"):
 										db = row["src"]
@@ -198,7 +203,7 @@ def predict(args, cmd_args):
 							print(f"{i}: {v}: ",', '.join(color_text(db, row[v][i])))
 
 
-
+					hr()
 
 
 			if args["use_message_passing"]:
@@ -217,11 +222,14 @@ def predict(args, cmd_args):
 				print(mp_state_str)
 
 
+			hr()
+
+
 		if args["use_message_passing"]:
 			print("Adjacency:\n",
 				adj_pretty(row["kb_adjacency"], row["kb_nodes_len"], row["kb_nodes"], vocab))
 
-		hr()
+		hr(bold=True)
 
 	def decode_row(row):
 		for i in ["type_string", "actual_label", "predicted_label", "src"]:
