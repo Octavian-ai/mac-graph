@@ -43,6 +43,11 @@ The core codebase implements graph question answering (GQA), using [CLEVR-graph]
 			<td><strong>Complete</strong></td>
 			<td>98.8% accuracy after 30k training steps `164ddc2`</td>
     	</tr>
+    	<tr>
+			<td>Station adjacent to two other stations</td>
+			<td><strong>In progress</strong></td>
+			<td>98% accuracy after 20k training steps</td>
+    	</tr>
 	</tbody>
 </table>
 
