@@ -5,6 +5,7 @@ import yaml
 import subprocess
 import pathlib
 import tensorflow as tf
+import glob
 
 from .activations import ACTIVATION_FNS
 from .input import Vocab
@@ -17,11 +18,17 @@ def generate_args_derivatives(args):
 	r = {}
 	r["modes"] = ["eval", "train", "predict"]
 
-	if "gqa_path" in args:
-		if args["gqa_path"] is None:
-			r["gqa_path"] = os.path.join(args["gqa_dir"], args["name"]) + ".yaml"
+	if "gqa_paths" in args:
+		if args["gqa_paths"] == []:
+			r["gqa_paths"] = [os.path.join(args["gqa_dir"], args["name"]) + ".yaml"]
 		else:
-			r["gqa_path"] = args["gqa_path"]
+			r["gqa_paths"] = []
+
+			for i in args["gqa_paths"]:
+				if "*" in i:
+					r["gqa_paths"] += glob.glob(i)
+				else:
+					r["gqa_paths"].append(i)
 		
 	if args["input_dir"] is None:
 		r["input_dir"] = os.path.join(args["input_dir_prefix"], args["name"])
@@ -37,7 +44,9 @@ def generate_args_derivatives(args):
 	for i in [*r["modes"], "all"]:
 		r[i+"_input_path"] = os.path.join(r["input_dir"], i+"_input.tfrecords")
 
-	r["vocab_path"] = os.path.join(r["input_dir"], "vocab.txt")
+	if args["vocab_path"] is None:
+		r["vocab_path"] = os.path.join(r["input_dir"], "vocab.txt")
+
 	r["config_path"] = os.path.join(r["model_dir"], "config.yaml")
 	r["question_types_path"] = os.path.join(r["input_dir"], "types.yaml")
 	r["answer_classes_path"] = os.path.join(r["input_dir"], "answer_classes.yaml")
@@ -131,8 +140,9 @@ def get_args(extend=lambda parser:None, argv=None):
 	# Network topology
 	# --------------------------------------------------------------------------
 
-	parser.add_argument('--vocab-size',	           		type=int, default=128,   help="How many different words are in vocab")
-	
+	parser.add_argument('--vocab-size',	           		type=int, default=256,   help="How many different words are in vocab")
+	parser.add_argument('--vocab-path',					type=str, default=None,		help="Custom vocab path")
+
 	parser.add_argument('--max-seq-len',	  	 		type=int, default=20,   help="Maximum length of question token list")
 	
 	parser.add_argument('--input-layers',	   			type=int, 	default=3,    help="How many input layers are in the english encoding LSTM stack")

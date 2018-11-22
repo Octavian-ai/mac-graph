@@ -4,6 +4,7 @@ import tensorflow as tf
 import random
 from tqdm import tqdm
 from collections import Counter
+from contextlib import ExitStack
 
 import logging
 logger = logging.getLogger(__name__)
@@ -72,24 +73,34 @@ def read_gqa(args, limit=None):
 	if limit is None:
 		limit = args["limit"]
 
+	with ExitStack() as stack:
+		files = [stack.enter_context(open(fname)) for fname in args["gqa_paths"]]
+		
+		in_files = [
+			stack.enter_context(tf.gfile.GFile(i, 'r'))
+			for i in args["gqa_paths"]
+		]
 
-	with tf.gfile.GFile(args["gqa_path"], 'r') as in_file:
-		d = yaml.safe_load_all(in_file)
+		yamls = [
+			yaml.safe_load_all(i)
+			for i in in_files
+		]
 
 		ctr = 0
 
-		for i in d:
-			if i is not None:
-				if args["filter_type_prefix"] is None or i["question"]["type_string"].startswith(args["filter_type_prefix"]):
-					yield i
-					ctr += 1
-					if limit is not None and ctr >= limit:
-						logger.debug("Hit limit, stop")
-						return
+		for row in zip(*yamls):
+			for i in row:
+				if i is not None:
+					if args["filter_type_prefix"] is None or i["question"]["type_string"].startswith(args["filter_type_prefix"]):
+						yield i
+						ctr += 1
+						if limit is not None and ctr >= limit:
+							logger.debug("Hit limit, stop")
+							return
+					else:
+						logger.debug(f"{i['question']['type_string']} does not match prefix {args['filter_type_prefix']}")
 				else:
-					logger.debug(f"{i['question']['type_string']} does not match prefix {args['filter_type_prefix']}")
-			else:
-				logger.debug("Skipping None yaml doc")
+					logger.debug("Skipping None yaml doc")
 
 class Partitioner(object):
 

@@ -69,6 +69,9 @@ def build(args):
 		logger.info(f"Wrote {len(vocab)} vocab entries")
 		logger.debug(f"vocab: {vocab.table}")
 		print()
+
+		if args["only_build_vocab"]:
+			return
 	else:
 		vocab = Vocab.load_from_args(args)
 
