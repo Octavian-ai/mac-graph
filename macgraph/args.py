@@ -5,6 +5,7 @@ import yaml
 import subprocess
 import pathlib
 import tensorflow as tf
+import glob
 
 from .activations import ACTIVATION_FNS
 from .input import Vocab
@@ -21,7 +22,14 @@ def generate_args_derivatives(args):
 		if args["gqa_paths"] == []:
 			r["gqa_paths"] = [os.path.join(args["gqa_dir"], args["name"]) + ".yaml"]
 		else:
-			r["gqa_paths"] = args["gqa_paths"]
+			gp = []
+			for i in args["gqa_paths"]:
+				if "*" in i:
+					gp += glob.glob(i)
+				else:
+					gp.append(i)
+
+			r["gqa_paths"] = gp
 		
 	if args["input_dir"] is None:
 		r["input_dir"] = os.path.join(args["input_dir_prefix"], args["name"])
