@@ -39,6 +39,8 @@ def generate_args_derivatives(args):
 
 	if args["vocab_path"] is None:
 		r["vocab_path"] = os.path.join(r["input_dir"], "vocab.txt")
+	else:
+		r["vocab_path"] = args["vocab_path"]
 
 	r["config_path"] = os.path.join(r["model_dir"], "config.yaml")
 	r["question_types_path"] = os.path.join(r["input_dir"], "types.yaml")
@@ -134,7 +136,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	# --------------------------------------------------------------------------
 
 	parser.add_argument('--vocab-size',	           		type=int, default=256,   help="How many different words are in vocab")
-	parser.add_argument('--vocab-path',					type=str, default=None,		help="Custom vocab path")
+	parser.add_argument('--vocab-path',					type=str, default=None,	 help="Custom vocab path")
 
 	parser.add_argument('--max-seq-len',	  	 		type=int, default=20,   help="Maximum length of question token list")
 	
