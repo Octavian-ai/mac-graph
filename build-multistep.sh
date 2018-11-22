@@ -1,7 +1,7 @@
 #!/bin/bash
 
 python -m macgraph.input.build \
-	--just-build-vocab \
+	--only-build-vocab \
 	--gqa-paths input_data/raw/* \
 	--name multistep
 
