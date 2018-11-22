@@ -63,6 +63,8 @@ def build(args):
 	except FileExistsError:
 		pass
 
+	logger.info(f"Building {args['name']} data from {args['gqa_paths']}")
+
 	if not args["skip_vocab"]:
 		logger.info(f"Build vocab {args['vocab_path']} ")
 		vocab = Vocab.build(args, lambda i:gqa_to_tokens(args, i), limit=args["vocab_build_limit"])
