@@ -100,12 +100,6 @@ def adj_pretty(mtx, kb_nodes_len, kb_nodes, vocab):
 def predict(args, cmd_args):
 	estimator = get_estimator(args)
 
-	# Logging setup
-	logging.basicConfig()
-	tf.logging.set_verbosity("WARN")
-	logger.setLevel("WARN")
-	logging.getLogger("mac-graph").setLevel("WARN")
-
 	# Info about the experiment, for the record
 	tfr_size = sum(1 for _ in tf.python_io.tf_record_iterator(args["predict_input_path"]))
 	logger.info(args)
@@ -270,8 +264,10 @@ def predict(args, cmd_args):
 
 
 if __name__ == "__main__":
-	tf.logging.set_verbosity(tf.logging.WARN)
 
+	# --------------------------------------------------------------------------
+	# Arguments
+	# --------------------------------------------------------------------------
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--n-rows",type=int,default=20)
 	parser.add_argument("--filter-type-prefix",type=str,default=None)
@@ -296,6 +292,23 @@ if __name__ == "__main__":
 	# If the directory got renamed, the model_dir might be out of sync, convenience hack
 	frozen_args["model_dir"] = cmd_args["model_dir"]
 
+
+
+	# --------------------------------------------------------------------------
+	# Logging
+	# --------------------------------------------------------------------------
+	
+	logging.basicConfig()
+	tf.logging.set_verbosity("WARN")
+	logger.setLevel("WARN")
+	logging.getLogger("mac-graph").setLevel("WARN")
+
+	
+
+	# --------------------------------------------------------------------------
+	# Lessssss do it!
+	# --------------------------------------------------------------------------
+	
 	predict(frozen_args, cmd_args)
 
 

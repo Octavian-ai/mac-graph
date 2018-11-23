@@ -6,6 +6,7 @@ import subprocess
 import pathlib
 import tensorflow as tf
 import glob
+import logging
 
 from .activations import ACTIVATION_FNS
 from .input import Vocab
@@ -224,6 +225,12 @@ def get_args(extend=lambda parser:None, argv=None):
 	# TODO: Remove
 	global_args.clear()
 	global_args.update(args)
+
+
+	# Setup logging
+	logging.basicConfig()
+	tf.logging.set_verbosity(args["log_level"])
+	logging.getLogger("mac-graph").setLevel(args["log_level"])
 
 	return args
 

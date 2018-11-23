@@ -45,12 +45,6 @@ def train(args):
 if __name__ == "__main__":
 	args = get_args()
 
-	# Logging setup
-	logging.basicConfig()
-	tf.logging.set_verbosity(args["log_level"])
-	logger.setLevel(args["log_level"])
-	logging.getLogger("mac-graph").setLevel(args["log_level"])
-
 	# Info about the experiment, for the record
 	train_size = sum(1 for _ in tf.python_io.tf_record_iterator(args["train_input_path"]))
 	logger.info(f"Training on {train_size} records")
