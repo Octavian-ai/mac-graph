@@ -83,7 +83,7 @@ def read_cell(head_index:int,
 			sources.append(token_signal)
 			add_taps("token_content", x_taps)
 
-			padding = [[0,0], [0, args["max_seq_len"] - tf.shape(in_question_tokens)[1]], [0,0]] # batch, seq_len, token
+			padding = [[0,0], [0, tf.maximum(0,args["max_seq_len"] - tf.shape(in_question_tokens)[1])], [0,0]] # batch, seq_len, token
 			in_question_tokens_padded = tf.pad(in_question_tokens, padding)
 			in_question_tokens_padded.set_shape([None, args["max_seq_len"], None])
 
@@ -181,7 +181,8 @@ def read_cell(head_index:int,
 		for i in range(args["read_layers"]):
 			prev_layer = out_data
 			out_data = layer_dense(out_data, args["read_width"], args["read_activation"], dropout=args["read_dropout"])
-			out_data += prev_layer
+			if out_data.shape[-1] == prev_layer.shape[-1]:
+				out_data += prev_layer
 
 		return out_data, taps
 

@@ -15,7 +15,7 @@ def memory_cell(args, features, in_memory_state, in_data_read, in_mp_reads, in_c
 		in_all = [in_memory_state, in_iter_id]
 		
 		if args["use_read_cell"]:
-			in_all.append(in_data_read)
+			in_all.extend(in_data_read)
 
 		if args["use_message_passing"]:
 			in_all.extend(in_mp_reads)

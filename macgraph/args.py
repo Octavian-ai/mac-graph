@@ -125,6 +125,9 @@ def get_args(extend=lambda parser:None, argv=None):
 	
 	parser.add_argument('--batch-size',            		type=int, default=32,   help="Number of items in a full batch")
 	parser.add_argument('--max-steps',             		type=int, default=None, help="In thousands")
+	parser.add_argument('--train-steps',             	type=int, default=30,   help="In thousands")
+	parser.add_argument('--results-path', 				type=str, default="./results.yaml")
+
 		
 	parser.add_argument('--max-gradient-norm',     		type=float, default=0.4)
 	parser.add_argument('--learning-rate',         		type=float, default=0.001)
@@ -143,10 +146,10 @@ def get_args(extend=lambda parser:None, argv=None):
 	# Network topology
 	# --------------------------------------------------------------------------
 
-	parser.add_argument('--vocab-size',	           		type=int, default=256,   help="How many different words are in vocab")
+	parser.add_argument('--vocab-size',	           		type=int, default=128,   help="How many different words are in vocab")
 	parser.add_argument('--vocab-path',					type=str, default=None,	 help="Custom vocab path")
 
-	parser.add_argument('--max-seq-len',	  	 		type=int, default=20,   help="Maximum length of question token list")
+	parser.add_argument('--max-seq-len',	  	 		type=int, default=24,   help="Maximum length of question token list")
 	
 	parser.add_argument('--input-layers',	   			type=int, 	default=3,    help="How many input layers are in the english encoding LSTM stack")
 	parser.add_argument('--input-dropout',              type=float, default=0.2)
@@ -209,7 +212,6 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-lr-decay', 			action='store_true',  dest="use_lr_decay")
 
 	parser.add_argument('--enable-tf-debug', 			action='store_true',  dest="use_tf_debug")
-	parser.add_argument('--enable-comet', 				action='store_true',  dest="use_comet")
 	parser.add_argument('--disable-summary-scalar', 	action='store_false', dest='use_summary_scalar')
 	parser.add_argument('--enable-summary-image', 		action='store_true', dest='use_summary_image')
 	
