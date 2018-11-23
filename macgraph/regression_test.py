@@ -7,6 +7,10 @@ from .args import get_args
 from .estimator import get_estimator
 from .input import gen_input_fn
 
+# Make TF be quiet
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"]="2"
+
 if __name__ == "__main__":
 
 	args = get_args()
@@ -21,7 +25,19 @@ if __name__ == "__main__":
 	except:
 		doc = {}
 
-	doc[args["name"]] = float(results["accuracy"])*100
+	if doc is None:
+		doc = {}
+
+
+	simplified_results = {
+		"accuracy": float(results["accuracy"]),
+		"accuracy_pct": str(round(results["accuracy"]*1000.0)/10.0) + "%",
+		"loss": float(results["loss"]),
+		"steps": int(results["current_step"]),
+	}
+
+	print(args["name"], simplified_results)
+	doc[args["name"]] = simplified_results
 
 	with tf.gfile.GFile(args["results_path"], "w") as file:
 		yaml.dump(doc, file)

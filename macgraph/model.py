@@ -70,8 +70,9 @@ def model_fn(features, labels, mode, params):
 	# Optimize
 	# --------------------------------------------------------------------------
 
+	global_step = tf.train.get_global_step()
+
 	if mode == tf.estimator.ModeKeys.TRAIN:
-		global_step = tf.train.get_global_step()
 
 		learning_rate = args["learning_rate"]
 
@@ -132,7 +133,10 @@ def model_fn(features, labels, mode, params):
 
 		eval_metric_ops = {
 			"accuracy": tf.metrics.accuracy(labels=labels, predictions=predicted_labels),
+			"current_step": tf.metrics.mean(global_step),
 		}
+
+
 
 	
 		try:
@@ -165,7 +169,8 @@ def model_fn(features, labels, mode, params):
 			pass
 
 
-		eval_hooks = [FloydHubMetricHook(eval_metric_ops)]
+		if args["use_floyd"]:
+			eval_hooks = [FloydHubMetricHook(eval_metric_ops)]
 
 	return tf.estimator.EstimatorSpec(mode,
 		loss=loss,
