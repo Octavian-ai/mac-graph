@@ -21,7 +21,7 @@ if __name__ == "__main__":
 	except:
 		doc = {}
 
-	doc[args["name"]] = results
+	doc[args["name"]] = float(results["accuracy"])*100
 
 	with tf.gfile.GFile(args["results_path"], "w") as file:
 		yaml.dump(doc, file)

@@ -147,7 +147,7 @@ def input_fn(args, mode, question=None, repeat=True):
 			},
 			zero_64 # label (unused)
 		),
-		drop_remainder=(mode == "predict")
+		drop_remainder=(mode == "train")
 	)
 
 	d = d.map(cast_adjacency_to_bool)
@@ -167,7 +167,7 @@ def input_fn(args, mode, question=None, repeat=True):
 
 
 def gen_input_fn(args, mode):
-	return lambda: input_fn(args, mode)
+	return lambda: input_fn(args, mode, repeat=(mode == "train"))
 
 
 
