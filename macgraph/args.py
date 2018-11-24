@@ -213,6 +213,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-lr-decay', 			action='store_true',  dest="use_lr_decay")
 
 	parser.add_argument('--enable-tf-debug', 			action='store_true',  dest="use_tf_debug")
+	parser.add_argument('--enable-comet', 				action='store_true',  dest="use_comet")
 	parser.add_argument('--enable-floyd',	 			action='store_true',  dest="use_floyd")
 	parser.add_argument('--disable-summary-scalar', 	action='store_false', dest='use_summary_scalar')
 	parser.add_argument('--enable-summary-image', 		action='store_true', dest='use_summary_image')

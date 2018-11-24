@@ -13,16 +13,16 @@ name = "pypi"
 
 tensorflow = "==1.10"
 numpy = "*"
-PyYAML = "*"
+pyyaml = "*"
 tqdm = "*"
 tableprint = "*"
 petname = "*"
 pika = "*"
 coloredlogs = "*"
-matplotlib = "*"
 python-json-logger = "*"
 floyd-cli = "*"
 colored = "*"
+comet-ml = "*"
 
 
 [requires]
