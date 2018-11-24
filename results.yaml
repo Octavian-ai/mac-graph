@@ -1,9 +1,10 @@
-CountCycles: {accuracy: 0.692307710647583, accuracy_pct: 69.2%, loss: 0.7460618615150452,
-  steps: 100}
-DistinctRoutes: {accuracy: 0.625, accuracy_pct: 62.5%, loss: 0.9124013781547546, steps: 100}
-NearestStationArchitecture: {accuracy: 0.1764705926179886, accuracy_pct: 17.6%, loss: 4.319903373718262,
-  steps: 100}
-StationShortestCount: {accuracy: 0.4848484992980957, accuracy_pct: 48.5%, loss: 1.1132968664169312,
-  steps: 100}
-StationTwoHops: {accuracy: 0.4444444477558136, accuracy_pct: 44.4%, loss: 1.8006668090820312,
-  steps: 100}
+CountCycles: {accuracy: 0.7307692170143127, accuracy_pct: 73.1%, loss: 2.8676295280456543,
+  steps: 3000}
+DistinctRoutes: {accuracy: 0.75, accuracy_pct: 75.0%, loss: 5.3329243659973145, steps: 3000}
+NearestStationArchitecture: {accuracy: 0.2647058963775635, accuracy_pct: 26.5%, loss: 18.572254180908203,
+  steps: 3000}
+StationShortestAvoidingCount: {accuracy: 0.5405405163764954, accuracy_pct: 54.1%,
+  loss: 12.313989639282227, steps: 3000}
+StationShortestCount: {accuracy: 0.5151515007019043, accuracy_pct: 51.5%, loss: 10.675836563110352,
+  steps: 3000}
+StationTwoHops: {accuracy: 0.5, accuracy_pct: 50.0%, loss: 15.604249954223633, steps: 3000}
