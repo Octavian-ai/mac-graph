@@ -150,7 +150,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--vocab-size',	           		type=int, default=128,   help="How many different words are in vocab")
 	parser.add_argument('--vocab-path',					type=str, default=None,	 help="Custom vocab path")
 
-	parser.add_argument('--max-seq-len',	  	 		type=int, default=24,   help="Maximum length of question token list")
+	parser.add_argument('--max-seq-len',	  	 		type=int, default=40,   help="Maximum length of question token list")
 	
 	parser.add_argument('--input-layers',	   			type=int, 	default=3,    help="How many input layers are in the english encoding LSTM stack")
 	parser.add_argument('--input-dropout',              type=float, default=0.2)
