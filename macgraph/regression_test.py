@@ -16,7 +16,7 @@ if __name__ == "__main__":
 	args = get_args()
 	estimator = get_estimator(args)
 
-	estimator.train(input_fn=gen_input_fn(args, "train"), max_steps=args["train_steps"])
+	estimator.train(input_fn=gen_input_fn(args, "train"), max_steps=args["train_steps"]*1000)
 	results = estimator.evaluate(input_fn=gen_input_fn(args, "eval"))
 
 	try:
