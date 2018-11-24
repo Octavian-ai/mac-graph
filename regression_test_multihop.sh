@@ -2,7 +2,7 @@
 
 
 tasks=(
-	"HasCycle" 
+	"HasCycles" 
 	"NearestStationArchitecture" 
 	"StationTwoHops" 
 	"DistinctRoutes" 
