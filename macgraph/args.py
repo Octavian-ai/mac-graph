@@ -126,7 +126,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	
 	parser.add_argument('--batch-size',            		type=int, default=32,   help="Number of items in a full batch")
 	parser.add_argument('--max-steps',             		type=int, default=None, help="In thousands")
-	parser.add_argument('--train-steps',             	type=int, default=30,   help="In thousands")
+	parser.add_argument('--train-steps',             	type=int, default=100,  help="In thousands")
 	parser.add_argument('--results-path', 				type=str, default="./results.yaml")
 
 		
