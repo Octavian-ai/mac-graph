@@ -1,4 +1,11 @@
 
+try:
+	# import comet_ml in the top of your file
+	from comet_ml import Experiment
+
+except:
+	# It's ok if we didn't install it
+	pass
 
 import yaml
 import tensorflow as tf
@@ -17,13 +24,21 @@ if __name__ == "__main__":
 	estimator = get_estimator(args)
 
 	if args["use_comet"]:
-		# import comet_ml in the top of your file
-		from comet_ml import Experiment
 		# Add the following code anywhere in your machine learning file
 		experiment = Experiment(api_key="bRptcjkrwOuba29GcyiNaGDbj", project_name="macgraph", workspace="davidhughhenrymack")
 		experiment.log_multiple_params(args)
 
-	estimator.train(input_fn=gen_input_fn(args, "train"), max_steps=args["train_steps"]*1000)
+
+	train_spec = tf.estimator.TrainSpec(
+		input_fn=gen_input_fn(args, "train"), 
+		max_steps=args["train_steps"]*1000)
+	
+	eval_spec  = tf.estimator.EvalSpec(
+		input_fn=gen_input_fn(args, "eval"),
+		throttle_secs=args["eval_every"])
+
+	tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
+
 	results = estimator.evaluate(input_fn=gen_input_fn(args, "eval"))
 
 	try:
