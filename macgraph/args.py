@@ -99,7 +99,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--name',						type=str, default="default", help="Name of dataset")
 	parser.add_argument('--input-dir',					type=str, default=None)
 	parser.add_argument('--input-dir-prefix',  			type=str, default="./input_data/processed")
-	parser.add_argument('--tag',						type=str, default="")
+	parser.add_argument('--tag',						action="append")
 	
 	parser.add_argument('--model-dir',					type=str, default=None)
 	parser.add_argument('--model-version',      		type=str, default=get_git_hash(), help="Model will be saved to a directory with this name, to assist with repeatable experiments")	
@@ -126,8 +126,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--warm-start-dir',				type=str, default=None, help="Load model initial weights from previous checkpoints")
 	
 	parser.add_argument('--batch-size',            		type=int, default=32,   help="Number of items in a full batch")
-	parser.add_argument('--max-steps',             		type=int, default=None, help="In thousands")
-	parser.add_argument('--train-steps',             	type=int, default=100,  help="In thousands")
+	parser.add_argument('--train-max-steps',            type=int, default=None, help="In thousands")
 	parser.add_argument('--results-path', 				type=str, default="./results.yaml")
 
 		

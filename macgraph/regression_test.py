@@ -7,12 +7,14 @@ except:
 	# It's ok if we didn't install it
 	pass
 
+
 import yaml
 import tensorflow as tf
 
 from .args import get_args
 from .estimator import get_estimator
 from .input import gen_input_fn
+from .train import train
 
 # Make TF be quiet
 import os
@@ -21,24 +23,9 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"]="2"
 if __name__ == "__main__":
 
 	args = get_args()
+	train(args)
+
 	estimator = get_estimator(args)
-
-	if args["use_comet"]:
-		# Add the following code anywhere in your machine learning file
-		experiment = Experiment(api_key="bRptcjkrwOuba29GcyiNaGDbj", project_name="macgraph", workspace="davidhughhenrymack")
-		experiment.log_multiple_params(args)
-
-
-	train_spec = tf.estimator.TrainSpec(
-		input_fn=gen_input_fn(args, "train"), 
-		max_steps=args["train_steps"]*1000)
-	
-	eval_spec  = tf.estimator.EvalSpec(
-		input_fn=gen_input_fn(args, "eval"),
-		throttle_secs=args["eval_every"])
-
-	tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
-
 	results = estimator.evaluate(input_fn=gen_input_fn(args, "eval"))
 
 	try:
