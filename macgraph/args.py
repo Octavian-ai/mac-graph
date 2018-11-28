@@ -99,6 +99,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--name',						type=str, default="default", help="Name of dataset")
 	parser.add_argument('--input-dir',					type=str, default=None)
 	parser.add_argument('--input-dir-prefix',  			type=str, default="./input_data/processed")
+	parser.add_argument('--tag',						type=str, default="")
 	
 	parser.add_argument('--model-dir',					type=str, default=None)
 	parser.add_argument('--model-version',      		type=str, default=get_git_hash(), help="Model will be saved to a directory with this name, to assist with repeatable experiments")	
