@@ -50,9 +50,6 @@ if __name__ == "__main__":
 	if not args["name"] in doc or simplified_results["accuracy"] > doc[args["name"]]["accuracy"]:
 		doc[args["name"]] = simplified_results
 
-	if args["use_comet"]:
-		experiment.log_multiple_metrics(simplified_results)
-
 	with tf.gfile.GFile(args["results_path"], "w") as file:
 		yaml.dump(doc, file)
 
