@@ -23,5 +23,6 @@ do
 		--disable-message-passing \
 		--log-level=DEBUG \
 		--train-steps 50 \
-		--max-decode-iterations 1  &
+		--max-decode-iterations 1 \
+		--enable-comet  &
 done
