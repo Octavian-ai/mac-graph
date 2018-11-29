@@ -1,29 +1,29 @@
 #!/bin/bash
 
-RUNTIME=$(expr 60 \* 60 \* 1)
+iterations=1
+task=StationShortestCount
+tag=only_control
+
+RUNTIME=$(expr 60 \* 60 \* 4)
 COMMIT=$(git --no-pager log --pretty=format:'%h' -n 1)
 
 floyd run \
-	--message "$COMMIT s3a" \
-	--gpu \
+	--message "$COMMIT $task $tag" \
+	--cpu \
 	--env tensorflow-1.10 \
 	--data davidmack/datasets/mac-graph-ssc:/input \
 	--max-runtime $RUNTIME \
-	"python -m macgraph.train \
+	"python -m macgraph.regression_test \
+		--name $task \
 		--input-dir /input \
-		--output-dir /output \
-		--model-dir /output/model \
-		\
-		--filter-output-class 0 \
-		--filter-output-class 1 \
-		--filter-output-class 2 \
-		--filter-output-class 3 \
-		\
-		--disable-dynamic-decode \
-		--max-decode-iterations 8 \
-		--control-heads 2 \
-		--disable-input-bilstm \
-		--input-width 64 \
-		--embed-width 64 \
+		--model-dir /output \
+		--tag $tag \
+		--train-max-steps 50 \
+		--max-decode-iterations $iterations \
+		--disable-memory-cell \
+		--disable-read-cell \
+		--disable-message-passing \
+		--enable-comet \
+		--enable-floyd \
 	"
 

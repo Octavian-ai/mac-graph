@@ -77,13 +77,17 @@ def generate_args_derivatives(args):
 	return r
 
 def get_git_hash():
-    result = subprocess.run(
-        ['git', '--no-pager', 'log', "--pretty=format:%h", '-n', '1'],
-        stdout=subprocess.PIPE,
-        check=True,
-        universal_newlines=True
-    )
-    return result.stdout
+	try:
+		result = subprocess.run(
+			['git', '--no-pager', 'log', "--pretty=format:%h", '-n', '1'],
+			stdout=subprocess.PIPE,
+			check=True,
+			universal_newlines=True
+		)
+		return result.stdout
+	except subprocess.CalledProcessError:
+		# Git was angry, oh well
+		return "unknown"
 
 def get_args(extend=lambda parser:None, argv=None):
 

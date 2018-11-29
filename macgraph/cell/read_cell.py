@@ -69,6 +69,8 @@ def read_cell(head_index:int,
 
 	attention_master_signal = tf.concat([in_iter_id, in_question_state], -1)
 	
+
+	
 	def read_cell_query(name):
 		with tf.name_scope(name):
 			taps = {}
@@ -78,11 +80,17 @@ def read_cell(head_index:int,
 				for k, v in extra_taps.items():
 					taps[prefix + "_" + k] = v
 
+			# --------------------------------------------------------------------------
+			# Produce all the difference sources of addressing query
+			# --------------------------------------------------------------------------
+
+			# Content address the question tokens
 			token_query = tf.layers.dense(attention_master_signal, args["input_width"])
 			token_signal, _, x_taps = attention(in_question_tokens, token_query)
 			sources.append(token_signal)
 			add_taps("token_content", x_taps)
 
+			# Index address the question tokens
 			padding = [[0,0], [0, tf.maximum(0,args["max_seq_len"] - tf.shape(in_question_tokens)[1])], [0,0]] # batch, seq_len, token
 			in_question_tokens_padded = tf.pad(in_question_tokens, padding)
 			in_question_tokens_padded.set_shape([None, args["max_seq_len"], None])
@@ -91,9 +99,11 @@ def read_cell(head_index:int,
 			sources.append(token_index_signal)
 			taps["token_index_attn"] = tf.expand_dims(query, 2)
 
+			# Use the iteration id
 			step_const_signal = tf.layers.dense(in_iter_id, args["input_width"])
 			sources.append(step_const_signal)
 			
+			# Use the memory contents
 			if args["use_memory_cell"]:
 				memory_shape = [features["d_batch_size"], args["memory_width"] // args["input_width"], args["input_width"]]
 				memory_query = tf.layers.dense(attention_master_signal, args["input_width"])
@@ -102,11 +112,16 @@ def read_cell(head_index:int,
 				sources.append(memory_signal)
 				add_taps("memory", x_taps)
 
+			# Use the previous output of the network
 			prev_output_query = tf.layers.dense(attention_master_signal, args["output_width"])
 			in_prev_outputs_padded = tf.pad(in_prev_outputs, [[0,0],[0, args["max_decode_iterations"] - tf.shape(in_prev_outputs)[1]],[0,0]])
 			prev_output_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
 			sources.append(prev_output_signal)
 			add_taps("prev_output", x_taps)
+
+			# --------------------------------------------------------------------------
+			# Choose a query source
+			# --------------------------------------------------------------------------
 
 			query_signal, q_tap = attention_by_index(tf.stack(sources, 1), attention_master_signal)
 			taps["switch_attn"] = q_tap
@@ -124,7 +139,7 @@ def read_cell(head_index:int,
 		attn_focus = []
 
 		# --------------------------------------------------------------------------
-		# Read data
+		# Read data from nodes and edges
 		# --------------------------------------------------------------------------
 
 		for i in args["kb_list"]:
@@ -151,19 +166,35 @@ def read_cell(head_index:int,
 			d = layer_dense(d, args["read_width"], args["read_activation"])
 			reads.append(d)
 
-		
-		read_width = reads[0].shape[-1]
+		if len(reads) > 0:
+			read_width = reads[0].shape[-1] # Some activations are naughty and make the output wider than asked for
+		else:
+			read_width = args["read_width"]
+
+		# --------------------------------------------------------------------------
+		# Read data from previous outputs of the network
+		# --------------------------------------------------------------------------
+
+		# Address by content
 
 		in_prev_outputs_padded = tf.pad(in_prev_outputs, [[0,0],[0, args["max_decode_iterations"] - tf.shape(in_prev_outputs)[1]],[0,0]])
 		in_prev_outputs_padded.set_shape([None, args["max_decode_iterations"], None])
+		
 		prev_output_query = tf.layers.dense(attention_master_signal, args["output_width"])
 		prev_output_content_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
 		reads.append(tf.layers.dense(prev_output_content_signal, read_width))
 		taps[f"read{head_index}_po_content_attn"] = x_taps["attn"]
 
+		# Address by index
+
 		prev_output_index_signal, query = attention_by_index(in_prev_outputs_padded, attention_master_signal)
 		reads.append(tf.layers.dense(prev_output_index_signal, read_width))
 		taps[f"read{head_index}_po_index_attn"] = query
+
+
+		# --------------------------------------------------------------------------
+		# Select between read sources
+		# --------------------------------------------------------------------------
 
 		reads = tf.stack(reads, axis=1)
 		read_word, taps[f"read{head_index}_head_attn"] = attention_by_index(reads, attention_master_signal, name=f"read{head_index}_head_attn")
@@ -172,8 +203,6 @@ def read_cell(head_index:int,
 		# Prepare and shape results
 		# --------------------------------------------------------------------------
 		
-		taps[f"read{head_index}_head_attn_focus"] = tf.concat(attn_focus, -1)
-
 		# Residual skip connection
 		out_data = tf.concat([read_word, attention_master_signal] + attn_focus, -1)
 		out_data = tf.layers.dense(out_data, args["read_width"]) # shape for residual
@@ -183,6 +212,11 @@ def read_cell(head_index:int,
 			out_data = layer_dense(out_data, args["read_width"], args["read_activation"], dropout=args["read_dropout"])
 			if out_data.shape[-1] == prev_layer.shape[-1]:
 				out_data += prev_layer
+
+		if len(attn_focus) > 0:
+			taps[f"read{head_index}_head_attn_focus"] = tf.concat(attn_focus, -1)
+		else:
+			taps[f"read{head_index}_head_attn_focus"] = tf.zeros([features["d_batch_size"],1])
 
 		return out_data, taps
 

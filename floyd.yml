@@ -1,4 +1,4 @@
-machine: gpu
+machine: cpu
 input:
   - source: davidmack/datasets/mac-graph-ssc
     destination: /input
@@ -7,14 +7,4 @@ description: MacGraph iterative graph reasoning from Octavian.ai
 command: python -m macgraph.train \
     --input-dir /input \
     --output-dir /output \
-    --model-dir /output/model \
-    \
-    --filter-output-class 0 \
-    --filter-output-class 1 \
-    --filter-output-class 2 \
-    --filter-output-class 3 \
-    --max-decode-iterations 8 \
-    --control-heads 2 \
-    --disable-input-bilstm \
-    --input-width 64 \
-    --embed-width 64 \
+    --model-dir /output/model 
