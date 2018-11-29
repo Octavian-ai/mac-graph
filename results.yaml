@@ -8,7 +8,7 @@ NearestStationArchitecture: {accuracy: 0.02409398928284645, accuracy_pct: 2.4%, 
   steps: 50000}
 StationShortestAvoidingCount: {accuracy: 0.08277879655361176, accuracy_pct: 8.3%,
   loss: 2.5121381282806396, steps: 50000}
-StationShortestCount: {accuracy: 0.06917127221822739, accuracy_pct: 6.9%, loss: 2.6689693927764893,
+StationShortestCount: {accuracy: 0.5902159810066223, accuracy_pct: 59.0%, loss: 1.140001654624939,
   steps: 50000}
 StationTwoHops: {accuracy: 0.057849425822496414, accuracy_pct: 5.8%, loss: 2.8483335971832275,
   steps: 50000}
