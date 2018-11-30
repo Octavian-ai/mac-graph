@@ -1,9 +1,10 @@
 #!/bin/bash
 
-python -m macgraph.input.build \
-	--only-build-vocab \
-	--gqa-paths input_data/raw/multistep/* \
-	--name multistep && \
+# python -m macgraph.input.build \
+# 	--only-build-vocab \
+# 	--gqa-paths input_data/raw/multistep/* \
+# 	--name multistep && \
+
 for j in StationShortestCount StationShortestAvoidingCount StationTwoHops NearestStationArchitecture DistinctRoutes CountCycles
 	do
 		nohup python -m macgraph.input.build \
