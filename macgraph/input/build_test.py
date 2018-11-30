@@ -3,14 +3,18 @@ import unittest
 import tensorflow as tf
 import numpy as np
 import math
+import logging
 
 from .input import input_fn
 from .build import build
 from .args import get_args
 
+logger = logging.getLogger(__name__)
+
 class TestBuild(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         tf.enable_eager_execution()
 
     def assert_adjacency_valid(self, args, features, batch_index):
@@ -60,11 +64,11 @@ class TestBuild(unittest.TestCase):
     def test_build_adjacency(self):
 
         argv = [
-            '--gqa-path',  'input_data/raw/gqa-test.yaml',
+            '--gqa-path',  'input_data/raw/test.yaml',
             '--input-dir', 'input_data/processed/test',
             '--limit', '100',
-            '--predict-holdback', '0',
-            '--eval-holdback', '0',
+            '--predict-holdback', '0.0',
+            '--eval-holdback', '0.0',
         ]
 
         args = get_args(argv=argv)
@@ -76,8 +80,33 @@ class TestBuild(unittest.TestCase):
                 self.assert_adjacency_valid(args, features, i)
 
 
+    def test_build_basics(self):
+
+        argv = [
+            '--gqa-path',  'input_data/raw/test.yaml',
+            '--input-dir', 'input_data/processed/test',
+            '--limit', '100',
+            '--predict-holdback', '0.2',
+            '--eval-holdback', '0.2',
+        ]
+
+        args = get_args(argv=argv)
+        build(args)
+
+        for mode in args["modes"]:
+            dataset = input_fn(args, mode, repeat=False)
+
+            # for features, label in dataset:
+            #     for i in range(len(list(label))):
+                   
+
+
+
 
 
 
 if __name__ == '__main__':
+    logging.basicConfig()
+    logger.setLevel('INFO')
+
     unittest.main()

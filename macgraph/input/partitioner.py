@@ -1,5 +1,13 @@
 
+import tensorflow as tf
+from collections import Counter
+import random
+
 class RecordWriter(object):
+	"""
+	Very basic wrapper that just serves to marshall the args for us and
+	plug into context manager
+	"""
 
 	def __init__(self, args, mode):
 		self.args = args
@@ -11,9 +19,6 @@ class RecordWriter(object):
 
 	def write(self, doc, record):
 		self.file.write(record)
-
-	def close(self):
-		self.file.close()
 
 	def __exit__(self, *vargs):
 		self.file.close()
@@ -40,7 +45,10 @@ class Partitioner(object):
 		self.writer_dict = writer_dict
 
 	def __enter__(self, *vargs):
-		pass
+		"""
+		Just here in case we've future buffered state to tidy up
+		"""
+		return self
 
 
 	def write(self, doc, record):

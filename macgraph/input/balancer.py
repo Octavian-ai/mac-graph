@@ -26,7 +26,7 @@ class Balancer(object):
 		'''Return over-sampling with n items total'''
 		raise NotImplementedException()
 
-	def add(self, doc, item):
+	def write(self, doc, item):
 		# Only do this for top level class
 		if self.parent is None:
 			self.batch_i += 1
@@ -72,10 +72,10 @@ class ListBalancer(Balancer):
 		super().__init__(record_writer, balance_freq, name, parent)
 		self.data = []
 
-	def add(self, doc, item):
+	def write(self, doc, item):
 		self.data.append((doc,item))
 		self.data = self.data[-self.balance_freq:]
-		super().add(doc, item)
+		super().write(doc, item)
 
 	def oversample(self, n):
 		if len(self.data) == 0:
@@ -94,7 +94,7 @@ class DictBalancer(Balancer):
 		self.CtrClzz = CtrClzz
 		self.running_total = Counter()
 
-	def add(self, doc, item):
+	def write(self, doc, item):
 		key = self.key_pred(doc)
 
 		if key not in self.data:
@@ -103,8 +103,8 @@ class DictBalancer(Balancer):
 		if key not in self.running_total:
 			self.running_total[key] = 0
 
-		self.data[key].add(doc, item)
-		super().add(doc, item)
+		self.data[key].write(doc, item)
+		super().write(doc, item)
 
 	def oversampled_so_far(self):
 		return sum(self.running_total.values())
@@ -116,7 +116,7 @@ class DictBalancer(Balancer):
 		if len(self.data) > 0:
 			target_per_class = math.ceil(total_target / len(self.data))
 		else:
-			logger.warn(f"Oversample called on {self.name} but no data added")
+			logger.warning(f"Oversample called on {self.name} but no data added")
 			return []
 
 		if n <= 0:

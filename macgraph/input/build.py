@@ -69,7 +69,7 @@ def build(args):
 
 	if not args["skip_vocab"]:
 		logger.info(f"Build vocab {args['vocab_path']} ")
-		vocab = Vocab.build(args, lambda i:gqa_to_tokens(args, i), limit=args["vocab_build_limit"])
+		vocab = Vocab.build(args, lambda i:gqa_to_tokens(args, i), limit=min(args["limit"], args["vocab_build_limit"]))
 		logger.info(f"Wrote {len(vocab)} vocab entries")
 		logger.debug(f"vocab: {vocab.table}")
 		print()
@@ -94,8 +94,8 @@ def build(args):
 		k_type_string = lambda d: d["question"]["type_string"]
 
 		for mode in args["modes"]:
-			writer = stack(RecordWriter(args, mode))
-			balancers[mode] = stack(TwoLevelBalancer(k_answer, k_type_string, writer, min_none(args["balance_batch"], args["limit"])))
+			writer = stack.enter_context(RecordWriter(args, mode))
+			balancers[mode] = stack.enter_context(TwoLevelBalancer(k_answer, k_type_string, writer, min_none(args["balance_batch"], args["limit"])))
 
 		with Partitioner(args, balancers) as p:
 			for doc in tqdm(read_gqa(args), total=args["limit"]):
@@ -103,7 +103,7 @@ def build(args):
 					record = generate_record(args, vocab, doc)
 					question_types[doc["question"]["type_string"]] += 1
 					output_classes[doc["answer"]] += 1
-					balancer.add(doc, record)
+					p.write(doc, record)
 
 				except ValueError as ex:
 					logger.debug(ex)
