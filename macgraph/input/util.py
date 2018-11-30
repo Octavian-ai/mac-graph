@@ -102,48 +102,6 @@ def read_gqa(args, limit=None):
 				else:
 					logger.debug("Skipping None yaml doc")
 
-class Partitioner(object):
-
-	def __init__(self, args):
-		self.args = args
-		self.written = 0
-		self.answer_classes = Counter()
-		self.answer_classes_types = Counter()
-
-
-
-	def __enter__(self, *vargs):
-		self.files = {
-			i: tf.python_io.TFRecordWriter(self.args[f"{i}_input_path"]) 
-			for i in self.args['modes']
-		}
-
-		return self
-
-
-	def write(self, doc, record):
-		r = random.random()
-
-		if r < self.args["eval_holdback"]:
-			mode = "eval"
-		elif r < self.args["eval_holdback"] + self.args["predict_holdback"]:
-			mode = "predict"
-		else:
-			mode = "train"
-
-		key = (str(doc["answer"]), doc["question"]["type_string"])
-
-		self.files[mode].write(record)
-		self.answer_classes[str(doc["answer"])] += 1
-		self.answer_classes_types[key] += 1
-		self.written += 1
-
-
-	def __exit__(self, *vargs):
-		for i in self.files.values():
-			i.close()
-
-		self.files = None
 
 
 

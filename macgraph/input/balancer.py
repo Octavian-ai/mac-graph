@@ -7,10 +7,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 class Balancer(object):
+	"""
+	It's the caller's duty to close record_writer
+	"""
 
-	def __init__(self, partitioner, balance_freq, name="", parent=None):
+	def __init__(self, record_writer, balance_freq, name="", parent=None):
 		self.batch_i = 0
-		self.partitioner = partitioner
+		self.record_writer = record_writer
 		self.balance_freq = balance_freq
 		self.name = name
 		self.parent = parent
@@ -31,7 +34,7 @@ class Balancer(object):
 
 	def pipe(self):
 		for i in self.oversample(self.batch_i):
-			self.partitioner.write(*i)
+			self.record_writer.write(*i)
 
 	def pipe_if_ready(self):
 		if self.batch_i > self.balance_freq:
@@ -65,8 +68,8 @@ def resample_list(l, n):
 
 class ListBalancer(Balancer):
 
-	def __init__(self, partitioner, balance_freq, name="", parent=None):
-		super().__init__(partitioner, balance_freq, name, parent)
+	def __init__(self, record_writer, balance_freq, name="", parent=None):
+		super().__init__(record_writer, balance_freq, name, parent)
 		self.data = []
 
 	def add(self, doc, item):
@@ -84,8 +87,8 @@ class ListBalancer(Balancer):
 
 class DictBalancer(Balancer):
 
-	def __init__(self, key_pred, CtrClzz, partitioner, balance_freq, name="", parent=None):
-		super().__init__(partitioner, balance_freq, name, parent)
+	def __init__(self, key_pred, CtrClzz, record_writer, balance_freq, name="", parent=None):
+		super().__init__(record_writer, balance_freq, name, parent)
 		self.data = {}
 		self.key_pred = key_pred
 		self.CtrClzz = CtrClzz
@@ -95,7 +98,7 @@ class DictBalancer(Balancer):
 		key = self.key_pred(doc)
 
 		if key not in self.data:
-			self.data[key] = self.CtrClzz(self.partitioner, self.balance_freq, key, self)
+			self.data[key] = self.CtrClzz(self.record_writer, self.balance_freq, key, self)
 
 		if key not in self.running_total:
 			self.running_total[key] = 0
@@ -137,7 +140,7 @@ class DictBalancer(Balancer):
 
 
 class TwoLevelBalancer(DictBalancer):
-	def __init__(self, key1, key2, partitioner, balance_freq, name="TwoLevelBalancer", parent=None):
-		Inner = lambda partitioner, balance_freq, name, parent: DictBalancer(key2, ListBalancer, partitioner, balance_freq, name, parent)
-		super().__init__(key1, Inner, partitioner, balance_freq, name, parent)
+	def __init__(self, key1, key2, record_writer, balance_freq, name="TwoLevelBalancer", parent=None):
+		Inner = lambda record_writer, balance_freq, name, parent: DictBalancer(key2, ListBalancer, record_writer, balance_freq, name, parent)
+		super().__init__(key1, Inner, record_writer, balance_freq, name, parent)
 
