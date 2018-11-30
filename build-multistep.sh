@@ -9,7 +9,7 @@ for j in StationShortestCount StationShortestAvoidingCount StationTwoHops Neares
 	do
 		nohup python -m macgraph.input.build \
 			--skip-vocab \
-			--vocab-path input_data/processed/multistep/vocab.txt \
+			--vocab-path input_data/processed/vocab.txt \
 			--gqa-paths input_data/raw/multistep/gqa-$j* \
 			--name $j &
 	done
