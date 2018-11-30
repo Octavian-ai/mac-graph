@@ -8,6 +8,7 @@ import logging
 from .input import input_fn
 from .build import build
 from .args import get_args
+from .util import *
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,19 @@ class TestBuild(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         tf.enable_eager_execution()
+
+        argv = [
+            '--gqa-paths',  'input_data/raw/test.yaml',
+            '--input-dir', 'input_data/processed/test',
+            '--limit', '100',
+            '--predict-holdback', '0.1',
+            '--eval-holdback', '0.1',
+        ]
+
+        args = get_args(argv=argv)
+        cls.args = args
+
+        build(args)
 
     def assert_adjacency_valid(self, args, features, batch_index):
 
@@ -63,41 +77,39 @@ class TestBuild(unittest.TestCase):
 
     def test_build_adjacency(self):
 
-        argv = [
-            '--gqa-path',  'input_data/raw/test.yaml',
-            '--input-dir', 'input_data/processed/test',
-            '--limit', '100',
-            '--predict-holdback', '0.0',
-            '--eval-holdback', '0.0',
-        ]
-
-        args = get_args(argv=argv)
-        build(args)
-        dataset = input_fn(args, "train", repeat=False)
+        dataset = input_fn(TestBuild.args, "train", repeat=False)
 
         for features, label in dataset:
             for i in range(len(list(label))):
-                self.assert_adjacency_valid(args, features, i)
+                self.assert_adjacency_valid(TestBuild.args, features, i)
 
 
     def test_build_basics(self):
 
-        argv = [
-            '--gqa-path',  'input_data/raw/test.yaml',
-            '--input-dir', 'input_data/processed/test',
-            '--limit', '100',
-            '--predict-holdback', '0.2',
-            '--eval-holdback', '0.2',
-        ]
+        # Validate questions are a unique set
+        gqa_questions = set()
+        for i in read_gqa(TestBuild.args):
+            digest = (i["question"]["english"], len(i["graph"]["edges"]), len(i["graph"]["nodes"]))
+            self.assertNotIn(digest, gqa_questions)
+            gqa_questions.add(digest)
 
-        args = get_args(argv=argv)
-        build(args)
+        questions = {}
 
-        for mode in args["modes"]:
-            dataset = input_fn(args, mode, repeat=False)
+        for mode in TestBuild.args["modes"]:
+            dataset = input_fn(TestBuild.args, mode, repeat=False)
+            questions[mode] = set()
 
-            # for features, label in dataset:
-            #     for i in range(len(list(label))):
+            for features, label in dataset:
+                for batch_index in range(len(list(label))):
+                    questions[mode].add((
+                        str(features["src"][batch_index]), int(features["kb_edges_len"][batch_index]), int(features["kb_nodes_len"][batch_index])
+                    ))
+
+
+        for mode in TestBuild.args["modes"]:
+            for mode_b in TestBuild.args["modes"]:
+                if mode != mode_b:
+                    self.assertTrue(questions[mode].isdisjoint(questions[mode_b]), f"Same question in mode {mode} and {mode_b}")
                    
 
 
