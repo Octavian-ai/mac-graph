@@ -25,7 +25,7 @@ do
 	do
 		nohup python -m macgraph.regression_test \
 			--name $task \
-			--model-dir output/model/$task/$tag/$iterations \
+			--model-dir output/model/$task/$tag/$iteration \
 			--tag $tag \
 			--train-max-steps 50 \
 			--max-decode-iterations $iteration \
