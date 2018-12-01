@@ -20,7 +20,7 @@ def generate_args_derivatives(args):
 	r["modes"] = ["eval", "train", "predict"]
 
 	if "gqa_paths" in args:
-		if args["gqa_paths"] == []:
+		if args["gqa_paths"] == [] or args["gqa_paths"] == None:
 			r["gqa_paths"] = [os.path.join(args["gqa_dir"], args["name"]) + ".yaml"]
 		else:
 			gp = []
