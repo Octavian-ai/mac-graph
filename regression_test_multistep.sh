@@ -21,14 +21,14 @@ iterations=(
 
 for task in "${tasks[@]}"
 do
-	for iterations in "${iterations[@]}"
+	for iteration in "${iterations[@]}"
 	do
 		nohup python -m macgraph.regression_test \
 			--name $task \
 			--model-dir output/model/$task/$tag/$iterations \
 			--tag $tag \
 			--train-max-steps 50 \
-			--max-decode-iterations $iterations \
-			--enable-comet  &
+			--max-decode-iterations $iteration \
+			--enable-comet &> nohup-$task-$iteration.out& &
 	done
 done
