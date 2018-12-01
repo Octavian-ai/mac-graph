@@ -29,6 +29,6 @@ do
 			--tag $tag \
 			--train-max-steps 50 \
 			--max-decode-iterations $iteration \
-			--enable-comet &> nohup-$task-$iteration.out& &
+			--enable-comet &> nohup-$task-$iteration.out&
 	done
 done
