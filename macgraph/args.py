@@ -215,6 +215,8 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-question-state', 		action='store_true',  dest="use_question_state")
 	parser.add_argument('--enable-lr-finder', 			action='store_true',  dest="use_lr_finder")
 	parser.add_argument('--enable-lr-decay', 			action='store_true',  dest="use_lr_decay")
+	parser.add_argument('--enable-curriculum', 			action='store_true',  dest="use_curriculum")
+
 
 	parser.add_argument('--enable-tf-debug', 			action='store_true',  dest="use_tf_debug")
 	parser.add_argument('--enable-comet', 				action='store_true',  dest="use_comet")
