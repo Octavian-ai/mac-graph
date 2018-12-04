@@ -4,8 +4,8 @@ DistinctRoutes: {accuracy: 0.031602032482624054, accuracy_pct: 3.2%, loss: 3.561
   steps: 50000}
 HasCycle: {accuracy: 0.4998546540737152, accuracy_pct: 50.0%, loss: 0.6969223618507385,
   steps: 50000}
-NearestStationArchitecture: {accuracy: 0.024800295010209084, accuracy_pct: 2.5%, loss: 4.846329212188721,
-  steps: 48}
+NearestStationArchitecture: {accuracy: 0.12002228200435638, accuracy_pct: 12.0%, loss: 3.097630500793457,
+  steps: 50000}
 StationShortestAvoidingCount: {accuracy: 0.08277879655361176, accuracy_pct: 8.3%,
   loss: 2.5121381282806396, steps: 50000}
 StationShortestCount: {accuracy: 0.5902159810066223, accuracy_pct: 59.0%, loss: 1.140001654624939,

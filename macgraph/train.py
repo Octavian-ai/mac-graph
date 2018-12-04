@@ -49,7 +49,7 @@ def train(args):
 
 	# ----------------------------------------------------------------------------------
 
-	estimator = get_estimator(args)
+	
 
 	training_segments = []
 	TrainingSegment = namedtuple('TrainingSegment', ['args', 'max_steps'])
@@ -65,8 +65,7 @@ def train(args):
 			seg_args["filter_output_class"] = [str(j) for j in list(range(i+1))]
 			total_seg_steps = i*seg_steps*1000
 
-			tf.logging.info("Begin training segment", i, total_seg_steps, seg_args["filter_output_class"])
-
+			
 			training_segments.append(TrainingSegment(seg_args, total_seg_steps))
 
 	else:
@@ -74,6 +73,11 @@ def train(args):
 
 
 	for i in training_segments:
+
+		tf.logging.info(f"Begin training segment {i.max_steps} {i.args['filter_output_class']}")
+
+		estimator = get_estimator(i.args)
+
 		train_spec = tf.estimator.TrainSpec(
 			input_fn=gen_input_fn(i.args, "train"), 
 			max_steps=i.max_steps,
