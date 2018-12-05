@@ -11,19 +11,12 @@ name = "pypi"
 
 [packages]
 
-tensorflow = "==1.10"
+tensorflow = "*"
 numpy = "*"
 pyyaml = "*"
 tqdm = "*"
 tableprint = "*"
-petname = "*"
-pika = "*"
-coloredlogs = "*"
-python-json-logger = "*"
-floyd-cli = "*"
 colored = "*"
-comet-ml = "*"
-
 
 [requires]
 

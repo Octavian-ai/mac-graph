@@ -38,7 +38,7 @@ def generate_args_derivatives(args):
 		r["input_dir"] = args["input_dir"]
 
 	if args["model_dir"] is None:
-		r["model_dir"] = os.path.join(args["model_dir_prefix"], args["dataset"], args["model_version"])
+		r["model_dir"] = os.path.join(args["model_dir_prefix"], args["dataset"], *args["tag"], args["model_version"])
 	else:
 		r["model_dir"] = args["model_dir"]
 
