@@ -45,10 +45,10 @@ if __name__ == "__main__":
 		"steps": int(results["current_step"]),
 	}
 
-	print(args["name"], simplified_results)
+	print(args["dataset"], simplified_results)
 
-	if not args["name"] in doc or simplified_results["accuracy"] > doc[args["name"]]["accuracy"]:
-		doc[args["name"]] = simplified_results
+	if not args["dataset"] in doc or simplified_results["accuracy"] > doc[args["dataset"]]["accuracy"]:
+		doc[args["dataset"]] = simplified_results
 
 	with tf.gfile.GFile(args["results_path"], "w") as file:
 		yaml.dump(doc, file)

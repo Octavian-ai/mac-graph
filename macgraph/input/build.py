@@ -65,7 +65,7 @@ def build(args):
 	except FileExistsError:
 		pass
 
-	logger.info(f"Building {args['name']} data from {args['gqa_paths']}")
+	logger.info(f"Building {args['dataset']} data from {args['gqa_paths']}")
 
 	if not args["skip_vocab"]:
 		logger.info(f"Build vocab {args['vocab_path']} ")

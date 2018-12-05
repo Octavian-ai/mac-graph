@@ -21,7 +21,7 @@ def generate_args_derivatives(args):
 
 	if "gqa_paths" in args:
 		if args["gqa_paths"] == [] or args["gqa_paths"] == None:
-			r["gqa_paths"] = [os.path.join(args["gqa_dir"], args["name"]) + ".yaml"]
+			r["gqa_paths"] = [os.path.join(args["gqa_dir"], args["dataset"]) + ".yaml"]
 		else:
 			gp = []
 			for i in args["gqa_paths"]:
@@ -33,14 +33,17 @@ def generate_args_derivatives(args):
 			r["gqa_paths"] = gp
 		
 	if args["input_dir"] is None:
-		r["input_dir"] = os.path.join(args["input_dir_prefix"], args["name"])
+		r["input_dir"] = os.path.join(args["input_dir_prefix"], args["dataset"])
 	else:
 		r["input_dir"] = args["input_dir"]
 
 	if args["model_dir"] is None:
-		r["model_dir"] = os.path.join(args["model_dir_prefix"], args["name"], args["model_version"])
+		r["model_dir"] = os.path.join(args["model_dir_prefix"], args["dataset"], args["model_version"])
 	else:
 		r["model_dir"] = args["model_dir"]
+
+
+	r["profile_path"] = os.path.join(r["model_dir"], "profile")
 
 	# Expand input dirs
 	for i in [*r["modes"], "all"]:
@@ -100,7 +103,7 @@ def get_args(extend=lambda parser:None, argv=None):
 
 	parser.add_argument('--log-level',  				type=str, default='INFO')
 	parser.add_argument('--output-dir', 				type=str, default="./output")
-	parser.add_argument('--name',						type=str, default="default", help="Name of dataset")
+	parser.add_argument('--dataset',					type=str, default="default", help="Name of dataset")
 	parser.add_argument('--input-dir',					type=str, default=None)
 	parser.add_argument('--input-dir-prefix',  			type=str, default="./input_data/processed")
 	parser.add_argument('--tag',						action="append")

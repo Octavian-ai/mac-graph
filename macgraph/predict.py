@@ -275,7 +275,7 @@ if __name__ == "__main__":
 	parser.add_argument("--filter-expected-class",type=str,default=None)
 	parser.add_argument("--model-dir",type=str,default=None)
 	parser.add_argument("--model-dir-prefix",type=str,default="output/model")
-	parser.add_argument('--name',type=str, default="default", help="Name of dataset")
+	parser.add_argument('--dataset',type=str, default="default", help="Name of dataset")
 	parser.add_argument("--model-version",type=str,default=get_git_hash())
 
 	parser.add_argument("--correct-only",action='store_true')
@@ -284,7 +284,7 @@ if __name__ == "__main__":
 	cmd_args = vars(parser.parse_args())
 
 	if cmd_args["model_dir"] is None:
-		cmd_args["model_dir"] = os.path.join(cmd_args["model_dir_prefix"], cmd_args["name"], cmd_args["model_version"])
+		cmd_args["model_dir"] = os.path.join(cmd_args["model_dir_prefix"], cmd_args["dataset"], cmd_args["model_version"])
 
 	with tf.gfile.GFile(os.path.join(cmd_args["model_dir"], "config.yaml"), "r") as file:
 		frozen_args = yaml.load(file)
