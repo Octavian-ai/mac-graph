@@ -45,8 +45,10 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 				t[f"read{j}_head_attn"        ] = 2 + len(self.args["kb_list"])
 				t[f"read{j}_head_attn_focus"  ] = 2 + len(self.args["kb_list"])
-				t[f"read{j}_po_content_attn"  ] = self.args["max_decode_iterations"]
-				t[f"read{j}_po_index_attn"    ] = self.args["max_decode_iterations"]
+
+				if self.args["use_read_previous_outputs"]:
+					t[f"read{j}_po_content_attn"  ] = self.args["max_decode_iterations"]
+					t[f"read{j}_po_index_attn"    ] = self.args["max_decode_iterations"]
 
 				for i in self.args["kb_list"]:
 
@@ -79,7 +81,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			in_iter_id = inputs[1]
 			in_iter_id = dynamic_assert_shape(in_iter_id, [self.features["d_batch_size"], self.args["max_decode_iterations"]], "in_iter_id")
 
-			in_prev_outputs = inputs[2]
+			in_prev_outputs = inputs[-1]
 
 			empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)
 			empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
@@ -143,6 +145,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				out_mp_state,
 			)
 
+			# TODO: AST this all away
 			out_taps = {
 				"finished":					tf.cast(finished, tf.float32),
 				"question_word_attn": 		control_taps.get("attn", empty_attn),
@@ -163,9 +166,12 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 				for j in range(self.args["read_heads"]):
 
-					for i in [f"read{j}_head_attn", f"read{j}_head_attn_focus", 
-							  f"read{j}_po_content_attn", f"read{j}_po_index_attn"]:
+					for i in [f"read{j}_head_attn", f"read{j}_head_attn_focus"]:
 						out_taps[i] = read_taps[i]
+
+					if self.args["use_read_previous_outputs"]:
+						for i in [f"read{j}_po_content_attn", f"read{j}_po_index_attn"]:
+							out_taps[i] = read_taps[i]
 
 					for i in self.args["kb_list"]:
 						for k in ["attn", *kk]:

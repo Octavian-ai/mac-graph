@@ -57,7 +57,7 @@ def train(args):
 	if args["use_curriculum"]:
 		assert args["train_max_steps"] is not None, "Curriculum training requires --train-max-steps"
 
-		seg_steps = args["train_max_steps"] // args["max_decode_iterations"]		
+		seg_steps = args["train_max_steps"] / float(args["max_decode_iterations"])
 
 		for i in range(1, args["max_decode_iterations"]+1):
 
@@ -80,7 +80,7 @@ def train(args):
 
 		train_spec = tf.estimator.TrainSpec(
 			input_fn=gen_input_fn(i.args, "train"), 
-			max_steps=i.max_steps,
+			max_steps=int(i.max_steps),
 			hooks=hooks)
 		
 		eval_spec  = tf.estimator.EvalSpec(

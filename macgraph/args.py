@@ -133,13 +133,13 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--warm-start-dir',				type=str, default=None, help="Load model initial weights from previous checkpoints")
 	
 	parser.add_argument('--batch-size',            		type=int, default=32,   help="Number of items in a full batch")
-	parser.add_argument('--train-max-steps',            type=int, default=None, help="In thousands")
+	parser.add_argument('--train-max-steps',            type=float, default=None, help="In thousands")
 	parser.add_argument('--results-path', 				type=str, default="./results.yaml")
 
 		
 	parser.add_argument('--max-gradient-norm',     		type=float, default=0.4)
 	parser.add_argument('--learning-rate',         		type=float, default=0.001)
-	parser.add_argument('--eval-every',					type=int,	default=3*60, help="Evaluate every X seconds")
+	parser.add_argument('--eval-every',					type=int,	default=7*60, help="Evaluate every X seconds")
 
 	# --------------------------------------------------------------------------
 	# Decode
@@ -176,6 +176,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--disable-kb-edge', 			action='store_false', dest='use_kb_edge')
 
 	parser.add_argument('--disable-read-cell',			action='store_false', dest='use_read_cell')
+	parser.add_argument('--enable-read-previous-outputs',action='store_true', dest='use_read_previous_outputs')
 	parser.add_argument('--read-width',         		type=int, default=128,  help="Width of the read state output")
 	parser.add_argument('--read-heads',         		type=int, default=1,    help="Number of read heads for each knowledge base table")
 	parser.add_argument('--read-layers',         		type=int, default=1,    help="Number of read transformation layers")

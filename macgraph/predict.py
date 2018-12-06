@@ -148,7 +148,8 @@ def predict(args, cmd_args):
 					for idx0, noun in enumerate(args["kb_list"]):
 						read_switch_parts.append(f"{noun}{head_i}")
 
-					read_switch_parts.extend(["prev_output_content", "prev_output_index"])
+					if args["use_read_previous_outputs"]:
+						read_switch_parts.extend(["prev_output_content", "prev_output_index"])
 
 					if len(args["kb_list"]) > 0:
 						read_head_part = ' '.join(color_text(read_switch_parts, row[f"read{head_i}_head_attn"][i]))
@@ -189,12 +190,13 @@ def predict(args, cmd_args):
 										)
 									))
 
-					for idx_, noun in enumerate(["po_content", "po_index"]):
-						idx = idx_ + len(args["kb_list"])
-						if row[f"read{head_i}_head_attn"][i][idx] > ATTN_THRESHOLD:
-							v = f"read{head_i}_{noun}_attn"
-							db = list(range(args["max_decode_iterations"]))
-							print(f"{i}: {v}: ",', '.join(color_text(db, row[v][i])))
+					if args["use_read_previous_outputs"]:
+						for idx_, noun in enumerate(["po_content", "po_index"]):
+							idx = idx_ + len(args["kb_list"])
+							if row[f"read{head_i}_head_attn"][i][idx] > ATTN_THRESHOLD:
+								v = f"read{head_i}_{noun}_attn"
+								db = list(range(args["max_decode_iterations"]))
+								print(f"{i}: {v}: ",', '.join(color_text(db, row[v][i])))
 
 
 					hr()

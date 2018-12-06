@@ -67,7 +67,7 @@ def read_cell(head_index:int,
 
 	"""
 
-	attention_master_signal = tf.concat([in_iter_id, in_question_state], -1)
+	attention_master_signal = tf.concat([in_iter_id, in_question_state, in_memory_state], -1)
 	
 
 	
@@ -175,21 +175,23 @@ def read_cell(head_index:int,
 		# Read data from previous outputs of the network
 		# --------------------------------------------------------------------------
 
-		# Address by content
 
-		in_prev_outputs_padded = tf.pad(in_prev_outputs, [[0,0],[0, args["max_decode_iterations"] - tf.shape(in_prev_outputs)[1]],[0,0]])
-		in_prev_outputs_padded.set_shape([None, args["max_decode_iterations"], None])
-		
-		prev_output_query = tf.layers.dense(attention_master_signal, args["output_width"])
-		prev_output_content_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
-		reads.append(tf.layers.dense(prev_output_content_signal, read_width))
-		taps[f"read{head_index}_po_content_attn"] = x_taps["attn"]
+		if args["use_read_previous_outputs"]:
+			# Address by content
 
-		# Address by index
+			in_prev_outputs_padded = tf.pad(in_prev_outputs, [[0,0],[0, args["max_decode_iterations"] - tf.shape(in_prev_outputs)[1]],[0,0]])
+			in_prev_outputs_padded.set_shape([None, args["max_decode_iterations"], None])
+			
+			prev_output_query = tf.layers.dense(attention_master_signal, args["output_width"])
+			prev_output_content_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
+			reads.append(tf.layers.dense(prev_output_content_signal, read_width))
+			taps[f"read{head_index}_po_content_attn"] = x_taps["attn"]
 
-		prev_output_index_signal, query = attention_by_index(in_prev_outputs_padded, attention_master_signal)
-		reads.append(tf.layers.dense(prev_output_index_signal, read_width))
-		taps[f"read{head_index}_po_index_attn"] = query
+			# Address by index
+
+			prev_output_index_signal, query = attention_by_index(in_prev_outputs_padded, attention_master_signal)
+			reads.append(tf.layers.dense(prev_output_index_signal, read_width))
+			taps[f"read{head_index}_po_index_attn"] = query
 
 
 		# --------------------------------------------------------------------------
