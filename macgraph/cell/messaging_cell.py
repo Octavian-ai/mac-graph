@@ -132,6 +132,8 @@ def do_messaging_cell(context:CellContext,
 		adj_norm = inv_degree * adj
 		adj_norm = tf.cast(adj_norm, node_state.dtype)
 		adj_norm = tf.check_numerics(adj_norm, "adj_norm")
+
+		adj_norm = adj
 		node_incoming = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
 
 
