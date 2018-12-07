@@ -1,18 +1,19 @@
 
 
-from collections import NamedTuple
-from typing import Dict
+from typing import *
 
-DigestedQuery = NamedTuple('DigestedQuery', ['fwd_state', 'bwd_state', 'token_states'])
+# Someday TensorFlow will have types!
+Tensor = Any
 
 class CellContext(NamedTuple):
 	features: Dict
-	args: Dict,
-	vocab_embedding
-	in_prev_outputs
-	in_iter_id
-	in_iter_question_state
-	in_memory_state
-	in_question_tokens
-	in_question_state
-	in_node_state
+	args: Dict
+	vocab_embedding: Tensor
+	in_prev_outputs: Tensor
+	in_iter_id: Tensor
+	in_iter_question_state: Tensor
+	in_memory_state: Tensor
+	in_question_tokens: Tensor
+	in_question_state: Tensor
+	in_node_state: Tensor
+	in_control_state: Tensor

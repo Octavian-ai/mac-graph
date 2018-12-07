@@ -85,7 +85,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			in_prev_outputs = inputs[-1]
 
 			context = CellContext(
-				features=features, 
+				features=self.features, 
 				args=self.args,
 				vocab_embedding=self.vocab_embedding,
 				in_prev_outputs=in_prev_outputs,
@@ -95,6 +95,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				in_question_tokens=self.question_tokens,
 				in_question_state=self.question_state,
 				in_node_state=in_node_state,
+				in_control_state=in_control_state,
 			)
 
 			empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)

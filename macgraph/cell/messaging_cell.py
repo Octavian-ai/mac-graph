@@ -61,9 +61,9 @@ def messaging_cell(context:CellContext):
 	in_signal = tf.concat([context.in_control_state, context.in_iter_id], -1)
 
 	# Read/Write queries
-	in_write_query  = generate_query(context, "mp_write_query")
-	in_write_signal = layer_selu(in_signal, args["mp_state_width"])
-	in_read_query   = generate_query(context, "mp_read_query")
+	in_write_query  	= tf.layers.dense(generate_query(context, "mp_write_query")[0], node_table_width)
+	in_write_signal 		= layer_selu(in_signal, context.args["mp_state_width"])
+	in_read_query   	= tf.layers.dense(generate_query(context, "mp_read_query")[0], node_table_width)
 	
 	return do_messaging_cell(context,
 		node_table, node_table_width, node_table_len,
@@ -135,12 +135,14 @@ def do_messaging_cell(context:CellContext,
 
 		old_and_new = tf.concat([node_state, node_incoming], axis=-1)
 
-		forget_w     = tf.get_variable("mp_forget_w",    [1, args["mp_state_width"]*2, args["mp_state_width"]])
-		reuse_w      = tf.get_variable("mp_reuse_w",     [1, args["mp_state_width"]*2, args["mp_state_width"]])
-		transform_w  = tf.get_variable("mp_transform_w", [1, args["mp_state_width"]*2, args["mp_state_width"]])
+		forget_w     = tf.get_variable("mp_forget_w",    [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
+		forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]])
+
+		reuse_w      = tf.get_variable("mp_reuse_w",     [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
+		transform_w  = tf.get_variable("mp_transform_w", [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
 
 		# Initially likely to be zero
-		forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal'))
+		forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)
 		reuse_signal  = tf.nn.sigmoid(mp_matmul(old_and_new , reuse_w,  'reuse_signal'))
 
 		reuse_and_new = tf.concat([reuse_signal * node_state, node_incoming], axis=-1)
@@ -149,40 +151,11 @@ def do_messaging_cell(context:CellContext,
 		node_state = (1-forget_signal) * node_state + (forget_signal) * proposed_new_state
 
 
-		# node_state = agg
-		# assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
-
-		# if args["use_message_passing_self_ref"]:
-		# 	# Add self-reference
-		# 	self_reference_kernel = tf.get_variable("mp_self_reference_W", [1, args["mp_state_width"], args["mp_state_width"]])
-		# 	sr = tf.nn.conv1d(in_node_state, self_reference_kernel, 1, 'SAME', name="self_reference")
-		# 	node_state += sr
-		# 	taps["mp_self_fn"] = self_reference_kernel
-		# else:
-		# 	node_state += in_node_state
-
-
-
-		# if args["use_message_passing_node_transform"]:
-		# 	# Message passing function is a 1d conv [filter_width, in_channels, out_channels]
-		# 	message_pass_kernel = tf.get_variable(
-		# 		"mp_node_W", 
-		# 		[1, args["mp_state_width"], args["mp_state_width"]],
-		# 		initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
-
-		# 	message_pass_bias = tf.get_variable("mp_node_b", [args["mp_state_width"]])
-
-		# 	# Apply message pass function:
-		# 	node_state = tf.nn.conv1d(node_state, message_pass_kernel, 1, 'SAME', name="message_pass")
-		# 	node_state += message_pass_bias
-		# 	# Apply activation
-		# 	node_state = ACTIVATION_FNS[args["mp_activation"]](node_state)
-		# 	assert node_state.shape[-1] == in_node_state.shape[-1], "Node state should not lose dimension"
-		# 	taps["mp_pass_fn"] = message_pass_kernel
-
+		# --------------------------------------------------------------------------
+		# Read from graph
+		# --------------------------------------------------------------------------
 
 		assert node_state.shape[-1] == context.in_node_state.shape[-1], "Node state should not lose dimension"
-
 		taps["mp_node_state"] = node_state
 
 		# Output
