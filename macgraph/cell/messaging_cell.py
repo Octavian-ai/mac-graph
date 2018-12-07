@@ -75,6 +75,17 @@ def messaging_cell(context:CellContext):
 def mp_matmul(state, mat, name):
 	return tf.nn.conv1d(state, mat, 1, 'VALID', name=name)
 
+
+"""
+	Where length is the second dimension
+"""
+def pad_to_table_len(tensor, table_to_mimic, name=None):
+	delta = tf.shape(table_to_mimic)[1] - tf.shape(tensor)[1]
+	tensor = tf.pad(tensor, [ [0,0], [0,delta], [0,0] ]) # zero pad out
+	# tensor = dynamic_assert_shape(tensor, tf.shape(table_to_mimic)[0:1]+[tf.shape(tensor)[2]], name)
+	return tensor
+
+
 def do_messaging_cell(context:CellContext, 
 	node_table, node_table_width, node_table_len,
 	in_write_query, in_write_signal, in_read_queries):
@@ -88,7 +99,6 @@ def do_messaging_cell(context:CellContext,
 		node_state_shape = tf.shape(context.in_node_state)
 		node_state = context.in_node_state
 		
-
 		# --------------------------------------------------------------------------
 		# Write to graph
 		# --------------------------------------------------------------------------
@@ -103,13 +113,10 @@ def do_messaging_cell(context:CellContext,
 		for k,v in a_taps.items():
 			taps["mp_write_"+k] = v
 
-		delta = tf.shape(node_state)[1] - tf.shape(write_signal)[1]
-		write_signal = tf.pad(write_signal, [ [0,0], [0,delta], [0,0] ]) # zero pad out
-		write_signal = dynamic_assert_shape(write_signal, tf.shape(node_state), "write_signal")
-
+		write_signal = pad_to_table_len(write_signal, node_state, "write_signal")
 		node_state += write_signal
-		assert node_state.shape[-1] == context.in_node_state.shape[-1], "Node state should not lose dimension"
-
+		node_state = dynamic_assert_shape(node_state, node_state_shape, "node_state")
+		
 		# --------------------------------------------------------------------------
 		# Calculate adjacency 
 		# --------------------------------------------------------------------------
@@ -157,12 +164,10 @@ def do_messaging_cell(context:CellContext,
 		# Read from graph
 		# --------------------------------------------------------------------------
 
-		assert node_state.shape[-1] == context.in_node_state.shape[-1], "Node state should not lose dimension"
 		taps["mp_node_state"] = node_state
 
 		# Output
-		delta = tf.shape(node_state)[1] - tf.shape(node_table)[1]
-		padded_node_table = tf.pad(node_table, [ [0,0], [0,delta], [0,0] ]) # zero pad out
+		padded_node_table = pad_to_table_len(node_table, node_state, "padded_node_table")
 
 		out_read_signals = []
 
