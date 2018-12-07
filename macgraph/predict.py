@@ -179,7 +179,7 @@ def predict(args, cmd_args):
 									print(f"{i}: {noun}{head_i}_{part_noun}_attn: {v}")
 
 
-							db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"] if kb_row[0] != UNK_ID]
+							db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"]]
 							print(f"{i}: {noun}{head_i}_attn: ",', '.join(color_text(db, row[f"{noun}{head_i}_attn"][i])))
 
 							for idx, attn in enumerate(row[f"{noun}{head_i}_attn"][i]):
