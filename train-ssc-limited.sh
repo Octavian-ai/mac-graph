@@ -15,6 +15,7 @@ python -m macgraph.train \
 	--disable-read-cell \
 	--control-heads 2 \
 	--memory-width 8 \
+	--eval-every 180 \
 
 # python -m macgraph.train \
 # 	--dataset StationShortestCount \

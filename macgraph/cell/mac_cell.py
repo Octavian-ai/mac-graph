@@ -7,6 +7,7 @@ from .control_cell import *
 from .output_cell import *
 from .write_cell import *
 from .messaging_cell import *
+from .types import *
 
 from ..util import *
 from ..minception import *
@@ -73,7 +74,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		
 		with tf.variable_scope("mac_cell", reuse=reuse):
 
-			in_control_state, in_memory_state, in_mp_state = in_state
+			in_control_state, in_memory_state, in_node_state = in_state
 
 			in_iter_question_state = inputs[0]
 			in_iter_question_state = dynamic_assert_shape(in_iter_question_state, [self.features["d_batch_size"], self.args["control_width"]], "in_iter_question_state")
@@ -82,6 +83,19 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			in_iter_id = dynamic_assert_shape(in_iter_id, [self.features["d_batch_size"], self.args["max_decode_iterations"]], "in_iter_id")
 
 			in_prev_outputs = inputs[-1]
+
+			context = CellContext(
+				features=features, 
+				args=self.args,
+				vocab_embedding=self.vocab_embedding,
+				in_prev_outputs=in_prev_outputs,
+				in_iter_id=in_iter_id,
+				in_iter_question_state=in_iter_question_state,
+				in_memory_state=in_memory_state,
+				in_question_tokens=self.question_tokens,
+				in_question_state=self.question_state,
+				in_node_state=in_node_state,
+			)
 
 			empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)
 			empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
@@ -97,7 +111,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				reads = []
 				read_taps = {}
 				for head_index in range(self.args["read_heads"]):
-					read, read_taps_ = read_cell(head_index,
+					read, read_taps_ = read_cell(context, head_index,
 						self.args, self.features, self.vocab_embedding,
 						in_memory_state, out_control_state, in_prev_outputs,
 						self.question_tokens, self.question_state, 
@@ -111,8 +125,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 
 			if self.args["use_message_passing"]:
-				mp_reads, out_mp_state, mp_taps = messaging_cell(self.args, self.features, self.vocab_embedding,
-					in_mp_state, out_control_state, self.question_state, in_memory_state, in_iter_id)
+				mp_reads, out_mp_state, mp_taps = messaging_cell(context)
 			else:
 				out_mp_state = in_mp_state
 				mp_reads = [tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0)]

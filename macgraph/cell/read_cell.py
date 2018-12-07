@@ -1,6 +1,9 @@
 
 import tensorflow as tf
 
+from .types import *
+from .query import *
+
 from ..util import *
 from ..attention import *
 from ..input import UNK_ID, get_table_with_embedding
@@ -55,7 +58,7 @@ def read_from_table_with_embedding(args, features, vocab_embedding, in_signal, n
 			keys_len=keys_len)
 
 
-def read_cell(head_index:int,
+def read_cell(context:CellContext, head_index:int,
 	args:dict, features:dict, vocab_embedding, 
 	in_memory_state, in_control_state, in_prev_outputs,
 	in_question_tokens, in_question_state, 
@@ -66,67 +69,6 @@ def read_cell(head_index:int,
 	@returns read_data
 
 	"""
-
-	attention_master_signal = tf.concat([in_iter_id, in_question_state, in_memory_state], -1)
-	
-
-	
-	def read_cell_query(name):
-		with tf.name_scope(name):
-			taps = {}
-			sources = []
-
-			def add_taps(prefix, extra_taps):
-				for k, v in extra_taps.items():
-					taps[prefix + "_" + k] = v
-
-			# --------------------------------------------------------------------------
-			# Produce all the difference sources of addressing query
-			# --------------------------------------------------------------------------
-
-			# Content address the question tokens
-			token_query = tf.layers.dense(attention_master_signal, args["input_width"])
-			token_signal, _, x_taps = attention(in_question_tokens, token_query)
-			sources.append(token_signal)
-			add_taps("token_content", x_taps)
-
-			# Index address the question tokens
-			padding = [[0,0], [0, tf.maximum(0,args["max_seq_len"] - tf.shape(in_question_tokens)[1])], [0,0]] # batch, seq_len, token
-			in_question_tokens_padded = tf.pad(in_question_tokens, padding)
-			in_question_tokens_padded.set_shape([None, args["max_seq_len"], None])
-
-			token_index_signal, query = attention_by_index(in_question_tokens_padded, attention_master_signal)
-			sources.append(token_index_signal)
-			taps["token_index_attn"] = tf.expand_dims(query, 2)
-
-			# Use the iteration id
-			step_const_signal = tf.layers.dense(in_iter_id, args["input_width"])
-			sources.append(step_const_signal)
-			
-			# Use the memory contents
-			if args["use_memory_cell"]:
-				memory_shape = [features["d_batch_size"], args["memory_width"] // args["input_width"], args["input_width"]]
-				memory_query = tf.layers.dense(attention_master_signal, args["input_width"])
-				memory_signal, _, x_taps  = attention(tf.reshape(in_memory_state, memory_shape), memory_query)
-
-				sources.append(memory_signal)
-				add_taps("memory", x_taps)
-
-			# Use the previous output of the network
-			prev_output_query = tf.layers.dense(attention_master_signal, args["output_width"])
-			in_prev_outputs_padded = tf.pad(in_prev_outputs, [[0,0],[0, args["max_decode_iterations"] - tf.shape(in_prev_outputs)[1]],[0,0]])
-			prev_output_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
-			sources.append(prev_output_signal)
-			add_taps("prev_output", x_taps)
-
-			# --------------------------------------------------------------------------
-			# Choose a query source
-			# --------------------------------------------------------------------------
-
-			query_signal, q_tap = attention_by_index(tf.stack(sources, 1), attention_master_signal)
-			taps["switch_attn"] = q_tap
-
-			return query_signal, taps
 
 
 	with tf.name_scope("read_cell"):
@@ -144,7 +86,7 @@ def read_cell(head_index:int,
 
 		for i in args["kb_list"]:
 
-			read_query, rcq_taps = read_cell_query(i + str(head_index))
+			read_query, rcq_taps = generate_query(context, i + str(head_index))
 
 			read, table, score_raw_total, read_table_taps = read_from_table_with_embedding(
 				args, 
