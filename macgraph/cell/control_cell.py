@@ -56,6 +56,7 @@ def control_cell(args, features, in_iter_question_state, in_control_state, in_qu
 			taps[noun] = tf.transpose(taps[noun], [0, 2, 1]) # switch so last dimension is words
 
 		if control_out.shape[-1] != args["control_width"]:
+			tf.logging.warning("Resizing control signal to fit control_width")
 			control_out = tf.layers.dense(control_out, args["control_width"], name="resize_control_out")
 		
 		control_out = tf.nn.dropout(control_out, 1.0-args["control_dropout"])
