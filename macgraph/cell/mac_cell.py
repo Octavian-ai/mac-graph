@@ -123,21 +123,11 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 					in_memory_state, reads, mp_reads, out_control_state, in_iter_id)
 			else:
 				out_memory_state = in_memory_state
-				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)
+				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)			
+	
+			output, finished = output_cell(self.args, self.features,
+				self.question_state, out_memory_state, reads, out_control_state, mp_reads, in_iter_id)	
 
-				
-			if self.args["use_output_cell"]:
-				output, finished = output_cell(self.args, self.features,
-					self.question_state, out_memory_state, reads, out_control_state, mp_reads, in_iter_id)	
-			else:
-				o = []
-				if self.args["use_message_passing"]:
-					o.append(mp_read)
-				if self.args["use_read_cell"]:
-					o.extend(reads)
-
-				output = tf.layers.dense(tf.concat(o, -1), self.args["output_width"])
-				finished = tf.fill([self.features["d_batch_size"], 1], False)
 
 			out_state = (
 				out_control_state, 

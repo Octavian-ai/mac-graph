@@ -138,7 +138,7 @@ def get_args(extend=lambda parser:None, argv=None):
 
 		
 	parser.add_argument('--max-gradient-norm',     		type=float, default=0.4)
-	parser.add_argument('--learning-rate',         		type=float, default=0.001)
+	parser.add_argument('--learning-rate',         		type=float, default=1e-3)
 	parser.add_argument('--eval-every',					type=int,	default=7*60, help="Evaluate every X seconds")
 
 	# --------------------------------------------------------------------------
@@ -213,7 +213,6 @@ def get_args(extend=lambda parser:None, argv=None):
 
 	parser.add_argument('--enable-position-encoding', 	action='store_true',  dest='use_position_encoding')
 	parser.add_argument('--disable-control-cell', 		action='store_false', dest="use_control_cell")
-	parser.add_argument('--disable-output-cell', 		action='store_false', dest="use_output_cell")
 	parser.add_argument('--disable-memory-cell', 		action='store_false', dest="use_memory_cell")
 	parser.add_argument('--disable-output-read', 		action='store_false', dest="use_output_read")
 	parser.add_argument('--enable-question-state', 		action='store_true',  dest="use_question_state")
