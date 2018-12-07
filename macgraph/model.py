@@ -81,7 +81,7 @@ def model_fn(features, labels, mode, params):
 				1E-06, 
 				global_step,
 				decay_steps=1000, 
-				decay_rate=1.1)
+				decay_rate=1.3)
 
 		elif args["use_lr_decay"]:
 			# Doesn't start until 10k steps 

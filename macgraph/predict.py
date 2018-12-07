@@ -183,7 +183,7 @@ def predict(args, cmd_args):
 							print(f"{i}: {noun}{head_i}_attn: ",', '.join(color_text(db, row[f"{noun}{head_i}_attn"][i])))
 
 							for idx, attn in enumerate(row[f"{noun}{head_i}_attn"][i]):
-								if attn > ATTN_THRESHOLD:
+								if attn > ATTN_THRESHOLD and idx < len(row[f"{noun}s"]):
 									print(f"{i}: {noun}{head_i}_word_attn: ",', '.join(color_text(
 										vocab.prediction_value_to_string(row[f"{noun}s"][idx], True),
 										row[f"{noun}{head_i}_word_attn"][i],
