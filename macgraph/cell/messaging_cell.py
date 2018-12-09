@@ -103,7 +103,10 @@ def calc_normalized_adjacency(context, node_state):
 	return node_incoming
 
 def calc_right_shift(node_incoming):
+	shape = tf.shape(node_incoming)
 	node_incoming = tf.concat([node_incoming[:,:,1:],node_incoming[:,:,0:1]], axis=-1) 
+	node_incoming = dynamic_assert_shape(node_incoming, shape, "node_incoming")
+	return node_incoming
 
 
 def node_gru(context, node_state, node_incoming, padded_node_table):
@@ -115,11 +118,13 @@ def node_gru(context, node_state, node_incoming, padded_node_table):
 
 	old_and_new = tf.concat(all_inputs, axis=-1)
 
-	forget_w     = tf.get_variable("mp_forget_w",    [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
+	input_width = old_and_new.shape[-1]
+
+	forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]])
 	forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]])
 
-	reuse_w      = tf.get_variable("mp_reuse_w",     [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
-	transform_w  = tf.get_variable("mp_transform_w", [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
+	reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]])
+	transform_w  = tf.get_variable("mp_transform_w", [1, 2 * context.args["mp_state_width"], context.args["mp_state_width"]])
 
 	# Initially likely to be zero
 	forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)

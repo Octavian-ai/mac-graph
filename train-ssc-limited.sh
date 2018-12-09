@@ -7,14 +7,14 @@ python -m macgraph.train \
 	--tag upto_2 \
 	--tag iter_1 \
 	--tag no_read+memory \
-	--tag mp_no_gru \
+	--tag mp_nid \
 	--filter-output-class 1 \
 	--filter-output-class 2 \
 	--disable-read-cell \
 	--control-heads 2 \
 	--disable-memory \
 	--mp-activation linear \
-	--disable-mp-gru \
+	--enable-mp-node-id \
 
 
 # python -m macgraph.train \
