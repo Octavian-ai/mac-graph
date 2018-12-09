@@ -1,6 +1,36 @@
 #!/bin/bash
 
-python -m macgraph.train \
+
+nohup python -m macgraph.train \
+	--dataset StationShortestCount \
+	--max-decode-iterations 1 \
+	--train-max-steps 1 \
+	--tag upto_2 \
+	--tag iter_1 \
+	--tag mp_vanilla \
+	--filter-output-class 1 \
+	--filter-output-class 2 \
+	--disable-read-cell \
+	--control-heads 2 \
+	--disable-memory \
+	--enable-comet &
+
+nohup python -m macgraph.train \
+	--dataset StationShortestCount \
+	--max-decode-iterations 1 \
+	--train-max-steps 1 \
+	--tag upto_2 \
+	--tag iter_1 \
+	--tag mp_linear \
+	--filter-output-class 1 \
+	--filter-output-class 2 \
+	--disable-read-cell \
+	--control-heads 2 \
+	--disable-memory \
+	--mp-activation linear \
+	--enable-comet &
+
+nohup python -m macgraph.train \
 	--dataset StationShortestCount \
 	--max-decode-iterations 1 \
 	--train-max-steps 1 \
@@ -13,9 +43,10 @@ python -m macgraph.train \
 	--control-heads 2 \
 	--disable-memory \
 	--enable-mp-node-id \
+	--enable-comet &
 
 
-python -m macgraph.train \
+nohup python -m macgraph.train \
 	--dataset StationShortestCount \
 	--max-decode-iterations 1 \
 	--train-max-steps 1 \
@@ -28,9 +59,10 @@ python -m macgraph.train \
 	--control-heads 2 \
 	--disable-memory \
 	--enable-mp-right-shift \
+	--enable-comet &
 
 
-python -m macgraph.train \
+nohup python -m macgraph.train \
 	--dataset StationShortestCount \
 	--max-decode-iterations 1 \
 	--train-max-steps 1 \
@@ -43,9 +75,10 @@ python -m macgraph.train \
 	--control-heads 2 \
 	--disable-memory \
 	--disable-mp-gru \
+	--enable-comet &
 
 
-python -m macgraph.train \
+nohup python -m macgraph.train \
 	--dataset StationShortestCount \
 	--max-decode-iterations 1 \
 	--train-max-steps 1 \
@@ -58,6 +91,7 @@ python -m macgraph.train \
 	--control-heads 2 \
 	--disable-memory \
 	--mp-state-width 128 \
+	--enable-comet &
 
 
 
