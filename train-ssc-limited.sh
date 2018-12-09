@@ -2,20 +2,20 @@
 
 python -m macgraph.train \
 	--dataset StationShortestCount \
-	--max-decode-iterations 3 \
-	--train-max-steps 50 \
-	--tag no_read \
-	--tag small \
-	--tag upto_3 \
-	--tag iter_3 \
-	--filter-output-class 0 \
+	--max-decode-iterations 1 \
+	--train-max-steps 1 \
+	--tag upto_2 \
+	--tag iter_1 \
+	--tag no_read+memory \
+	--tag mp_no_gru \
 	--filter-output-class 1 \
 	--filter-output-class 2 \
-	--filter-output-class 3 \
 	--disable-read-cell \
 	--control-heads 2 \
-	--memory-width 8 \
-	--eval-every 180 \
+	--disable-memory \
+	--mp-activation linear \
+	--disable-mp-gru \
+
 
 # python -m macgraph.train \
 # 	--dataset StationShortestCount \

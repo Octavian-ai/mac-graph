@@ -203,8 +203,10 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--mp-activation',				type=str, default="selu", 		choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--mp-state-width', 			type=int, default=4)
 	parser.add_argument('--disable-message-passing',    action='store_false', dest='use_message_passing')
-	parser.add_argument('--disable-message-passing-node-transform', action='store_false', dest='use_message_passing_node_transform')
-	parser.add_argument('--disable-message-passing-self-ref', action='store_false', dest='use_message_passing_self_ref')
+	parser.add_argument('--disable-mp-gru', 			action='store_false', dest='use_mp_gru')
+	parser.add_argument('--enable-mp-node-id', 			action='store_false', dest='use_mp_node_id')
+	parser.add_argument('--enable-mp-right-shift', 		action='store_false', dest='use_mp_right_shift')
+
 
 
 	parser.add_argument('--output-activation',			type=str, default="selu", choices=ACTIVATION_FNS.keys())

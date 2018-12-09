@@ -11,6 +11,7 @@ from ..input import get_table_with_embedding
 from ..const import EPSILON
 from ..util import *
 from ..layers import *
+from ..activations import *
 
 MP_State = tf.Tensor
 
@@ -85,6 +86,53 @@ def pad_to_table_len(tensor, table_to_mimic, name=None):
 	# tensor = dynamic_assert_shape(tensor, tf.shape(table_to_mimic)[0:1]+[tf.shape(tensor)[2]], name)
 	return tensor
 
+def calc_normalized_adjacency(context, node_state):
+	# Aggregate via adjacency matrix with normalisation (that does not include self-edges)
+	adj = tf.cast(context.features["kb_adjacency"], tf.float32)
+	degree = tf.reduce_sum(adj, -1, keepdims=True)
+	inv_degree = tf.reciprocal(degree)
+	node_mask = tf.expand_dims(tf.sequence_mask(context.features["kb_nodes_len"], context.args["kb_node_max_len"]), -1)
+	inv_degree = tf.where(node_mask, inv_degree, tf.zeros(tf.shape(inv_degree)))
+	inv_degree = tf.where(tf.greater(degree, 0), inv_degree, tf.zeros(tf.shape(inv_degree)))
+	inv_degree = tf.check_numerics(inv_degree, "inv_degree")
+	adj_norm = inv_degree * adj
+	adj_norm = tf.cast(adj_norm, node_state.dtype)
+	adj_norm = tf.check_numerics(adj_norm, "adj_norm")
+	node_incoming = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
+
+	return node_incoming
+
+def calc_right_shift(node_incoming):
+	node_incoming = tf.concat([node_incoming[:,:,1:],node_incoming[:,:,0:1]], axis=-1) 
+
+
+def node_gru(context, node_state, node_incoming, padded_node_table):
+
+	all_inputs = [node_state, node_incoming]
+
+	if context.args["use_mp_node_id"]:
+		all_inputs.append(padded_node_table[:,:,:context.args["embed_width"]])
+
+	old_and_new = tf.concat(all_inputs, axis=-1)
+
+	forget_w     = tf.get_variable("mp_forget_w",    [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
+	forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]])
+
+	reuse_w      = tf.get_variable("mp_reuse_w",     [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
+	transform_w  = tf.get_variable("mp_transform_w", [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
+
+	# Initially likely to be zero
+	forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)
+	reuse_signal  = tf.nn.sigmoid(mp_matmul(old_and_new , reuse_w,  'reuse_signal'))
+
+	reuse_and_new = tf.concat([reuse_signal * node_state, node_incoming], axis=-1)
+	proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](mp_matmul(reuse_and_new, transform_w, 'proposed_new_state'))
+
+	node_state = (1-forget_signal) * node_state + (forget_signal) * proposed_new_state
+
+	return node_state
+
+
 
 def do_messaging_cell(context:CellContext, 
 	node_table, node_table_width, node_table_len,
@@ -98,6 +146,7 @@ def do_messaging_cell(context:CellContext,
 
 		node_state_shape = tf.shape(context.in_node_state)
 		node_state = context.in_node_state
+		padded_node_table = pad_to_table_len(node_table, node_state, "padded_node_table")
 		
 		# --------------------------------------------------------------------------
 		# Write to graph
@@ -121,55 +170,25 @@ def do_messaging_cell(context:CellContext,
 		# Calculate adjacency 
 		# --------------------------------------------------------------------------
 
-		# Aggregate via adjacency matrix with normalisation (that does not include self-edges)
-		adj = tf.cast(context.features["kb_adjacency"], tf.float32)
-		degree = tf.reduce_sum(adj, -1, keepdims=True)
-		inv_degree = tf.reciprocal(degree)
-		node_mask = tf.expand_dims(tf.sequence_mask(context.features["kb_nodes_len"], context.args["kb_node_max_len"]), -1)
-		inv_degree = tf.where(node_mask, inv_degree, tf.zeros(tf.shape(inv_degree)))
-		inv_degree = tf.where(tf.greater(degree, 0), inv_degree, tf.zeros(tf.shape(inv_degree)))
-		inv_degree = tf.check_numerics(inv_degree, "inv_degree")
-		adj_norm = inv_degree * adj
-		adj_norm = tf.cast(adj_norm, node_state.dtype)
-		adj_norm = tf.check_numerics(adj_norm, "adj_norm")
+		node_incoming = calc_normalized_adjacency(context, node_state)
 
-		adj_norm = adj
-		node_incoming = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
+		if context.args["use_mp_right_shift"]:
+			node_incoming = calc_right_shift(node_incoming)
 
 
 		# --------------------------------------------------------------------------
 		# Perform propagation
 		# --------------------------------------------------------------------------
 		
+		if context.args["use_mp_gru"]:
+			node_state = node_gru(context, node_state, node_incoming, padded_node_table)
 
-		# Node value = gru(node_prev, node_incoming)
-
-		old_and_new = tf.concat([node_state, node_incoming], axis=-1)
-
-		forget_w     = tf.get_variable("mp_forget_w",    [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
-		forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]])
-
-		reuse_w      = tf.get_variable("mp_reuse_w",     [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
-		transform_w  = tf.get_variable("mp_transform_w", [1, context.args["mp_state_width"]*2, context.args["mp_state_width"]])
-
-		# Initially likely to be zero
-		forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)
-		reuse_signal  = tf.nn.sigmoid(mp_matmul(old_and_new , reuse_w,  'reuse_signal'))
-
-		reuse_and_new = tf.concat([reuse_signal * node_state, node_incoming], axis=-1)
-		proposed_new_state = tf.nn.selu(mp_matmul(reuse_and_new, transform_w, 'proposed_new_state'))
-
-		node_state = (1-forget_signal) * node_state + (forget_signal) * proposed_new_state
-
+		else:
+			node_state = node_incoming
 
 		# --------------------------------------------------------------------------
 		# Read from graph
 		# --------------------------------------------------------------------------
-
-		taps["mp_node_state"] = node_state
-
-		# Output
-		padded_node_table = pad_to_table_len(node_table, node_state, "padded_node_table")
 
 		out_read_signals = []
 
@@ -187,6 +206,7 @@ def do_messaging_cell(context:CellContext,
 				taps[f"mp_read{idx}_{k}"] = v
 			taps[f"mp_read{idx}_signal"] = out_read_signal
 
+		taps["mp_node_state"] = node_state
 		node_state = dynamic_assert_shape(node_state, node_state_shape, "node_state")
 		assert node_state.shape[-1] == context.in_node_state.shape[-1], "Node state should not lose dimension"
 
