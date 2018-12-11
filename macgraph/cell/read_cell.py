@@ -70,6 +70,8 @@ def read_cell(context:CellContext, head_index:int,
 
 	"""
 
+	attention_master_signal = tf.concat([context.in_iter_id, context.in_question_state], -1)
+
 
 	with tf.name_scope("read_cell"):
 
