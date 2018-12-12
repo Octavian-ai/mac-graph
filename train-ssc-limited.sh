@@ -22,6 +22,23 @@ nohup python -m macgraph.train \
 	--train-max-steps 17 \
 	--tag upto_1 \
 	--tag iter_1 \
+	--tag mp_linear_ngru \
+	--filter-output-class 1 \
+	--filter-output-class 0 \
+	--disable-read-cell \
+	--control-heads 2 \
+	--disable-memory-cell \
+	--disable-read-cell \
+	--mp-activation linear \
+	--disable-mp-gru \
+	--enable-comet &
+
+nohup python -m macgraph.train \
+	--dataset StationShortestCount \
+	--max-decode-iterations 1 \
+	--train-max-steps 17 \
+	--tag upto_1 \
+	--tag iter_1 \
 	--tag mp_nid \
 	--filter-output-class 1 \
 	--filter-output-class 0 \
