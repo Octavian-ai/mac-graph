@@ -140,7 +140,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				out_memory_state = in_memory_state
 				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)			
 	
-			output_not, finished = output_cell(self.args, self.features,
+			output, finished = output_cell(self.args, self.features,
 				self.question_state, out_memory_state, reads, out_control_state, mp_reads, in_iter_id)
 
 			out_state = (

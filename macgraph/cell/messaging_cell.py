@@ -68,7 +68,7 @@ def messaging_cell(context:CellContext):
 
 	# Read/Write queries
 	in_write_query  	= context.in_question_tokens[:,10,:] # tf.layers.dense(generate_query(context, "mp_write_query")[0], node_table_width)
-	in_write_signal 	= tf.ones([context.features["d_batch_size"], context.args["mp_state_width"]])
+	in_write_signal 	= layer_selu(in_signal, context.args["mp_state_width"])
 	in_read_query   	= context.in_question_tokens[:,14,:] # tf.layers.dense(generate_query(context, "mp_read_query")[0], node_table_width)
 	
 	return do_messaging_cell(context,
