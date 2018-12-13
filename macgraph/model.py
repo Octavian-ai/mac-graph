@@ -32,12 +32,12 @@ def model_fn(features, labels, mode, params):
 	# Shared variables
 	# --------------------------------------------------------------------------
 
-	vocab_embedding = tf.get_variable(
-		"vocab_embedding",
-		[args["vocab_size"], args["embed_width"]],
-		tf.float32)
+	# vocab_embedding = tf.get_variable(
+	# 	"vocab_embedding",
+	# 	[args["vocab_size"], args["embed_width"]],
+	# 	tf.float32)
 
-	# vocab_embedding = tf.Variable(tf.eye(args["vocab_size"], args["embed_width"]), name="vocab_embedding")
+	vocab_embedding = tf.Variable(tf.eye(args["vocab_size"], args["embed_width"]), name="vocab_embedding")
 
 	if args["use_summary_image"]:
 		tf.summary.image("vocab_embedding", tf.reshape(vocab_embedding,
