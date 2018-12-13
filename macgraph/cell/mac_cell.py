@@ -129,7 +129,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			if self.args["use_message_passing"]:
 				mp_reads, out_mp_state, mp_taps = messaging_cell(context)
 			else:
-				out_mp_state = in_mp_state
+				out_mp_state = in_node_state
 				mp_reads = [tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0)]
 				mp_taps = {}
 			

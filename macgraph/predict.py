@@ -113,6 +113,8 @@ def predict(args, cmd_args):
 	read_control_parts = list(read_control_parts_global) # copy
 	if not args["use_memory_cell"]:
 		read_control_parts.remove("memory")
+	if not args["use_read_previous_outputs"]:
+		read_control_parts.remove("prev_output")
 
 	def print_row(row):
 		if p["actual_label"] == p["predicted_label"]:

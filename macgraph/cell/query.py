@@ -49,12 +49,13 @@ def generate_query(context:CellContext, name):
 		# 	sources.append(memory_signal)
 		# 	add_taps("memory", x_taps)
 
-		# Use the previous output of the network
-		prev_output_query = tf.layers.dense(master_signal, context.args["output_width"])
-		in_prev_outputs_padded = tf.pad(context.in_prev_outputs, [[0,0],[0, context.args["max_decode_iterations"] - tf.shape(context.in_prev_outputs)[1]],[0,0]])
-		prev_output_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
-		sources.append(prev_output_signal)
-		add_taps("prev_output", x_taps)
+		if context.args["use_read_previous_outputs"]:
+			# Use the previous output of the network
+			prev_output_query = tf.layers.dense(master_signal, context.args["output_width"])
+			in_prev_outputs_padded = tf.pad(context.in_prev_outputs, [[0,0],[0, context.args["max_decode_iterations"] - tf.shape(context.in_prev_outputs)[1]],[0,0]])
+			prev_output_signal, _, x_taps = attention(in_prev_outputs_padded, prev_output_query)
+			sources.append(prev_output_signal)
+			add_taps("prev_output", x_taps)
 
 		# --------------------------------------------------------------------------
 		# Choose a query source

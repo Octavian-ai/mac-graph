@@ -45,7 +45,7 @@ def train(args):
 
 
 	train_size = sum(1 for _ in tf.python_io.tf_record_iterator(args["train_input_path"]))
-	logger.info(f"Training on {train_size} records")
+	tf.logging.info(f"Training on {train_size} records")
 
 	# ----------------------------------------------------------------------------------
 
