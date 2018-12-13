@@ -7,13 +7,12 @@ python -m macgraph.train \
 	--tag upto_1 \
 	--tag iter_1 \
 	--tag mp_simple \
-	--tag lrf \
 	--filter-output-class 1 \
 	--filter-output-class 0 \
 	--control-heads 2 \
 	--disable-memory-cell \
 	--disable-read-cell \
-	--eval-every 600 \
+	--eval-every 120 \
 	--mp-state-width 1 \
 	--disable-mp-gru \
 	--disable-input-bilstm \
