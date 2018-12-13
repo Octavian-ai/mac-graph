@@ -13,13 +13,12 @@ python -m macgraph.train \
 	--control-heads 2 \
 	--disable-memory-cell \
 	--disable-read-cell \
-	--eval-every 60 \
+	--eval-every 600 \
 	--mp-state-width 1 \
 	--disable-mp-gru \
 	--disable-input-bilstm \
 	--enable-summary-image \
 	--input-width 64 \
-	--learning-rate 0.015 \
+	--learning-rate 1.0 \
 	--max-gradient-norm 100.0 \
-	--enable-lr-finder \
 
