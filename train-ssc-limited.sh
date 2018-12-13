@@ -9,7 +9,7 @@ python -m macgraph.train \
 	--tag mp_simple \
 	--filter-output-class 1 \
 	--filter-output-class 0 \
-	--control-heads 2 \
+	--control-heads 1 \
 	--disable-memory-cell \
 	--disable-read-cell \
 	--eval-every 90 \
