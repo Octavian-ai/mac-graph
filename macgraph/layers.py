@@ -22,7 +22,7 @@ def layer_selu(tensor, width, dropout=0.0, name=None):
 
 	return r
 
-def layer_dense(tensor, width, activation_str, dropout=0.0, name=None):
+def layer_dense(tensor, width, activation_str="linear", dropout=0.0, name=None):
 
 	if activation_str == "selu":
 		return layer_selu(tensor, width, dropout, name)

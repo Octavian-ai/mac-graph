@@ -228,7 +228,8 @@ The successful station property model does no better than random guessing. I'm e
 	- Feeding memory into the read_cell was hampering performance
 	- Idea to use softmax selection of read input (and possibly activation) to allow specialisation of read heads
 
-
+ - `ce9ca1a70fc678e3d32479888332d322007a1bb2`
+ 	- 100% on adjacency with forced query
 
 
 ## Notes on training infrastructure

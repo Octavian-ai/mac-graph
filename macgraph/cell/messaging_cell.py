@@ -67,7 +67,9 @@ def messaging_cell(context:CellContext):
 	control_parts = tf.reshape(context.control_state, [context.features["d_batch_size"], -1, context.args["input_width"]])
 
 	# Read/Write queries
-	in_write_query  	= context.in_question_tokens[:,10,:] # tf.layers.dense(generate_query(context, "mp_write_query")[0], node_table_width)
+	in_write_query		= layer_dense(context.control_state, node_table_width)
+	# in_write_query  	= context.in_question_tokens[:,10,:] 
+	# in_write_query		= tf.layers.dense(generate_query(context, "mp_write_query")[0], node_table_width)
 	# in_write_signal 	= layer_dense(in_signal, context.args["mp_state_width"], "sigmoid")
 	in_write_signal		= tf.ones([context.features["d_batch_size"], context.args["mp_state_width"]])
 	in_read_query   	= context.in_question_tokens[:,14,:] # tf.layers.dense(generate_query(context, "mp_read_query")[0], node_table_width)
