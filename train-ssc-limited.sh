@@ -21,4 +21,5 @@ python -m macgraph.train \
 	--embed-width 64 \
 	--learning-rate 1.0 \
 	--max-gradient-norm 100.0 \
+	--batch-size 64 \
 
