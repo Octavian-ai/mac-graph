@@ -15,6 +15,7 @@ python -m macgraph.train \
 	--eval-every 60 \
 	--mp-state-width 1 \
 	--disable-mp-gru \
+	--disable-input-bilstm \
 	--enable-summary-image \
 	--learning-rate 0.015 \
 
