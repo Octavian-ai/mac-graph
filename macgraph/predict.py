@@ -177,8 +177,10 @@ def predict(args, cmd_args):
 									elif part_noun.startswith("prev_output"):
 										db = list(range(i+1))
 
+									attn_sum = sum(row[f'{noun}{head_i}_{part_noun}_attn'][i])
+									assert attn_sum > 0.99, f"Attention does not sum to 1.0 {noun}{head_i}_{part_noun}_attn"
 									v = ' '.join(color_text(db, row[f"{noun}{head_i}_{part_noun}_attn"][i]))
-									print(f"{i}: {noun}{head_i}_{part_noun}_attn: {v}")
+									print(f"{i}: {noun}{head_i}_{part_noun}_attn: {v} [{attn_sum}]")
 
 
 							db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"]]

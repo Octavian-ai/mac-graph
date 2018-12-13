@@ -6,9 +6,11 @@ python -m macgraph.train \
 	--train-max-steps 10 \
 	--tag upto_inf \
 	--tag iter_1 \
+	--tag no_ctrl \
 	--tag kb_edges \
 	--control-heads 2 \
 	--disable-memory-cell \
+	--disable-control-cell \
 	--eval-every 60 \
 	--mp-state-width 1 \
 	--disable-mp-gru \

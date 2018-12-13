@@ -18,7 +18,15 @@ def generate_query(context:CellContext, name):
 		# Produce all the difference sources of addressing query
 		# --------------------------------------------------------------------------
 
-		master_signal = tf.concat([context.in_iter_id, context.in_question_state, context.in_memory_state], -1)
+		ms = [context.in_iter_id]
+
+		if context.args["use_memory_cell"]:
+			ms.append(context.in_memory_state)
+
+		if context.args["use_question_state"]:
+			ms.append(context.in_question_state)
+
+		master_signal = tf.concat(ms, -1)
 
 		# Content address the question tokens
 		token_query = tf.layers.dense(master_signal, context.args["input_width"])
