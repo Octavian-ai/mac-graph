@@ -12,7 +12,7 @@ python -m macgraph.train \
 	--control-heads 2 \
 	--disable-memory-cell \
 	--disable-read-cell \
-	--eval-every 120 \
+	--eval-every 90 \
 	--mp-state-width 1 \
 	--disable-mp-gru \
 	--disable-input-bilstm \
