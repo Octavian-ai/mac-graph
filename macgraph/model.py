@@ -80,8 +80,8 @@ def model_fn(features, labels, mode, params):
 			learning_rate = tf.train.exponential_decay(
 				1E-06, 
 				global_step,
-				decay_steps=1000, 
-				decay_rate=1.3)
+				decay_steps=100, 
+				decay_rate=1.5)
 
 		elif args["use_lr_decay"]:
 			# Doesn't start until 10k steps 

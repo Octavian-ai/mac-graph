@@ -7,6 +7,7 @@ python -m macgraph.train \
 	--tag upto_1 \
 	--tag iter_1 \
 	--tag mp_simple \
+	--tag lrf \
 	--filter-output-class 1 \
 	--filter-output-class 0 \
 	--control-heads 2 \
@@ -20,4 +21,5 @@ python -m macgraph.train \
 	--input-width 64 \
 	--learning-rate 0.015 \
 	--max-gradient-norm 100.0 \
+	--enable-lr-finder \
 
