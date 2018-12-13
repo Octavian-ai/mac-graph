@@ -17,8 +17,8 @@ python -m macgraph.train \
 	--disable-mp-gru \
 	--disable-input-bilstm \
 	--enable-summary-image \
-	--input-width 128 \
-	--embed-width 128 \
+	--input-width 64 \
+	--embed-width 64 \
 	--learning-rate 1.0 \
 	--max-gradient-norm 100.0 \
 

@@ -172,6 +172,7 @@ def attention_compute_scores(keys:tf.Tensor, query:tf.Tensor, key_width:int=None
 		# --------------------------------------------------------------------------
 
 		scores = tf.matmul(keys, tf.expand_dims(query, 2))
+		scores /= tf.shape(query)[-1]
 		scores = dynamic_assert_shape(scores, scores_shape, "scores")
 
 		if keys_len is not None:
