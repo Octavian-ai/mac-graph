@@ -143,9 +143,6 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			output_not, finished = output_cell(self.args, self.features,
 				self.question_state, out_memory_state, reads, out_control_state, mp_reads, in_iter_id)
 
-			output = layer_dense(mp_reads[0], self.args["output_width"], self.args["output_activation"])
-
-
 			out_state = (
 				out_control_state, 
 				out_memory_state, 
