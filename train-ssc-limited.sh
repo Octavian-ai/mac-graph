@@ -19,4 +19,5 @@ python -m macgraph.train \
 	--enable-summary-image \
 	--input-width 64 \
 	--learning-rate 0.015 \
+	--max-gradient-norm 100.0 \
 
