@@ -16,4 +16,4 @@ class CellContext(NamedTuple):
 	in_question_tokens: Tensor
 	in_question_state: Tensor
 	in_node_state: Tensor
-	in_control_state: Tensor
+	control_state: Tensor

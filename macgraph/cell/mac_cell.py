@@ -84,6 +84,17 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 			in_prev_outputs = inputs[-1]
 
+
+			empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)
+			empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
+
+			if self.args["use_control_cell"]:
+				out_control_state, control_taps = control_cell(self.args, self.features, 
+					in_iter_question_state, in_control_state, self.question_state, self.question_tokens)
+			else:
+				out_control_state = in_control_state
+				control_taps = {}
+
 			context = CellContext(
 				features=self.features, 
 				args=self.args,
@@ -95,18 +106,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				in_question_tokens=self.question_tokens,
 				in_question_state=self.question_state,
 				in_node_state=in_node_state,
-				in_control_state=in_control_state,
+				control_state=out_control_state,
 			)
-
-			empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)
-			empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
-
-			if self.args["use_control_cell"]:
-				out_control_state, control_taps = control_cell(self.args, self.features, 
-					in_iter_question_state, in_control_state, self.question_state, self.question_tokens)
-			else:
-				out_control_state = in_control_state
-				control_taps = {}
 		
 			if self.args["use_read_cell"]:
 				reads = []

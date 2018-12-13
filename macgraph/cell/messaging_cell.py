@@ -59,9 +59,9 @@ def messaging_cell(context:CellContext):
 
 	node_table, node_table_width, node_table_len = get_table_with_embedding(context.args, context.features, context.vocab_embedding, "kb_node")
 
-	in_signal = tf.concat([context.in_control_state, context.in_iter_id], -1)
+	in_signal = tf.concat([context.control_state, context.in_iter_id], -1)
 
-	control_parts = tf.reshape(context.in_control_state, [context.features["d_batch_size"], -1, context.args["input_width"]])
+	control_parts = tf.reshape(context.control_state, [context.features["d_batch_size"], -1, context.args["input_width"]])
 
 	# Read/Write queries
 	in_write_query  	= tf.layers.dense(control_parts[:,0,:], node_table_width) # tf.layers.dense(generate_query(context, "mp_write_query")[0], node_table_width)
