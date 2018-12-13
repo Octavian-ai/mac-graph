@@ -59,6 +59,9 @@ def messaging_cell(context:CellContext):
 
 	node_table, node_table_width, node_table_len = get_table_with_embedding(context.args, context.features, context.vocab_embedding, "kb_node")
 
+	node_table_width = context.args["input_width"]
+	node_table = node_table[:,:,0:node_table_width]
+
 	in_signal = tf.concat([context.control_state, context.in_iter_id], -1)
 
 	control_parts = tf.reshape(context.control_state, [context.features["d_batch_size"], -1, context.args["input_width"]])
