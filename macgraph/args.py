@@ -139,7 +139,7 @@ def get_args(extend=lambda parser:None, argv=None):
 		
 	parser.add_argument('--max-gradient-norm',     		type=float, default=0.4)
 	parser.add_argument('--learning-rate',         		type=float, default=1e-3)
-	parser.add_argument('--l2-factor',					type=float, default=0.001)
+	parser.add_argument('--regularization-factor',		type=float, default=0.001)
 	parser.add_argument('--enable-gradient-clipping',	action='store_true', dest='use_gradient_clipping')
 	parser.add_argument('--eval-every',					type=int,	default=7*60, help="Evaluate every X seconds")
 
