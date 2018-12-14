@@ -74,7 +74,7 @@ def messaging_cell(context:CellContext):
 	# in_write_signal 		= layer_dense(in_signal, context.args["mp_state_width"], "sigmoid")
 	in_write_signal			= tf.ones([context.features["d_batch_size"], context.args["mp_state_width"]])
 	# in_read_query   		= context.in_question_tokens[:,14,:] 
-	in_read_query 			= control_parts[:,1,:]
+	in_read_query 			= control_parts[:,0,:]
 	# in_read_query			= tf.layers.dense(generate_query(context, "mp_read_query")[0], node_table_width)
 	# in_read_query			= generate_query(context, "mp_read_query")[0]
 	
