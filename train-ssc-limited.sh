@@ -7,18 +7,19 @@ python -m macgraph.train \
 	--tag upto_1 \
 	--tag iter_1 \
 	--tag mp_simple \
-	--tag with_l2 \
+	--tag with_fixed_embed \
 	--filter-output-class 1 \
 	--filter-output-class 0 \
 	--control-heads 1 \
 	--disable-memory-cell \
 	--disable-read-cell \
+	--enable-embed-const-eye \
 	--eval-every 90 \
 	--mp-state-width 1 \
 	--disable-mp-gru \
 	--disable-input-bilstm \
 	--enable-summary-image \
-	--input-width 64 \
-	--embed-width 64 \
+	--input-width 128 \
+	--embed-width 128 \
 	--learning-rate 1.0 \
 

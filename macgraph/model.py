@@ -32,10 +32,19 @@ def model_fn(features, labels, mode, params):
 	# Shared variables
 	# --------------------------------------------------------------------------
 
-	vocab_embedding = tf.get_variable(
-		"vocab_embedding",
-		[args["vocab_size"], args["embed_width"]],
-		tf.float32)
+	vocab_shape = [args["vocab_size"], args["embed_width"]]
+
+	if args["use_embed_const_eye"]:
+		vocab_embedding = tf.constant(
+			np.eye(*vocab_shape),
+			dtype=tf.float32,
+			shape=vocab_shape)
+
+	else:
+		vocab_embedding = tf.get_variable(
+			"vocab_embedding",
+			shape=vocab_shape,
+			dtype=tf.float32)
 
 	# Doesn't seem to help but interesting idea
 	# vocab_embedding = tf.Variable(tf.eye(args["vocab_size"], args["embed_width"]), name="vocab_embedding")
@@ -67,9 +76,10 @@ def model_fn(features, labels, mode, params):
 		loss_logit = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
 		loss = loss_logit
 
-		l1_regularizer = tf.contrib.layers.l1_regularizer(scale=0.005, scope=None)
-		regularisation_penality = tf.contrib.layers.apply_regularization(l1_regularizer, [vocab_embedding])
-		loss += args["regularization_factor"] * regularisation_penality
+		if args["use_regularization"]:
+			l1_regularizer = tf.contrib.layers.l1_regularizer(scale=0.005, scope=None)
+			regularisation_penality = tf.contrib.layers.apply_regularization(l1_regularizer, [vocab_embedding])
+			loss += args["regularization_factor"] * regularisation_penality
 
 	# --------------------------------------------------------------------------
 	# Optimize

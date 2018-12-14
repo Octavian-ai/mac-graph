@@ -139,6 +139,7 @@ def get_args(extend=lambda parser:None, argv=None):
 		
 	parser.add_argument('--max-gradient-norm',     		type=float, default=0.4)
 	parser.add_argument('--learning-rate',         		type=float, default=1e-3)
+	parser.add_argument('--enable-regularization',		action='store_true', dest='use_regularization')
 	parser.add_argument('--regularization-factor',		type=float, default=0.0001)
 	parser.add_argument('--enable-gradient-clipping',	action='store_true', dest='use_gradient_clipping')
 	parser.add_argument('--eval-every',					type=int,	default=7*60, help="Evaluate every X seconds")
@@ -169,6 +170,8 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--disable-input-adjacency', 	action='store_false', dest='use_input_adjacency')
 
 	parser.add_argument('--embed-width',	       		type=int, default=64,   help="The width of token embeddings")
+	parser.add_argument('--enable-embed-const-eye',		action='store_true', dest='use_embed_const_eye')
+
 	
 	parser.add_argument('--kb-node-width',         		type=int, default=7,    help="Width of node entry into graph table aka the knowledge base")
 	parser.add_argument('--kb-node-max-len',         	type=int, default=40,   help="Maximum number of nodes in kb")
