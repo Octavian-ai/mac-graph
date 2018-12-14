@@ -136,12 +136,15 @@ def predict(args, cmd_args):
 
 			# print("iter_id", row["iter_id"][i])
 
-			def visualize_question_attn(attn):
-				return ' '.join(color_text(row["src"], attn))
+
 
 			if args["use_control_cell"]:
-				for control_head in row["question_word_attn"][i]:
-					print(f"{i}: " + visualize_question_attn(control_head))
+				for idx, control_head in enumerate(row["question_word_attn"][i]):
+					attn_sum = sum(control_head)
+					attn_text = ' '.join(color_text(row["src"], control_head))
+					print(f"{i}: {attn_text}")
+					print(f"{i}: attn {list(zip(row['src'], np.squeeze(control_head)))} Σ={attn_sum}")
+					print(f"{i}: attn_raw", list(zip(row["src"], row["question_word_attn_raw"][i][idx])))
 
 				# print(f"{i}: question_word_attn_raw: ", row["question_word_attn_raw"][i])
 				# print(f"{i}: question_word_attn: ",     row["question_word_attn"][i])
@@ -211,7 +214,7 @@ def predict(args, cmd_args):
 
 
 			if args["use_message_passing"]:
-				for tap in ["mp_read_attn", "mp_write_attn", "mp_write_attn_raw", "mp_read0_attn_raw"]:
+				for tap in ["mp_read0_attn_raw", "mp_read0_attn", "mp_write_attn_raw", "mp_write_attn"]:
 					db = [vocab.prediction_value_to_string(kb_row[0:1]) for kb_row in row["kb_nodes"]]
 					db = db[0:row["kb_nodes_len"]]
 					attn_sum = sum(row[tap][i])

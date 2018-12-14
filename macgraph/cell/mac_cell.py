@@ -32,12 +32,13 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			"question_word_attn": 		self.args["control_heads"] * self.features["d_src_len"],
 			"question_word_attn_raw": 	self.args["control_heads"] * self.features["d_src_len"],
 			
-			"mp_read_attn": 			self.args["kb_node_max_len"],
+			
 			"mp_write_attn": 			self.args["kb_node_max_len"],
 			"mp_write_attn_raw": 		self.args["kb_node_max_len"],
 			"mp_node_state":			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
 			"mp_write_query":			self.args["kb_node_width"] * self.args["embed_width"],	
 			"mp_write_signal":			self.args["mp_state_width"],
+			"mp_read0_attn": 			self.args["kb_node_max_len"],
 			"mp_read0_signal":			self.args["mp_state_width"],
 			"mp_read0_query":			self.args["kb_node_width"],
 			"mp_read0_attn_raw":		self.args["kb_node_max_len"],
@@ -164,8 +165,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			}
 
 			if self.args["use_message_passing"]:
-				for i in ["mp_read_attn", "mp_write_attn", "mp_write_attn_raw", "mp_write_query", "mp_write_signal", 
-						"mp_read0_signal", "mp_read0_query", "mp_read0_attn_raw"]:
+				for i in ["mp_write_attn", "mp_write_attn_raw", "mp_write_query", "mp_write_signal", 
+						  "mp_read0_attn", "mp_read0_attn_raw", "mp_read0_query", "mp_read0_signal" ]:
 					out_taps[i] = mp_taps.get(i, empty_query)
 
 			if self.args["use_read_cell"]:
