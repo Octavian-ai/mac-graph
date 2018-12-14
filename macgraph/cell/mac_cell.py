@@ -39,6 +39,10 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			"mp_write_query":			self.args["kb_node_width"] * self.args["embed_width"],	
 			"mp_write_signal":			self.args["mp_state_width"],
 			"mp_read0_signal":			self.args["mp_state_width"],
+			"mp_read0_query":			self.args["kb_node_width"],
+			"mp_read0_attn_raw":		self.args["kb_node_max_len"],
+
+
 			"iter_id":					self.args["max_decode_iterations"],
 		}
 
@@ -160,7 +164,8 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			}
 
 			if self.args["use_message_passing"]:
-				for i in ["mp_read_attn", "mp_write_attn", "mp_write_attn_raw", "mp_write_query", "mp_write_signal", "mp_read0_signal"]:
+				for i in ["mp_read_attn", "mp_write_attn", "mp_write_attn_raw", "mp_write_query", "mp_write_signal", 
+						"mp_read0_signal", "mp_read0_query", "mp_read0_attn_raw"]:
 					out_taps[i] = mp_taps.get(i, empty_query)
 
 			if self.args["use_read_cell"]:

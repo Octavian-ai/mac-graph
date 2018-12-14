@@ -222,6 +222,8 @@ def do_messaging_cell(context:CellContext,
 			for k,v in a_taps.items():
 				taps[f"mp_read{idx}_{k}"] = v
 			taps[f"mp_read{idx}_signal"] = out_read_signal
+			taps[f"mp_read{idx}_query"] = qry
+
 
 		taps["mp_node_state"] = node_state
 		node_state = dynamic_assert_shape(node_state, node_state_shape, "node_state")
