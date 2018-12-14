@@ -68,7 +68,7 @@ def model_fn(features, labels, mode, params):
 		loss = loss_logit
 
 		l1_regularizer = tf.contrib.layers.l1_regularizer(scale=0.005, scope=None)
-		regularisation_penality = tf.contrib.layers.apply_regularization(l1_regularizer, vocab_embedding)
+		regularisation_penality = tf.contrib.layers.apply_regularization(l1_regularizer, [vocab_embedding])
 		loss += args["regularization_factor"] * regularisation_penality
 
 	# --------------------------------------------------------------------------
