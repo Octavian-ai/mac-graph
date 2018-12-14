@@ -108,8 +108,8 @@ def model_fn(features, labels, mode, params):
 
 		if args["use_gradient_clipping"]:
 			train_op, gradients = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
-		else
-			train_op = optimizer.minimize(loss)
+		else:
+			train_op = optimizer.minimize(loss, global_step=global_step)
 	
 
 	# --------------------------------------------------------------------------
