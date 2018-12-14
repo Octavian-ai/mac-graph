@@ -210,11 +210,14 @@ def predict(args, cmd_args):
 
 
 			if args["use_message_passing"]:
-				for tap in ["mp_read_attn", "mp_write_attn"]:
+				for tap in ["mp_read_attn", "mp_write_attn", "mp_write_attn_raw"]:
 					db = [vocab.prediction_value_to_string(kb_row[0:1]) for kb_row in row["kb_nodes"]]
 					db = db[0:row["kb_nodes_len"]]
+					attn_sum = sum(row[tap][i])
 					print(f"{i}: {tap}: ",', '.join(color_text(db, row[tap][i])))
+					print(f"{i}: {tap}: ", list(zip(db, np.squeeze(row[tap][i]))), f"Σ={attn_sum}")
 
+				print(f"{i}: mp_write_query:  {row['mp_write_query'][i]}")
 				print(f"{i}: mp_write_signal: {row['mp_write_signal'][i]}")
 				print(f"{i}: mp_read0_signal: {row['mp_read0_signal'][i]}")
 				mp_state = color_vector(row['mp_node_state'][i][0:row['kb_nodes_len']])

@@ -171,8 +171,13 @@ def attention_compute_scores(keys:tf.Tensor, query:tf.Tensor, key_width:int=None
 		# Run model
 		# --------------------------------------------------------------------------
 
+		mul = tf.get_variable("attn_mul", [1], dtype=query.dtype)
+		bias = tf.get_variable("attn_bias", [1], dtype=query.dtype)
+
 		scores = tf.matmul(keys, tf.expand_dims(query, 2))
-		scores /= tf.sqrt(tf.cast(tf.shape(query)[-1], scores.dtype))
+		# scores /= tf.sqrt(tf.cast(tf.shape(query)[-1], scores.dtype))
+		scores *= mul
+		scores += bias
 		scores = dynamic_assert_shape(scores, scores_shape, "scores")
 
 		if keys_len is not None:

@@ -71,11 +71,12 @@ def messaging_cell(context:CellContext):
 	# in_write_query		= layer_dense(context.control_state, node_table_width)
 	in_write_query  		= context.in_question_tokens[:,10,:]
 	# in_write_query		= tf.layers.dense(generate_query(context, "mp_write_query")[0], node_table_width)
-	# in_write_signal 	= layer_dense(in_signal, context.args["mp_state_width"], "sigmoid")
-	in_write_signal		= tf.ones([context.features["d_batch_size"], context.args["mp_state_width"]])
-	in_read_query   	= context.in_question_tokens[:,14,:] 
-	# in_read_query		= tf.layers.dense(generate_query(context, "mp_read_query")[0], node_table_width)
-	# in_read_query		= generate_query(context, "mp_read_query")[0]
+	# in_write_signal 		= layer_dense(in_signal, context.args["mp_state_width"], "sigmoid")
+	in_write_signal			= tf.ones([context.features["d_batch_size"], context.args["mp_state_width"]])
+	# in_read_query   		= context.in_question_tokens[:,14,:] 
+	in_read_query 			= control_parts[:,1,:]
+	# in_read_query			= tf.layers.dense(generate_query(context, "mp_read_query")[0], node_table_width)
+	# in_read_query			= generate_query(context, "mp_read_query")[0]
 	
 	return do_messaging_cell(context,
 		node_table, node_table_width, node_table_len,
@@ -172,6 +173,7 @@ def do_messaging_cell(context:CellContext,
 			keys_len=node_table_len,
 			query=in_write_query,
 			value=in_write_signal,
+			name="mp_write_signal"
 		)
 		for k,v in a_taps.items():
 			taps["mp_write_"+k] = v
@@ -213,6 +215,7 @@ def do_messaging_cell(context:CellContext,
 				key_width=node_table_width,
 				query=qry,
 				table=node_state,
+				name=f"mp_read{idx}"
 				)
 			out_read_signals.append(out_read_signal)
 
