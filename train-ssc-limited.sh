@@ -7,6 +7,7 @@ python -m macgraph.train \
 	--tag upto_1 \
 	--tag iter_1 \
 	--tag mp_simple \
+	--tag with_l2 \
 	--filter-output-class 1 \
 	--filter-output-class 0 \
 	--control-heads 1 \
@@ -20,6 +21,4 @@ python -m macgraph.train \
 	--input-width 64 \
 	--embed-width 64 \
 	--learning-rate 1.0 \
-	--max-gradient-norm 100.0 \
-	--batch-size 64 \
 

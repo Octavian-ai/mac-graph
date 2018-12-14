@@ -67,6 +67,9 @@ def model_fn(features, labels, mode, params):
 		loss_logit = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
 		loss = loss_logit
 
+		regularisation_penality = tf.nn.l2_loss(vocab_embedding)
+		loss += args["l2_factor"] * regularisation_penality
+
 	# --------------------------------------------------------------------------
 	# Optimize
 	# --------------------------------------------------------------------------
@@ -102,7 +105,11 @@ def model_fn(features, labels, mode, params):
 			tf.summary.scalar("grad_norm", tf.reduce_max(norms), family="hyperparam")
 
 		optimizer = tf.train.AdamOptimizer(learning_rate)
-		train_op, gradients = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
+
+		if args["use_gradient_clipping"]:
+			train_op, gradients = minimize_clipped(optimizer, loss, args["max_gradient_norm"])
+		else
+			train_op = optimizer.minimize(loss)
 	
 
 	# --------------------------------------------------------------------------

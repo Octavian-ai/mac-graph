@@ -128,6 +128,9 @@ def predict(args, cmd_args):
 
 		print(emoji, " ", answer_part, " - ", ''.join(row['src']).replace('<space>', ' ').replace('<eos>', ''))
 
+		if cmd_args["hide_details"]:
+			return
+
 		for i in range(iterations):
 
 			# print("iter_id", row["iter_id"][i])
@@ -241,7 +244,7 @@ def predict(args, cmd_args):
 	confusion = Counter()
 
 	for count, p in enumerate(predictions):
-		if count >= cmd_args["n_rows"]:
+		if count >= cmd_args["n"]:
 			break
 
 		decode_row(p)
@@ -253,13 +256,6 @@ def predict(args, cmd_args):
 					predicted_classes[p["predicted_label"]] += 1
 
 					correct = p["actual_label"] == p["predicted_label"]
-
-					if correct:
-						emoji = "✅"
-					else:
-						emoji = "❌"
-
-					confusion[emoji + " \texp:" + p["actual_label"] +" \tact:" + p["predicted_label"] + " \t" + p["type_string"]] += 1
 
 					if cmd_args["failed_only"] and not correct:
 						print_row(p)
@@ -275,7 +271,7 @@ if __name__ == "__main__":
 	# Arguments
 	# --------------------------------------------------------------------------
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--n-rows",type=int,default=20)
+	parser.add_argument("--n",type=int,default=20)
 	parser.add_argument("--filter-type-prefix",type=str,default=None)
 	parser.add_argument("--filter-output-class",type=str,default=None)
 	parser.add_argument("--filter-expected-class",type=str,default=None)
@@ -286,6 +282,7 @@ if __name__ == "__main__":
 
 	parser.add_argument("--correct-only",action='store_true')
 	parser.add_argument("--failed-only",action='store_true')
+	parser.add_argument("--hide-details",action='store_true')
 
 	cmd_args = vars(parser.parse_args())
 
