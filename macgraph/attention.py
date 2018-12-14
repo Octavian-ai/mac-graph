@@ -183,7 +183,7 @@ def attention_compute_scores(keys:tf.Tensor, query:tf.Tensor, key_width:int=None
 			scores_mask = tf.expand_dims(scores_mask, -1)
 			scores_mask = dynamic_assert_shape(scores_mask, scores_shape, "scores_mask")
 
-			scores = tf.where(scores_mask, scores, 1e-6)
+			scores = tf.where(scores_mask, scores, tf.fill(scores_shape, -1e9))
 			scores_sm = tf.nn.softmax(scores + EPSILON, axis=1)
 
 			# scores_sm = softmax_with_masking(scores, mask=scores_mask, axis=1, name=name)
