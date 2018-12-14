@@ -13,7 +13,7 @@ from ..util import *
 from ..minception import *
 from ..layers import *
 
-
+query_suffixes = ["token_content_attn", "token_index_attn", "memory_attn", "prev_output_attn", "switch_attn"]
 
 class MACCell(tf.nn.rnn_cell.RNNCell):
 
@@ -27,25 +27,33 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		super().__init__(self)
 
 	def get_taps(self):
+
+		# we need a DSL so badly
+		def add_query_taps(t, prefix):
+			t[f"{prefix}_token_content_attn"] = self.features["d_src_len"]
+			t[f"{prefix}_token_index_attn"  ] = self.features["d_src_len"]
+			t[f"{prefix}_memory_attn" 	    ] = self.args["memory_width"] // self.args["input_width"]
+			t[f"{prefix}_prev_output_attn"  ] = self.args["max_decode_iterations"]
+			t[f"{prefix}_switch_attn" 	    ] = 2
+
+
 		t = {
 			"finished":					1,
 			"question_word_attn": 		self.args["control_heads"] * self.features["d_src_len"],
 			"question_word_attn_raw": 	self.args["control_heads"] * self.features["d_src_len"],
-			
-			
-			"mp_write_attn": 			self.args["kb_node_max_len"],
-			"mp_write_attn_raw": 		self.args["kb_node_max_len"],
 			"mp_node_state":			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
-			"mp_write_query":			self.args["kb_node_width"] * self.args["embed_width"],	
-			"mp_write_signal":			self.args["mp_state_width"],
-			"mp_read0_attn": 			self.args["kb_node_max_len"],
-			"mp_read0_signal":			self.args["mp_state_width"],
-			"mp_read0_query":			self.args["kb_node_width"],
-			"mp_read0_attn_raw":		self.args["kb_node_max_len"],
-
-
 			"iter_id":					self.args["max_decode_iterations"],
 		}
+
+		if self.args["use_message_passing"]:
+			for mp_head in ["mp_write", "mp_read0"]:
+				t[f"{mp_head}_attn"]			= self.args["kb_node_max_len"]
+				t[f"{mp_head}_attn_raw"] 		= self.args["kb_node_max_len"]
+				t[f"{mp_head}_query"]			= self.args["kb_node_width"] * self.args["embed_width"]
+				t[f"{mp_head}_signal"]			= self.args["mp_state_width"]
+
+				add_query_taps(t, mp_head+"_query")
+
 
 		if self.args["use_read_cell"]:
 			for j in range(self.args["read_heads"]):
@@ -60,12 +68,9 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 				for i in self.args["kb_list"]:
 
 					t[f"{i}{j}_attn" 			  ] = self.args[f"{i}_width"] * self.args["embed_width"]
-					t[f"{i}{j}_token_content_attn"] = self.features["d_src_len"]
-					t[f"{i}{j}_token_index_attn"  ] = self.features["d_src_len"]
-					t[f"{i}{j}_memory_attn" 	  ] = self.args["memory_width"] // self.args["input_width"]
-					t[f"{i}{j}_prev_output_attn"  ] = self.args["max_decode_iterations"]
-					t[f"{i}{j}_switch_attn" 	  ] = 2
 					t[f"{i}{j}_word_attn" 		  ] = self.args[f"{i}_width"]
+
+					add_query_taps(t, f"{i}{j}")
 
 		return t
 
@@ -165,9 +170,15 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			}
 
 			if self.args["use_message_passing"]:
-				for i in ["mp_write_attn", "mp_write_attn_raw", "mp_write_query", "mp_write_signal", 
-						  "mp_read0_attn", "mp_read0_attn_raw", "mp_read0_query", "mp_read0_signal" ]:
-					out_taps[i] = mp_taps.get(i, empty_query)
+
+				suffixes = ["_attn", "_attn_raw", "_query", "_signal"]
+				for qt in query_suffixes:
+					suffixes.append("_query_"+qt)
+
+				for mp_head in ["mp_write", "mp_read0"]:
+					for suffix in suffixes:
+						i = mp_head + suffix
+						out_taps[i] = mp_taps.get(i, empty_query)
 
 			if self.args["use_read_cell"]:
 				kk = [k+"_attn" for k in read_control_parts]

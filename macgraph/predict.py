@@ -117,6 +117,28 @@ def predict(args, cmd_args):
 	if not args["use_read_previous_outputs"]:
 		read_control_parts.remove("prev_output")
 
+	def print_query(i, prefix, row):
+		print(f"{i}: {prefix}_switch: ", 
+			' '.join(color_text(read_control_parts, row[f"{prefix}_switch_attn"][i])))
+
+		for idx, part_noun in enumerate(read_control_parts):
+			if row[f"{prefix}_switch_attn"][i][idx] > ATTN_THRESHOLD:
+
+				if part_noun == "step_const":
+					db = None
+				if part_noun.startswith("token"):
+					db = row["src"]
+				elif part_noun == "memory":
+					db = list(range(args["memory_width"]//args["input_width"]))
+				elif part_noun.startswith("prev_output"):
+					db = list(range(i+1))
+
+				if db is not None:
+					attn_sum = sum(row[f'{prefix}_{part_noun}_attn'][i])
+					assert attn_sum > 0.99, f"Attention does not sum to 1.0 {prefix}_{part_noun}_attn"
+					v = ' '.join(color_text(db, row[f"{prefix}_{part_noun}_attn"][i]))
+					print(f"{i}: {prefix}_{part_noun}_attn: {v} [{attn_sum}]")
+
 	def print_row(row):
 		if p["actual_label"] == p["predicted_label"]:
 			emoji = "✅"
@@ -135,8 +157,6 @@ def predict(args, cmd_args):
 		for i in range(iterations):
 
 			# print("iter_id", row["iter_id"][i])
-
-
 
 			if args["use_control_cell"]:
 				for idx, control_head in enumerate(row["question_word_attn"][i]):
@@ -165,27 +185,7 @@ def predict(args, cmd_args):
 					for idx0, noun in enumerate(args["kb_list"]):
 						if row[f"read{head_i}_head_attn"][i][idx0] > ATTN_THRESHOLD:
 
-							print(f"{i}: {noun}{head_i}_switch: ", 
-								' '.join(color_text(read_control_parts, row[f"{noun}{head_i}_switch_attn"][i])))
-
-							for idx, part_noun in enumerate(read_control_parts):
-								if row[f"{noun}{head_i}_switch_attn"][i][idx] > ATTN_THRESHOLD:
-
-									if part_noun == "step_const":
-										print("skip")
-										next
-									if part_noun.startswith("token"):
-										db = row["src"]
-									elif part_noun == "memory":
-										db = list(range(args["memory_width"]//args["input_width"]))
-									elif part_noun.startswith("prev_output"):
-										db = list(range(i+1))
-
-									attn_sum = sum(row[f'{noun}{head_i}_{part_noun}_attn'][i])
-									assert attn_sum > 0.99, f"Attention does not sum to 1.0 {noun}{head_i}_{part_noun}_attn"
-									v = ' '.join(color_text(db, row[f"{noun}{head_i}_{part_noun}_attn"][i]))
-									print(f"{i}: {noun}{head_i}_{part_noun}_attn: {v} [{attn_sum}]")
-
+							print_query(i, f"{noun}{head_i}", row)
 
 							db = [vocab.prediction_value_to_string(kb_row) for kb_row in row[f"{noun}s"]]
 							print(f"{i}: {noun}{head_i}_attn: ",', '.join(color_text(db, row[f"{noun}{head_i}_attn"][i])))
@@ -211,15 +211,21 @@ def predict(args, cmd_args):
 
 
 			if args["use_message_passing"]:
-				for tap in ["mp_read0_attn_raw", "mp_read0_attn", "mp_write_attn_raw", "mp_write_attn"]:
+
+				for mp_head in ["mp_write", "mp_read0"]:
+
+					# -- Print node query ---
+					print_query(i, mp_head+"_query", row)
+
+					# --- Print node attn ---
 					db = [vocab.prediction_value_to_string(kb_row[0:1]) for kb_row in row["kb_nodes"]]
 					# db = db[0:row["kb_nodes_len"]]
-					attn_sum = sum(row[tap][i])
-					print(f"{i}: {tap}: ",', '.join(color_text(db, row[tap][i])))
-					print(f"{i}: {tap}: ", list(zip(db, np.squeeze(row[tap][i]))), f"Σ={attn_sum}")
+					attn_sum = sum(row[mp_head+"_attn"][i])
+					print(f"{i}: {mp_head}_attn: ",', '.join(color_text(db, row[mp_head+"_attn"][i])))
+					# print(f"{i}: {tap}: ", list(zip(db, np.squeeze(row[tap][i]))), f"Σ={attn_sum}")
 
-				for tap in ["mp_write_query", "mp_write_signal", "mp_read0_query", "mp_read0_signal"]:
-					print(f"{i}: {tap}:  {row[tap][i]}")
+					for tap in ["query", "signal"]:
+						print(f"{i}: {mp_head}_{tap}:  {row[f'{mp_head}_{tap}'][i]}")
 
 				mp_state = color_vector(row['mp_node_state'][i][0:row['kb_nodes_len']])
 				node_ids = [' node ' + pad_str(vocab.prediction_value_to_string(row[0])) for row in row['kb_nodes']]

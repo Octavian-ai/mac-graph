@@ -72,6 +72,13 @@ def generate_args_derivatives(args):
 		r["kb_list"].append("kb_edge")
 
 
+	r["mp_head_list"] = ["mp_write", "mp_read0"]
+
+	r["query_sources"] = ["token_content", "token_index", "step_const"]
+	if context.args["use_read_previous_outputs"]:
+		r["query_sources"].append("prev_output")
+
+
 	try:
 		r["vocab"] = Vocab.load(r["vocab_path"], args["vocab_size"])
 	except tf.errors.NotFoundError:
