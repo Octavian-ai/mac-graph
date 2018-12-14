@@ -8,10 +8,11 @@ python -m macgraph.train \
 	--tag iter_1 \
 	--tag mp_simple \
 	--tag with_fixed_embed \
-	--tag with_read_q \
+	--tag with_both_q \
 	--filter-output-class 1 \
 	--filter-output-class 0 \
 	--control-heads 1 \
+	--disable-control-cell \
 	--disable-memory-cell \
 	--disable-read-cell \
 	--enable-embed-const-eye \
