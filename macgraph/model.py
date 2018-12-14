@@ -67,7 +67,8 @@ def model_fn(features, labels, mode, params):
 		loss_logit = tf.reduce_sum(crossent) / tf.to_float(features["d_batch_size"])
 		loss = loss_logit
 
-		regularisation_penality = tf.nn.l1_loss(vocab_embedding)
+		l1_regularizer = tf.contrib.layers.l1_regularizer(scale=0.005, scope=None)
+		regularisation_penality = tf.contrib.layers.apply_regularization(l1_regularizer, vocab_embedding)
 		loss += args["regularization_factor"] * regularisation_penality
 
 	# --------------------------------------------------------------------------
