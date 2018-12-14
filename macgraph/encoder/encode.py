@@ -64,6 +64,7 @@ def encode_input(args, features, vocab_embedding):
 		# --------------------------------------------------------------------------
 
 		src  = tf.nn.embedding_lookup(vocab_embedding, features["src"])
+		src *= tf.sqrt(tf.cast(args["embed_width"], src.dtype)) # As per Transformer model
 		src = dynamic_assert_shape(src, [batch_size, seq_len, args["embed_width"]])
 
 		# --------------------------------------------------------------------------

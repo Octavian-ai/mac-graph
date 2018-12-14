@@ -40,6 +40,8 @@ def get_table_with_embedding(args, features, vocab_embedding, noun):
 	table = dynamic_assert_shape(table, [features["d_batch_size"], d_len, width])
 
 	emb_kb = tf.nn.embedding_lookup(vocab_embedding, table)
+	emb_kb *= tf.sqrt(tf.cast(args["embed_width"], emb_kb.dtype)) # As per Transformer model
+
 	emb_kb = dynamic_assert_shape(emb_kb, 
 		[features["d_batch_size"], d_len, width, args["embed_width"]])
 

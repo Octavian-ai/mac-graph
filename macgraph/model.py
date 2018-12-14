@@ -36,7 +36,7 @@ def model_fn(features, labels, mode, params):
 
 	if args["use_embed_const_eye"]:
 		vocab_embedding = tf.constant(
-			np.eye(*vocab_shape),
+			np.eye(*vocab_shape)*2.0 - 1.0,
 			dtype=tf.float32,
 			shape=vocab_shape)
 
