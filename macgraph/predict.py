@@ -37,8 +37,13 @@ np.set_printoptions(precision=3)
 
 def color_text(text_array, levels, color_fg=True):
 	out = []
+
+	l_max = np.amax(levels)
+	l_min = np.amin(levels)
+
 	for l, s in zip(levels, text_array):
-		l_n = max(0.0, min(1.0, l))
+		l_n = (l - l_min) / (l_max + EPSILON)
+		l_n = max(0.0, min(1.0, l_n))
 		if color_fg:
 			color = fg(int(math.floor(DARK_GREY + l_n * (WHITE-DARK_GREY))))
 		else:
@@ -47,6 +52,7 @@ def color_text(text_array, levels, color_fg=True):
 	return out
 
 def color_vector(vec, show_numbers=True):
+
 	v_max = np.amax(vec)
 	v_min = np.amin(vec)
 	delta = np.abs(v_max - v_min)
@@ -61,7 +67,10 @@ def color_vector(vec, show_numbers=True):
 	def to_color(row):
 		return ' '.join(color_text([format_element(i) for i in row], (row-v_min) / np.maximum(delta, EPSILON)))
 	
-	return [to_color(row) for row in vec]
+	if len(np.shape(vec)) == 1:
+		return to_color(vec)
+	else:
+		return [to_color(row) for row in vec]
 
 def pad_str(s, target=3):
 	if len(s) < target:
@@ -113,7 +122,7 @@ def predict(args, cmd_args):
 		switch_attn = row[f"{prefix}_switch_attn"][i]
 		print(f"{i}: {prefix}_switch: ", 
 			' '.join(color_text(args["query_sources"], row[f"{prefix}_switch_attn"][i])))
-		print(np.squeeze(switch_attn), f"Σ={sum(switch_attn)}")
+		# print(np.squeeze(switch_attn), f"Σ={sum(switch_attn)}")
 
 		for idx, part_noun in enumerate(args["query_sources"]):
 			if row[f"{prefix}_switch_attn"][i][idx] > ATTN_THRESHOLD:
@@ -129,10 +138,12 @@ def predict(args, cmd_args):
 					db = list(range(i+1))
 
 				if db is not None:
-					attn_sum = sum(row[f'{prefix}_{part_noun}_attn'][i])
+					scores = row[f"{prefix}_{part_noun}_attn"][i]
+					attn_sum = sum(scores)
 					assert attn_sum > 0.99, f"Attention does not sum to 1.0 {prefix}_{part_noun}_attn"
-					v = ' '.join(color_text(db, row[f"{prefix}_{part_noun}_attn"][i]))
-					print(f"{i}: {prefix}_{part_noun}_attn: {v} Σ={attn_sum}")
+					v = ' '.join(color_text(db, scores))
+					print(f"{i}: {prefix}_{part_noun}_attn: {v}")
+					print(f"{i}: {prefix}_{part_noun}_attn: {color_vector(np.squeeze(scores))} Σ={attn_sum}")
 
 	def print_row(row):
 		if p["actual_label"] == p["predicted_label"]:
@@ -220,7 +231,8 @@ def predict(args, cmd_args):
 					# print(f"{i}: {tap}: ", list(zip(db, np.squeeze(row[tap][i]))), f"Σ={attn_sum}")
 
 					for tap in ["query", "signal"]:
-						print(f"{i}: {mp_head}_{tap}:  {row[f'{mp_head}_{tap}'][i]}")
+						t_v = row[f'{mp_head}_{tap}'][i]
+						print(f"{i}: {mp_head}_{tap}:  {color_vector(t_v)}")
 
 				mp_state = color_vector(row['mp_node_state'][i][0:row['kb_nodes_len']])
 				node_ids = [' node ' + pad_str(vocab.prediction_value_to_string(row[0])) for row in row['kb_nodes']]
