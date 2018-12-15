@@ -225,7 +225,8 @@ def predict(args, cmd_args):
 
 					# --- Print node attn ---
 					db = [vocab.prediction_value_to_string(kb_row[0:1]) for kb_row in row["kb_nodes"]]
-					# db = db[0:row["kb_nodes_len"]]
+					db = db[0:row["kb_nodes_len"]]
+					
 					attn_sum = sum(row[mp_head+"_attn"][i])
 					print(f"{i}: {mp_head}_attn: ",', '.join(color_text(db, row[mp_head+"_attn"][i])))
 					# print(f"{i}: {tap}: ", list(zip(db, np.squeeze(row[tap][i]))), f"Σ={attn_sum}")

@@ -29,10 +29,10 @@ def generate_query(context:CellContext, name):
 		master_signal = tf.concat(ms, -1)
 
 		# Content address the question tokens
-		token_query = tf.layers.dense(master_signal, context.args["input_width"])
-		token_signal, _, x_taps = attention(context.in_question_tokens, token_query)
-		sources.append(token_signal)
-		add_taps("token_content", x_taps)
+		# token_query = tf.layers.dense(master_signal, context.args["input_width"])
+		# token_signal, _, x_taps = attention(context.in_question_tokens, token_query)
+		# sources.append(token_signal)
+		# add_taps("token_content", x_taps)
 
 		# Index address the question tokens
 		padding = [[0,0], [0, tf.maximum(0,context.args["max_seq_len"] - tf.shape(context.in_question_tokens)[1])], [0,0]] # batch, seq_len, token

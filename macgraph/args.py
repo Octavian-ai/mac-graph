@@ -74,8 +74,8 @@ def generate_args_derivatives(args):
 
 	r["mp_head_list"] = ["mp_write", "mp_read0"]
 
-	r["query_sources"] = ["token_content", "token_index"]
-	r["query_taps"] = ["switch_attn", "token_content_attn", "token_index_attn"]
+	r["query_sources"] = [ "token_index"] # "token_content",
+	r["query_taps"] = ["switch_attn", "token_index_attn"] # "token_content_attn",
 	# r["query_sources"].append("step_const")
 	# r["query_taps"].append("step_const_signal")
 
