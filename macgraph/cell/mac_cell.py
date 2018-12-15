@@ -13,8 +13,6 @@ from ..util import *
 from ..minception import *
 from ..layers import *
 
-query_suffixes = ["token_content_attn", "token_index_attn", "memory_attn", "prev_output_attn", "switch_attn"]
-
 class MACCell(tf.nn.rnn_cell.RNNCell):
 
 	def __init__(self, args, features, question_state, question_tokens, vocab_embedding):
@@ -32,6 +30,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 		def add_query_taps(t, prefix):
 			t[f"{prefix}_token_content_attn"] = self.features["d_src_len"]
 			t[f"{prefix}_token_index_attn"  ] = self.features["d_src_len"]
+			t[f"{prefix}_step_const_signal" ] = self.args["input_width"]
 			t[f"{prefix}_memory_attn" 	    ] = self.args["memory_width"] // self.args["input_width"]
 			t[f"{prefix}_prev_output_attn"  ] = self.args["max_decode_iterations"]
 			t[f"{prefix}_switch_attn" 	    ] = 2
@@ -172,7 +171,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 			if self.args["use_message_passing"]:
 
 				suffixes = ["_attn", "_attn_raw", "_query", "_signal"]
-				for qt in query_suffixes:
+				for qt in self.args["query_taps"]:
 					suffixes.append("_query_"+qt)
 
 				for mp_head in ["mp_write", "mp_read0"]:
@@ -181,9 +180,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 						out_taps[i] = mp_taps.get(i, empty_query)
 
 			if self.args["use_read_cell"]:
-				kk = [k+"_attn" for k in read_control_parts]
-				kk.remove("step_const_attn") # not a thing
-
+				
 				for j in range(self.args["read_heads"]):
 
 					for i in [f"read{j}_head_attn", f"read{j}_head_attn_focus"]:
@@ -194,7 +191,7 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 							out_taps[i] = read_taps[i]
 
 					for i in self.args["kb_list"]:
-						for k in ["attn", *kk]:
+						for k in ["attn", *self.args["query_taps"]]:
 							out_taps[f"{i}{j}_{k}"    ] = tf.squeeze(read_taps.get(f"{i}{j}_{k}", empty_attn), 2)
 						out_taps[f"{i}{j}_switch_attn"] = read_taps.get(f"{i}{j}_switch_attn", empty_attn)
 						out_taps[f"{i}{j}_word_attn"  ] = read_taps.get(f"{i}{j}_word_attn", empty_query)
@@ -232,7 +229,9 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 
 		out_data = [output]
 		for k in self.get_taps().keys():
-			out_data.append(out_taps[k])
+			if k not in out_taps:
+				tf.logging.warning(f"{k} not in MacCell out_taps")
+			out_data.append(out_taps.get(k, tf.zeros([self.features["d_batch_size"], 1])))
 
 		return out_data, out_state
 

@@ -9,8 +9,6 @@ from ..attention import *
 from ..input import UNK_ID, get_table_with_embedding
 from ..layers import *
 
-read_control_parts = ["token_content", "token_index", "step_const", "memory", "prev_output"]
-
 
 # TODO: Make indicator row data be special token
 

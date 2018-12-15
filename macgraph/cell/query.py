@@ -44,8 +44,10 @@ def generate_query(context:CellContext, name):
 		taps["token_index_attn"] = tf.expand_dims(query, 2)
 
 		# Use the iteration id
-		step_const_signal = tf.layers.dense(context.in_iter_id, context.args["input_width"])
-		sources.append(step_const_signal)
+		# Disabling for now as not useful
+		# step_const_signal = tf.layers.dense(context.in_iter_id, context.args["input_width"])
+		# taps["step_const_signal"] = step_const_signal
+		# sources.append(step_const_signal)
 		
 		# Use the memory contents
 		# For now disabled as it forces memory to be too big and is not currently used

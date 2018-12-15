@@ -4,6 +4,7 @@ import tensorflow as tf
 
 from .types import *
 from .query import *
+from .messaging_cell_helpers import *
 
 from ..args import ACTIVATION_FNS
 from ..attention import *
@@ -13,49 +14,8 @@ from ..util import *
 from ..layers import *
 from ..activations import *
 
-MP_State = tf.Tensor
-
-class MP_Node(NamedTuple):
-	id: str
-	properties: tf.Tensor
-	state: MP_State
-
-use_message_passing_fn = False
-use_self_reference = False
-
-def layer_normalize(tensor):
-	'''Apologies if I've abused this term'''
-
-	in_shape = tf.shape(tensor)
-	axes = list(range(1, len(tensor.shape)))
-
-	# Keep batch axis
-	t = tf.reduce_sum(tensor, axis=axes )
-	t += EPSILON
-	t = tf.reciprocal(t)
-	t = tf.check_numerics(t, "1/sum")
-
-	tensor = tf.einsum('brc,b->brc', tensor, t)
-
-	tensor = dynamic_assert_shape(tensor, in_shape, "layer_normalize_tensor")
-	return tensor
-
 
 def messaging_cell(context:CellContext):
-
-	'''
-	Operate a message passing cell
-	Each iteration it'll do one round of message passing
-
-	Returns: read_signal, node_state
-
-	for to_node in nodes:
-		to_node.state = combine_incoming_signals([
-			message_pass(from_node, to_node) for from_node in nodes
-		] + [node_self_update(to_node)])  
-			
-
-	'''
 
 	node_table, node_table_width, node_table_len = get_table_with_embedding(context.args, context.features, context.vocab_embedding, "kb_node")
 
@@ -80,14 +40,14 @@ def messaging_cell(context:CellContext):
 	# in_write_query			= add_taps(generate_query(context, "mp_write_query"), "mp_write_query")
 	# in_write_signal 		= layer_dense(in_signal, context.args["mp_state_width"], "sigmoid")
 	in_write_signal			= tf.ones([context.features["d_batch_size"], context.args["mp_state_width"]])
-	# in_read_query   		= context.in_question_tokens[:,14,:] 
-	# in_read_query 			= control_parts[:,0,:]
-	# in_read_query			= tf.layers.dense(generate_query(context, "mp_read_query")[0], node_table_width)
-	in_read_query			= add_taps(generate_query(context, "mp_read_query"), "mp_read_query")
+	# in_read0_query			= context.in_question_tokens[:,14,:] 
+	# in_read0_query 			= control_parts[:,0,:]
+	# in_read0_query			= tf.layers.dense(generate_query(context, "mp_read_query")[0], node_table_width)
+	in_read0_query			= add_taps(generate_query(context, "mp_read0_query"), "mp_read0_query")
 	
 	out_read_signals, node_state, taps2 = do_messaging_cell(context,
 		node_table, node_table_width, node_table_len,
-		in_write_query, in_write_signal, [in_read_query])
+		in_write_query, in_write_signal, [in_read0_query])
 
 
 	return out_read_signals, node_state, {**taps, **taps2}
@@ -95,18 +55,6 @@ def messaging_cell(context:CellContext):
 
 
 
-def mp_matmul(state, mat, name):
-	return tf.nn.conv1d(state, mat, 1, 'VALID', name=name)
-
-
-"""
-	Where length is the second dimension
-"""
-def pad_to_table_len(tensor, table_to_mimic, name=None):
-	delta = tf.shape(table_to_mimic)[1] - tf.shape(tensor)[1]
-	tensor = tf.pad(tensor, [ [0,0], [0,delta], [0,0] ]) # zero pad out
-	# tensor = dynamic_assert_shape(tensor, tf.shape(table_to_mimic)[0:1]+[tf.shape(tensor)[2]], name)
-	return tensor
 
 def calc_normalized_adjacency(context, node_state):
 	# Aggregate via adjacency matrix with normalisation (that does not include self-edges)
@@ -124,11 +72,6 @@ def calc_normalized_adjacency(context, node_state):
 
 	return node_incoming
 
-def calc_right_shift(node_incoming):
-	shape = tf.shape(node_incoming)
-	node_incoming = tf.concat([node_incoming[:,:,1:],node_incoming[:,:,0:1]], axis=-1) 
-	node_incoming = dynamic_assert_shape(node_incoming, shape, "node_incoming")
-	return node_incoming
 
 
 def node_gru(context, node_state, node_incoming, padded_node_table):
@@ -164,6 +107,20 @@ def node_gru(context, node_state, node_incoming, padded_node_table):
 def do_messaging_cell(context:CellContext, 
 	node_table, node_table_width, node_table_len,
 	in_write_query, in_write_signal, in_read_queries):
+
+	'''
+	Operate a message passing cell
+	Each iteration it'll do one round of message passing
+
+	Returns: read_signal, node_state
+
+	for to_node in nodes:
+		to_node.state = combine_incoming_signals([
+			message_pass(from_node, to_node) for from_node in to_node.neighbors
+		] + [node_self_update(to_node)])  
+			
+
+	'''
 
 	with tf.name_scope("messaging_cell"):
 

@@ -13,8 +13,6 @@ from .estimator import get_estimator
 from .input import *
 from .const import EPSILON
 from .args import get_git_hash
-from .cell import read_control_parts as read_control_parts_global
-
 
 import logging
 logger = logging.getLogger(__name__)
@@ -110,21 +108,18 @@ def predict(args, cmd_args):
 	predictions = estimator.predict(input_fn=gen_input_fn(args, "predict"))
 	vocab = Vocab.load_from_args(args)
 
-	# need to make this data driven
-	read_control_parts = list(read_control_parts_global) # copy
-	if not args["use_memory_cell"]:
-		read_control_parts.remove("memory")
-	if not args["use_read_previous_outputs"]:
-		read_control_parts.remove("prev_output")
 
 	def print_query(i, prefix, row):
+		switch_attn = row[f"{prefix}_switch_attn"][i]
 		print(f"{i}: {prefix}_switch: ", 
-			' '.join(color_text(read_control_parts, row[f"{prefix}_switch_attn"][i])))
+			' '.join(color_text(args["query_sources"], row[f"{prefix}_switch_attn"][i])))
+		print(np.squeeze(switch_attn), f"Σ={sum(switch_attn)}")
 
-		for idx, part_noun in enumerate(read_control_parts):
+		for idx, part_noun in enumerate(args["query_sources"]):
 			if row[f"{prefix}_switch_attn"][i][idx] > ATTN_THRESHOLD:
 
 				if part_noun == "step_const":
+					print(f"{i}: {prefix}_step_const_signal: {row[f'{prefix}_step_const_signal']}")
 					db = None
 				if part_noun.startswith("token"):
 					db = row["src"]
@@ -137,7 +132,7 @@ def predict(args, cmd_args):
 					attn_sum = sum(row[f'{prefix}_{part_noun}_attn'][i])
 					assert attn_sum > 0.99, f"Attention does not sum to 1.0 {prefix}_{part_noun}_attn"
 					v = ' '.join(color_text(db, row[f"{prefix}_{part_noun}_attn"][i]))
-					print(f"{i}: {prefix}_{part_noun}_attn: {v} [{attn_sum}]")
+					print(f"{i}: {prefix}_{part_noun}_attn: {v} Σ={attn_sum}")
 
 	def print_row(row):
 		if p["actual_label"] == p["predicted_label"]:
