@@ -41,6 +41,8 @@ def color_text(text_array, levels, color_fg=True):
 	l_max = np.amax(levels)
 	l_min = np.amin(levels)
 
+	l_max = max(l_max, 1.0)
+
 	for l, s in zip(levels, text_array):
 		l_n = (l - l_min) / (l_max + EPSILON)
 		l_n = max(0.0, min(1.0, l_n))
@@ -227,6 +229,7 @@ def predict(args, cmd_args):
 					db = [vocab.prediction_value_to_string(kb_row[0:1]) for kb_row in row["kb_nodes"]]
 					db = db[0:row["kb_nodes_len"]]
 					
+					tap = mp_head+"_attn"
 					attn_sum = sum(row[mp_head+"_attn"][i])
 					print(f"{i}: {mp_head}_attn: ",', '.join(color_text(db, row[mp_head+"_attn"][i])))
 					# print(f"{i}: {tap}: ", list(zip(db, np.squeeze(row[tap][i]))), f"Σ={attn_sum}")

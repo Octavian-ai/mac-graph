@@ -20,6 +20,8 @@ def generate_token_index_query(context:CellContext, name:str):
 		output = token_index_signal
 		taps["token_index_attn"] = tf.expand_dims(query, 2)
 
+		taps["switch_attn"] = tf.tile(tf.constant([[1.0, 0.0]]), [context.features["d_batch_size"], 1])
+
 		return output, taps
 
 
@@ -49,10 +51,10 @@ def generate_query(context:CellContext, name):
 		master_signal = tf.concat(ms, -1)
 
 		# Content address the question tokens
-		# token_query = tf.layers.dense(master_signal, context.args["input_width"])
-		# token_signal, _, x_taps = attention(context.in_question_tokens, token_query)
-		# sources.append(token_signal)
-		# add_taps("token_content", x_taps)
+		token_query = tf.layers.dense(master_signal, context.args["input_width"])
+		token_signal, _, x_taps = attention(context.in_question_tokens, token_query)
+		sources.append(token_signal)
+		add_taps("token_content", x_taps)
 
 		# Index address the question tokens
 		padding = [[0,0], [0, tf.maximum(0,context.args["max_seq_len"] - tf.shape(context.in_question_tokens)[1])], [0,0]] # batch, seq_len, token
