@@ -8,7 +8,7 @@ python -m macgraph.train \
 	--tag iter_1 \
 	--tag mp_simple \
 	--tag with_fixed_embed \
-	--tag with_both_q \
+	--tag with_read_query \
 	--filter-output-class 1 \
 	--filter-output-class 0 \
 	--control-heads 1 \
