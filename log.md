@@ -231,6 +231,9 @@ The successful station property model does no better than random guessing. I'm e
  - `ce9ca1a70fc678e3d32479888332d322007a1bb2`
  	- 100% on adjacency with forced query
 
+ - `9866573` 100% with forced write query and token_index read query
+ 	- Interesting because using an attn mix of token_index and token_content failed
+
 
 ## Notes on training infrastructure
 
