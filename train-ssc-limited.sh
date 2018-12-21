@@ -11,7 +11,6 @@ python -m macgraph.train \
 	--tag with_read_query \
 	--filter-output-class 1 \
 	--filter-output-class 0 \
-	--control-heads 1 \
 	--disable-control-cell \
 	--disable-memory-cell \
 	--disable-read-cell \
