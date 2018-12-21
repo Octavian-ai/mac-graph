@@ -111,6 +111,9 @@ def model_fn(features, labels, mode, params):
 			gradients = tf.gradients(loss, var)
 			norms = [tf.norm(i, 2) for i in gradients if i is not None]
 
+			for i in gradients if i is not None:
+				tf.summary.scalar(f"gradient_norm_{i.name}", tf.reduce_mean(tf.abs(i)))
+
 			tf.summary.scalar("learning_rate", learning_rate, family="hyperparam")
 			tf.summary.scalar("current_step", global_step, family="hyperparam")
 			tf.summary.scalar("grad_norm", tf.reduce_max(norms), family="hyperparam")
