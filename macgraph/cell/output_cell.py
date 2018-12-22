@@ -6,7 +6,9 @@ from ..args import ACTIVATION_FNS
 from ..util import *
 from ..layers import *
 
-def output_cell(args, features, in_question_state, in_memory_state, in_reads, in_control_state, in_mp_reads, in_iter_id):
+def output_cell(context, in_question_state, in_memory_state, in_reads, in_control_state, in_mp_reads, in_iter_id):
+
+	args = context.args
 
 	with tf.name_scope("output_cell"):
 
@@ -23,6 +25,8 @@ def output_cell(args, features, in_question_state, in_memory_state, in_reads, in
 
 		if args["use_message_passing"]:
 			in_all.extend(in_mp_reads)
+
+		in_all.extend(tf.unstack(context.in_prev_outputs, axis=1))
 
 		in_all = tf.concat(in_all, -1)
 
