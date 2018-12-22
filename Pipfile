@@ -17,6 +17,8 @@ pyyaml = "*"
 tqdm = "*"
 tableprint = "*"
 colored = "*"
+coloredlogs = "*"
+
 
 [requires]
 

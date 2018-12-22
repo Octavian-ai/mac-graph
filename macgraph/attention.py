@@ -238,27 +238,28 @@ def attention_by_index(table, control, name:str="attention_by_index"):
 	'''
 
 	with tf.name_scope(name):
+		with tf.variable_scope(name):
 
-		word_size = tf.shape(table)[-1]
-		seq_len = table.shape[-2]
-		batch_size = tf.shape(table)[0]
+			word_size = tf.shape(table)[-1]
+			seq_len = table.shape[-2]
+			batch_size = tf.shape(table)[0]
 
-		query_shape  = [batch_size, seq_len]
-		output_shape = [batch_size, word_size]
+			query_shape  = [batch_size, seq_len]
+			output_shape = [batch_size, word_size]
 
-		assert seq_len is not None, "Seq len must be defined"
+			assert seq_len is not None, "Seq len must be defined"
 
-		if control is not None:
-			query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
-		else:
-			query_var = tf.get_variable("query", [1, seq_len], trainable=True)
-			query = tf.nn.softmax(query_var)
+			if control is not None:
+				query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
+			else:
+				query_var = tf.get_variable("query", [1, seq_len], trainable=True)
+				query = tf.nn.softmax(query_var)
 
-		weighted_stack = table * tf.expand_dims(query, -1)
-		weighted_sum = tf.reduce_sum(weighted_stack, -2)
+			weighted_stack = table * tf.expand_dims(query, -1)
+			weighted_sum = tf.reduce_sum(weighted_stack, -2)
 
-		output = weighted_sum
-		output = dynamic_assert_shape(output, output_shape)
-		return output, query
-		
+			output = weighted_sum
+			output = dynamic_assert_shape(output, output_shape)
+			return output, query
+			
 

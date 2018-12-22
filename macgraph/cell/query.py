@@ -6,23 +6,24 @@ from .types import *
 
 def generate_token_index_query(context:CellContext, name:str):
 	with tf.name_scope(name):
+		with tf.variable_scope(name):
 
-		taps = {}
+			taps = {}
 
-		master_signal = context.in_iter_id
+			master_signal = context.in_iter_id
 
-		padding = [[0,0], [0, tf.maximum(0,context.args["max_seq_len"] - tf.shape(context.in_question_tokens)[1])], [0,0]] # batch, seq_len, token
-		in_question_tokens_padded = tf.pad(context.in_question_tokens, padding)
-		in_question_tokens_padded.set_shape([None, context.args["max_seq_len"], None])
+			padding = [[0,0], [0, tf.maximum(0,context.args["max_seq_len"] - tf.shape(context.in_question_tokens)[1])], [0,0]] # batch, seq_len, token
+			in_question_tokens_padded = tf.pad(context.in_question_tokens, padding)
+			in_question_tokens_padded.set_shape([None, context.args["max_seq_len"], None])
 
-		token_index_signal, query = attention_by_index(in_question_tokens_padded, None)
-		
-		output = token_index_signal
-		taps["token_index_attn"] = tf.expand_dims(query, 2)
+			token_index_signal, query = attention_by_index(in_question_tokens_padded, None)
+			
+			output = token_index_signal
+			taps["token_index_attn"] = tf.expand_dims(query, 2)
 
-		taps["switch_attn"] = tf.tile(tf.constant([[1.0, 0.0]]), [context.features["d_batch_size"], 1])
+			taps["switch_attn"] = tf.tile(tf.constant([[1.0, 0.0]]), [context.features["d_batch_size"], 1])
 
-		return output, taps
+			return output, taps
 
 
 

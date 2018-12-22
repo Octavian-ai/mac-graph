@@ -7,6 +7,7 @@ import pathlib
 import tensorflow as tf
 import glob
 import logging
+import coloredlogs
 
 from .activations import ACTIVATION_FNS
 from .input import Vocab
@@ -270,6 +271,13 @@ def get_args(extend=lambda parser:None, argv=None):
 	logging.basicConfig()
 	tf.logging.set_verbosity(args["log_level"])
 	logging.getLogger("mac-graph").setLevel(args["log_level"])
+
+	loggers = [logging.getLogger(i) 
+		for i in ["__main__", "pbt", "experiment", "macgraph", "util", "tensorflow"]]
+
+	for i in loggers:
+		i.handlers = []
+		coloredlogs.install(logger=i, level=args["log_level"], fmt='%(levelname)s %(name)s %(message)s')
 
 	return args
 
