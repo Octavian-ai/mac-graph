@@ -234,7 +234,9 @@ The successful station property model does no better than random guessing. I'm e
  - `9866573` 100% with forced write query and token_index read query
  	- Interesting because using an attn mix of token_index and token_content failed
 
- - `44972f3` works for 0 to 1 paths
+ - `44972f3` 
+ 	- sometimes works for 0 to 1 paths - it gets stuck on read + write of same node at times
+ 	- --fast causes it to fail, otherwise it succeeds
 
 
 ## Notes on training infrastructure
