@@ -252,8 +252,9 @@ def attention_by_index(table, control, name:str="attention_by_index"):
 			if control is not None:
 				query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
 			else:
-				query_var = tf.get_variable("query", [1, seq_len], trainable=True)
-				query = tf.nn.softmax(query_var)
+				query = tf.get_variable("query", [1, seq_len], trainable=True)
+				query = tf.tile(query, [batch_size, 1])
+				query = tf.nn.softmax(query)
 
 			weighted_stack = table * tf.expand_dims(query, -1)
 			weighted_sum = tf.reduce_sum(weighted_stack, -2)

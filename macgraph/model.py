@@ -111,11 +111,6 @@ def model_fn(features, labels, mode, params):
 			gradients = tf.gradients(loss, var)
 			norms = [tf.norm(i, 2) for i in gradients if i is not None]
 
-
-
-			for i, j in zip(var, gradients):
-				print("Variable", i.name, "gradient", j)
-
 			for i in gradients:
 				if i is not None:
 					tf.summary.histogram(f"{i.name}", i, family="gradient_norm")

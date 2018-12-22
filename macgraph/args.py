@@ -9,10 +9,11 @@ import glob
 import logging
 import coloredlogs
 
+from .global_args import global_args
+
 from .activations import ACTIVATION_FNS
 from .input import Vocab
 
-global_args = {}
 
 
 def generate_args_derivatives(args):
@@ -253,6 +254,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-tf-debug', 			action='store_true',  dest="use_tf_debug")
 	parser.add_argument('--enable-comet', 				action='store_true',  dest="use_comet")
 	parser.add_argument('--enable-floyd',	 			action='store_true',  dest="use_floyd")
+	parser.add_argument('--diable-assert',	 			action='store_false',  dest="use_assert")
 	parser.add_argument('--disable-summary-scalar', 	action='store_false', dest='use_summary_scalar')
 	parser.add_argument('--enable-summary-image', 		action='store_true', dest='use_summary_image')
 	

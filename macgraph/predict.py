@@ -13,6 +13,7 @@ from .estimator import get_estimator
 from .input import *
 from .const import EPSILON
 from .args import get_git_hash
+from .global_args import global_args
 
 import logging
 logger = logging.getLogger(__name__)
@@ -315,6 +316,9 @@ if __name__ == "__main__":
 
 	# If the directory got renamed, the model_dir might be out of sync, convenience hack
 	frozen_args["model_dir"] = cmd_args["model_dir"]
+
+	global_args.clear()
+	global_args.update(frozen_args)
 
 
 

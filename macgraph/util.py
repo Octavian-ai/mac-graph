@@ -2,6 +2,8 @@
 import tensorflow as tf
 import math
 
+from .global_args import global_args
+
 def tf_assert_almost_equal(x, y, delta=0.001, **kwargs):
 	return tf.assert_less(tf.abs(x-y), delta, **kwargs)
 
@@ -40,21 +42,26 @@ def dynamic_assert_shape(tensor, shape, name=None):
 	Returns: the argument `tensor` unchanged
 	"""
 
-	tensor_shape = tf.shape(tensor)
-	tensor_shape = tf.cast(tensor_shape, tf.int64)
-	
-	expected_shape = tf.convert_to_tensor(shape)
-	expected_shape = tf.cast(expected_shape, tf.int64)
-	
-	t_name = "tensor" if tf.executing_eagerly() else tensor.name
+	if global_args["use_assert"]:
 
-	if isinstance(shape, list):
-		assert len(tensor.shape) == len(shape), f"Tensor shape {tensor_shape} and expected shape {expected_shape} have different lengths"
+		tensor_shape = tf.shape(tensor)
+		tensor_shape = tf.cast(tensor_shape, tf.int64)
+		
+		expected_shape = tf.convert_to_tensor(shape)
+		expected_shape = tf.cast(expected_shape, tf.int64)
+		
+		t_name = "tensor" if tf.executing_eagerly() else tensor.name
 
-	assert_op = tf.assert_equal(tensor_shape, expected_shape, message=f"Asserting shape of {t_name}", summarize=10, name=name)
+		if isinstance(shape, list):
+			assert len(tensor.shape) == len(shape), f"Tensor shape {tensor_shape} and expected shape {expected_shape} have different lengths"
 
-	with tf.control_dependencies([assert_op]):
-		return tf.identity(tensor, name="dynamic_assert_shape")
+		assert_op = tf.assert_equal(tensor_shape, expected_shape, message=f"Asserting shape of {t_name}", summarize=10, name=name)
+
+		with tf.control_dependencies([assert_op]):
+			return tf.identity(tensor, name="dynamic_assert_shape")
+
+	else:
+		return tensor
 
 
 
