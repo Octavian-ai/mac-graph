@@ -241,13 +241,18 @@ def attention_by_index(table, control, name:str="attention_by_index"):
 
 		word_size = tf.shape(table)[-1]
 		seq_len = table.shape[-2]
+		batch_size = tf.shape(table)[0]
 
-		output_shape = [tf.shape(control)[0], word_size]
+		query_shape  = [batch_size, seq_len]
+		output_shape = [batch_size, word_size]
 
 		assert seq_len is not None, "Seq len must be defined"
-		
-		query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
-		
+
+		if control is not None:
+			query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
+		else:
+			query = tf.nn.softmax(tf.get_variable("query", query_shape))
+
 		weighted_stack = table * tf.expand_dims(query, -1)
 		weighted_sum = tf.reduce_sum(weighted_stack, -2)
 

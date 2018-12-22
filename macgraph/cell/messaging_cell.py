@@ -41,8 +41,8 @@ def messaging_cell(context:CellContext):
 	# Read/Write queries
 	# in_write_query 		= context.control_state
 	# in_write_query		= layer_dense(context.control_state, node_table_width)
-	in_write_query  		= context.in_question_tokens[:,10,:]
-	# in_write_query			= add_taps(generate_token_index_query(context, "mp_write_query"), "mp_write_query")
+	# in_write_query  		= context.in_question_tokens[:,10,:]
+	in_write_query			= add_taps(generate_token_index_query(context, "mp_write_query"), "mp_write_query")
 	# in_read0_query			= context.in_question_tokens[:,14,:] 
 	# in_read0_query 			= control_parts[:,0,:]
 	# in_read0_query			= tf.layers.dense(generate_query(context, "mp_read_query")[0], node_table_width)

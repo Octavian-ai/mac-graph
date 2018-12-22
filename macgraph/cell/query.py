@@ -15,7 +15,7 @@ def generate_token_index_query(context:CellContext, name:str):
 		in_question_tokens_padded = tf.pad(context.in_question_tokens, padding)
 		in_question_tokens_padded.set_shape([None, context.args["max_seq_len"], None])
 
-		token_index_signal, query = attention_by_index(in_question_tokens_padded, master_signal)
+		token_index_signal, query = attention_by_index(in_question_tokens_padded, None)
 		
 		output = token_index_signal
 		taps["token_index_attn"] = tf.expand_dims(query, 2)

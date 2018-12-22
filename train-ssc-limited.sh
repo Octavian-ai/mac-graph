@@ -3,12 +3,12 @@
 python -m macgraph.train \
 	--dataset StationShortestCount \
 	--max-decode-iterations 1 \
-	--train-max-steps 4 \
+	--train-max-steps 10 \
 	--tag upto_1 \
 	--tag iter_1 \
 	--tag mp_simple \
 	--tag with_fixed_embed \
-	--tag with_read_query \
+	--tag with_r_w_query \
 	--filter-output-class 1 \
 	--filter-output-class 0 \
 	--disable-control-cell \

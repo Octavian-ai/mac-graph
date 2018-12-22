@@ -84,6 +84,12 @@ def generate_args_derivatives(args):
 		r["query_taps"].append("prev_output_attn")
 
 
+	if args["use_fast"]:
+		r["use_summary_scalar"] = False
+		r["use_summary_image"] = False
+		r["use_assert"] = False
+
+
 
 	try:
 		r["vocab"] = Vocab.load(r["vocab_path"], args["vocab_size"])
@@ -156,6 +162,8 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--regularization-factor',		type=float, default=0.0001)
 	parser.add_argument('--enable-gradient-clipping',	action='store_true', dest='use_gradient_clipping')
 	parser.add_argument('--eval-every',					type=int,	default=7*60, help="Evaluate every X seconds")
+
+	parser.add_argument('--fast',						action='store_true', dest='use_fast')
 
 	# --------------------------------------------------------------------------
 	# Decode
