@@ -1,6 +1,8 @@
 
 import tensorflow as tf
 
+from .component import Component
+
 from .read_cell import *
 from .memory_cell import *
 from .control_cell import *
@@ -13,76 +15,92 @@ from ..util import *
 from ..minception import *
 from ..layers import *
 
-class MACCell(tf.nn.rnn_cell.RNNCell):
+class MAC_RNNCell(tf.nn.rnn_cell.RNNCell):
 
 	def __init__(self, args, features, question_state, question_tokens, vocab_embedding):
+
 		self.args = args
 		self.features = features
+		self.mac = self.MAC_Component(question_state, question_tokens, vocab_embedding)
+
+		super.__init__(self)
+
+
+	def __call__(self, inputs, in_state):
+		'''Build this cell (part of implementing RNNCell)
+
+		This is a wrapper that marshalls our named taps, to 
+		make sure they end up where we expect and are present.
+		
+		Args:
+			inputs: `2-D` tensor with shape `[batch_size, input_size]`.
+			state: if `self.state_size` is an integer, this should be a `2-D Tensor`
+				with shape `[batch_size, self.state_size]`.	Otherwise, if
+				`self.state_size` is a tuple of integers, this should be a tuple
+				with shapes `[batch_size, s] for s in self.state_size`.
+			scope: VariableScope for the created subgraph; defaults to class name.
+		Returns:
+			A pair containing:
+			- Output: A `2-D` tensor with shape `[batch_size, self.output_size]`.
+			- New state: Either a single `2-D` tensor, or a tuple of tensors matching
+				the arity and shapes of `state`.
+		'''
+
+		output, out_state = self.mac.forward(self.args, self.features, inputs, in_state)
+
+		taps = self.mac.recursive_taps()
+
+		out_data = [output]
+
+		for k,v in taps.items()
+			out_data.append(v.tensor)
+
+		return out_data, out_state
+
+
+
+	@property
+	def state_size(self):
+		"""
+		Returns a size tuple
+		"""
+		return (
+			self.args["control_width"], 
+			self.args["memory_width"], 
+			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
+		)
+
+	@property
+	def output_size(self):
+
+		taps = self.mac.recursive_taps()
+		tap_sizes = [v.size for k,v in taps.items()]
+
+		return [
+			self.args["output_width"], 
+		] + tap_sizes
+
+
+
+
+class MAC_Component(Component):
+
+	def __init__(self, question_state, question_tokens, vocab_embedding):
 		self.question_state = question_state
 		self.question_tokens = question_tokens
 		self.vocab_embedding = vocab_embedding
 
-		super().__init__(self)
+		super().__init__("mac_cell")
 
-	def get_taps(self):
+	"""
+	Special forward. Should return output, out_state
+	"""
+	def forward(self, args, features, inputs, in_state):
+		# TODO: remove this transition scaffolding
+		self.args = args
+		self.features = features
 
-		# we need a DSL so badly
-		def add_query_taps(t, prefix):
-			t[f"{prefix}_token_content_attn"] = self.features["d_src_len"]
-			t[f"{prefix}_token_index_attn"  ] = self.features["d_src_len"]
-			t[f"{prefix}_step_const_signal" ] = self.args["input_width"]
-			t[f"{prefix}_memory_attn" 	    ] = self.args["memory_width"] // self.args["input_width"]
-			t[f"{prefix}_prev_output_attn"  ] = self.args["max_decode_iterations"]
-			t[f"{prefix}_switch_attn" 	    ] = 2
-
-
-		t = {
-			"finished":					1,
-			"question_word_attn": 		self.args["control_heads"] * self.features["d_src_len"],
-			"question_word_attn_raw": 	self.args["control_heads"] * self.features["d_src_len"],
-			"mp_node_state":			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
-			"iter_id":					self.args["max_decode_iterations"],
-		}
-
-		if self.args["use_message_passing"]:
-			for mp_head in ["mp_write", "mp_read0"]:
-				t[f"{mp_head}_attn"]			= self.args["kb_node_max_len"]
-				t[f"{mp_head}_attn_raw"] 		= self.args["kb_node_max_len"]
-				t[f"{mp_head}_query"]			= self.args["kb_node_width"] * self.args["embed_width"]
-				t[f"{mp_head}_signal"]			= self.args["mp_state_width"]
-
-				add_query_taps(t, mp_head+"_query")
-
-
-		if self.args["use_read_cell"]:
-			for j in range(self.args["read_heads"]):
-
-				t[f"read{j}_head_attn"        ] = 2 + len(self.args["kb_list"])
-				t[f"read{j}_head_attn_focus"  ] = 2 + len(self.args["kb_list"])
-
-				if self.args["use_read_previous_outputs"]:
-					t[f"read{j}_po_content_attn"  ] = self.args["max_decode_iterations"]
-					t[f"read{j}_po_index_attn"    ] = self.args["max_decode_iterations"]
-
-				for i in self.args["kb_list"]:
-
-					t[f"{i}{j}_attn" 			  ] = self.args[f"{i}_width"] * self.args["embed_width"]
-					t[f"{i}{j}_word_attn" 		  ] = self.args[f"{i}_width"]
-
-					add_query_taps(t, f"{i}{j}")
-
-		return t
-
-
-
-	def build_cell(self, inputs, in_state):
-
-		if self.args["use_independent_iterations"]:
-			reuse=False
-		else:
-			reuse=tf.AUTO_REUSE
-		
-		with tf.variable_scope("mac_cell", reuse=reuse):
+		with tf.variable_scope("mac_cell", reuse=True):
 
 			in_control_state, in_memory_state, in_node_state = in_state
 
@@ -148,16 +166,25 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 					in_memory_state, reads, mp_reads, out_control_state, in_iter_id)
 			else:
 				out_memory_state = in_memory_state
-				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)			
+				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)	
+
+			self.output_cell = OutputCell(context, out_memory_state, reads, mp_reads)
+			output = output_cell.foward(args, features)	
 	
-			output, finished = output_cell(context,
-				self.question_state, out_memory_state, reads, out_control_state, mp_reads, in_iter_id)
+			finished = tf.fill([self.features["d_batch_size"], 1], 0.0)
 
 			out_state = (
 				out_control_state, 
 				out_memory_state, 
 				out_mp_state,
 			)
+
+
+			return output, out_state
+
+
+	def taps(self):
+
 
 			# TODO: AST this all away
 			out_taps = {
@@ -196,64 +223,62 @@ class MACCell(tf.nn.rnn_cell.RNNCell):
 						out_taps[f"{i}{j}_switch_attn"] = read_taps.get(f"{i}{j}_switch_attn", empty_attn)
 						out_taps[f"{i}{j}_word_attn"  ] = read_taps.get(f"{i}{j}_word_attn", empty_query)
 
-			return output, out_taps, out_state
 
 
 
-	def __call__(self, inputs, in_state):
-		'''Build this cell (part of implementing RNNCell)
-
-		This is a wrapper that marshalls our named taps, to 
-		make sure they end up where we expect and are present.
-		
-		Args:
-			inputs: `2-D` tensor with shape `[batch_size, input_size]`.
-			state: if `self.state_size` is an integer, this should be a `2-D Tensor`
-				with shape `[batch_size, self.state_size]`.	Otherwise, if
-				`self.state_size` is a tuple of integers, this should be a tuple
-				with shapes `[batch_size, s] for s in self.state_size`.
-			scope: VariableScope for the created subgraph; defaults to class name.
-		Returns:
-			A pair containing:
-			- Output: A `2-D` tensor with shape `[batch_size, self.output_size]`.
-			- New state: Either a single `2-D` tensor, or a tuple of tensors matching
-				the arity and shapes of `state`.
-		'''
-
-		output, out_taps, out_state = self.build_cell(inputs, in_state)
-
-		out_taps_keys = set(out_taps.keys())
-		expected_keys = set(self.get_taps().keys())
-
-		assert out_taps_keys <= expected_keys, f"Cell builder must return taps in get_taps(), missing {out_taps_keys - expected_keys}"
-
-		out_data = [output]
-		for k in self.get_taps().keys():
-			if k not in out_taps:
-				tf.logging.warning(f"{k} not in MacCell out_taps")
-			out_data.append(out_taps.get(k, tf.zeros([self.features["d_batch_size"], 1])))
-
-		return out_data, out_state
 
 
+	def get_taps(self):
 
-	@property
-	def state_size(self):
-		"""
-		Returns a size tuple
-		"""
-		return (
-			self.args["control_width"], 
-			self.args["memory_width"], 
-			# tf.TensorShape([self.args["data_stack_len"], self.args["data_stack_width"]]),
-			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
-		)
+		# we need a DSL so badly
+		def add_query_taps(t, prefix):
+			t[f"{prefix}_token_content_attn"] = self.features["d_src_len"]
+			t[f"{prefix}_token_index_attn"  ] = self.features["d_src_len"]
+			t[f"{prefix}_step_const_signal" ] = self.args["input_width"]
+			t[f"{prefix}_memory_attn" 	    ] = self.args["memory_width"] // self.args["input_width"]
+			t[f"{prefix}_prev_output_attn"  ] = self.args["max_decode_iterations"]
+			t[f"{prefix}_switch_attn" 	    ] = 2
 
-	@property
-	def output_size(self):
-		return [
-			self.args["output_width"], 
-		] + list(self.get_taps().values())
+
+		t = {
+			"finished":					1,
+			"question_word_attn": 		self.args["control_heads"] * self.features["d_src_len"],
+			"question_word_attn_raw": 	self.args["control_heads"] * self.features["d_src_len"],
+			"mp_node_state":			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
+			"iter_id":					self.args["max_decode_iterations"],
+		}
+
+		if self.args["use_message_passing"]:
+			for mp_head in ["mp_write", "mp_read0"]:
+				t[f"{mp_head}_attn"]			= self.args["kb_node_max_len"]
+				t[f"{mp_head}_attn_raw"] 		= self.args["kb_node_max_len"]
+				t[f"{mp_head}_query"]			= self.args["kb_node_width"] * self.args["embed_width"]
+				t[f"{mp_head}_signal"]			= self.args["mp_state_width"]
+
+				add_query_taps(t, mp_head+"_query")
+
+
+		if self.args["use_read_cell"]:
+			for j in range(self.args["read_heads"]):
+
+				t[f"read{j}_head_attn"        ] = 2 + len(self.args["kb_list"])
+				t[f"read{j}_head_attn_focus"  ] = 2 + len(self.args["kb_list"])
+
+				if self.args["use_read_previous_outputs"]:
+					t[f"read{j}_po_content_attn"  ] = self.args["max_decode_iterations"]
+					t[f"read{j}_po_index_attn"    ] = self.args["max_decode_iterations"]
+
+				for i in self.args["kb_list"]:
+
+					t[f"{i}{j}_attn" 			  ] = self.args[f"{i}_width"] * self.args["embed_width"]
+					t[f"{i}{j}_word_attn" 		  ] = self.args[f"{i}_width"]
+
+					add_query_taps(t, f"{i}{j}")
+
+		return t
+
+
+
 
 
 

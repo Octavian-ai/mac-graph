@@ -5,38 +5,49 @@ from ..minception import *
 from ..args import ACTIVATION_FNS
 from ..util import *
 from ..layers import *
+from ..attention import *
+from ..component import *
 
-def output_cell(context, in_question_state, in_memory_state, in_reads, in_control_state, in_mp_reads, in_iter_id):
 
-	args = context.args
+def OutputCell(Component):
 
-	with tf.name_scope("output_cell"):
+	def __init__(context, memory_state, reads, mp_reads):
+		self.context = context
+		self.memory_state = memory_state
+		self.reads = reads
+		self.mp_reads = reads
 
-		in_all = []
-		
-		if args["use_question_state"]:
-			in_all.append(in_question_state)
+		super.__init__("output_cell")
 
-		if args["use_memory_cell"]:
-			in_all.append(in_memory_state)
-		
-		if args["use_output_read"]:
-			in_all.extend(in_reads)
+	def forward(self, args, features):
 
-		if args["use_message_passing"]:
-			in_all.extend(in_mp_reads)
+		with tf.name_scope(self.name):
 
-		in_all.extend(tf.unstack(context.in_prev_outputs, axis=1))
+			in_all = []
+			
+			if args["use_question_state"]:
+				in_all.append(context.in_question_state)
 
-		in_all = tf.concat(in_all, -1)
+			if args["use_memory_cell"]:
+				in_all.append(in_memory_state)
+			
+			if args["use_output_read"]:
+				in_all.extend(in_reads)
 
-		v = in_all
-		finished = in_all
+			if args["use_message_passing"]:
+				in_all.extend(in_mp_reads)
 
-		for i in range(args["output_layers"]):
-			v = layer_dense(v, args["output_width"], args["output_activation"])
-			finished = layer_dense(v, in_all.shape[-1].value/4, args["output_activation"])
+			prev_query = layer_dense(context.in_iter_id, args["input_width"])
 
-		finished = tf.greater(tf.layers.dense(finished, 1, kernel_initializer=tf.zeros_initializer()), 0.5)
+			self.from_prev = Attention(Tensor(context.in_prev_outputs), Tensor(prev_query))
+			in_all.append(from_prev.forward(args, features))
 
-		return v, finished
+			in_all = tf.concat(in_all, -1)
+
+			v = in_all
+			finished = in_all
+
+			for i in range(args["output_layers"]):
+				v = layer_dense(v, args["output_width"], args["output_activation"], name=f"output{i}")
+
+			return v

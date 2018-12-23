@@ -6,6 +6,8 @@ from .util import *
 from .args import global_args
 from .const import EPSILON
 
+from .component import *
+
 
 def softmax_with_masking(logits, mask, axis, name="", internal_dtype=tf.float64):
 	with tf.name_scope(name+"_softmax_with_masking"):
@@ -81,6 +83,39 @@ def softmax_with_masking(logits, mask, axis, name="", internal_dtype=tf.float64)
 			
 			with tf.control_dependencies([sum_to_one]):
 				return normalized
+
+
+class Attention(Component):
+	def __init__(self, table:Component, query:Component, key_width:int, seq_len:int, keys_len:Tensor=None, name:str):
+		super().__init__(name)
+
+		self.table = table
+		self.query = query
+		self.key_width = key_width
+		self.seq_len = seq_len
+		self.keys_len = keys_len
+
+	def forward(self, args, features):
+		attn, self.focus, self._taps = attention(
+			self.table.forward(args, features),
+			self.query.forward(args, features),
+			self.key_width,
+			self.keys_len,
+			name=self.name
+		)
+
+		return attn
+
+	def taps(self):
+		return {
+			"attn": 	FixedSizeTensor(self._taps['attn'], 	[self.seq_len]), 
+			"attn_raw": FixedSizeTensor(self._taps['attn_raw'],	[self.seq_len])
+		}
+
+	def print(self, taps, path):
+		for k,v in taps.items():
+			print(k,v)
+
 
 
 def attention(table:tf.Tensor, query:tf.Tensor, key_width:int=None, keys_len=None, name="attention"):
