@@ -1,7 +1,7 @@
 
 from typing import *
 
-from abc import ABC
+from abc import *
 import numpy as np
 
 RawTensor = Any
@@ -13,69 +13,109 @@ class FixedSizeTensor(NamedTuple):
 
 class Component(ABC):
 
-	def __init__(name:str):
+	def __init__(self, name:str):
+		'''
+		Components should instantiate their sub-components in init
+
+		This is so that methods like print do not need to run
+		`forward` (which may be impossible outside of a session)
+		prior to being able to recursively print all sub-components.
+		'''
 		self.name = name
 
-	@abstracmethod
-	def forward(self, args:Dict[str, Any], features:Dict[str, RawTensor]):
+	@abstractmethod
+	def forward(self, args:Dict[str, Any], features:Dict[str, RawTensor]) -> RawTensor, Dict[str, RawTensor]:
+		'''
+		Wire the forward pass (e.g. take tensors and return transformed tensors)
+		to ultimately build the whole network
+		'''
+		pass
+
+	def taps(self) -> Dict[str, RawTensor]:
+		'''
+		Get the taps (tensors that provide insight into the workings
+		of the network)
+
+		Forward will always have been called before this method, so 
+		it's ok to stash tensors as instance members in forward
+		then recall them here
+		'''
+		return {}
+
+
+	def tap_sizes(self) -> Dict[str, List[int]]:
+		'''
+		Get the names and sizes of expected taps
+
+		Will be called independently from forward and taps
+		'''
+		return {}
+
+	def print(self, tap_dict:Dict[str, np.array], path:List[str]):
+		'''
+		Print predict output nicely
+		'''
 		pass
 
 
-	# Will always be called AFTER forward
-	@abstracmethod
-	def taps(self) -> Dict[str, FixedSizeTensor]:
-
-	def recursive_taps(self, path:List[str]=[]) -> Dict[str,RawTensor]:
-		new_path = [*path, name]
+	def _do_recursive_map(self, fn, path:List[str]=[]):
+		new_path = [*path, self.name]
 		prefix = '_'.join(new_path)
 		
-		r = taps()
-		r_prefixed = {prefix+"_"+k:v for k,v in r.items()}
+		r = fn(self, prefix, new_path)
 
-		self.taps_keys = [
-			(prefix+"_"+k, k) for k in r.keys()
-		]
-
-		for i in var(self):
+		for i in vars(self):
 			if isinstance(i,Component):
-				r = {**r, i.recursive_taps(new_path)}
+				r = {**r, **i._do_recursive_map(fn, new_path)}
 
 		return r
 
 
-	# Will always be called AFTER taps
-	@abstracmethod
-	def print(self, tap_dict:Dict[str, np.array], path:List[str]):
-		"""Print predict output nicely"""
-		pass
+	def all_taps(self) -> Dict[str,RawTensor]:
+
+		def fn(self, prefix, path):		
+			r = self.taps()
+			r_prefixed = {prefix+"_"+k: v for k,v in r.items()}
+			return r
+
+		return self._do_recursive_map(fn)
+
+	def all_tap_sizes(self) -> Dict[str, List[int]]:
+
+		def fn(self, prefix, path):
+			r = self.tap_sizes()
+			r_prefixed = {prefix+"_"+k: v for k, v in r.items()}
+
+		return self._do_recursive_map(fn)
 
 
-	def recursive_print(self, tap_dict:Dict[str, np.array], path:List[str]=[]):
-		assert self.taps_keys is not None
+	# You must call recursive_taps before this
+	def print_all(self, tap_dict:Dict[str, np.array], path:List[str]=[]):
+		
+		def fn(self, prefix, path):
+			t = self.tap_sizes()
 
-		new_path = [*path, name]
-		my_taps = { k : tap_dict[k_p] for (k_p, k) in self.taps_keys}
+			r = {
+				k: tap_dict[f"{prefix}_{k}"]
+				for k in t.keys()
+			}
 
-		self.print(my_taps, new_path)
+			self.print(r, path)
+			return {}
 
-		for i in var(self):
-			if isinstance(i,Component):
-				i.print(tap_dict, new_path)
+		self._do_recursive_map(fn)
 
 
 
 
 class Tensor(Component):
-	def __init__(tensor:RawTensor, name=None):
-		self.tensor=tensor
+	def __init__(self, name=None):
+		super().__init__(name)
 
-	def forward(args, features):
+	def bind(self, tensor:RawTensor):
+		self.tensor = tensor
+
+	def forward(self, args, features):
 		return self.tensor
-
-	def taps(self):
-		return {}
-
-	def print(self, tap_dict, path):
-		pass
 
 		

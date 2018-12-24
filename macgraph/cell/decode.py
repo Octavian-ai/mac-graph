@@ -25,7 +25,7 @@ def expand_if_needed(t, target=4):
 def dynamic_decode(args, features, inputs, question_state, question_tokens, labels, vocab_embedding):
 	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE) as decoder_scope:
 
-		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
+		d_cell = MAC_RNNCell(args, features, question_state, question_tokens, vocab_embedding)
 		d_cell_initial = d_cell.zero_state(dtype=tf.float32, batch_size=features["d_batch_size"])
 		
 		# --------------------------------------------------------------------------
@@ -93,7 +93,7 @@ def dynamic_decode(args, features, inputs, question_state, question_tokens, labe
 def static_decode(args, features, inputs, question_state, question_tokens, labels, vocab_embedding):
 	with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE):
 
-		d_cell = MACCell(args, features, question_state, question_tokens, vocab_embedding)
+		d_cell = MAC_RNNCell(args, features, question_state, question_tokens, vocab_embedding)
 		d_cell_initial = d_cell.zero_state(dtype=tf.float32, batch_size=features["d_batch_size"])
 		d_cell_empty_output = [tf.zeros([features["d_batch_size"], args["output_width"]])]
 
@@ -135,7 +135,7 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 
 		out_taps = {
 			key: get_tap(idx+1, key)
-			for idx, key in enumerate(d_cell.get_taps().keys())
+			for idx, key in enumerate(d_cell.taps().keys())
 		}
 		
 		return final_output, out_taps

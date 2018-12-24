@@ -1,7 +1,7 @@
 
 import tensorflow as tf
 
-from .component import Component
+from ..component import Component
 
 from .read_cell import *
 from .memory_cell import *
@@ -21,9 +21,13 @@ class MAC_RNNCell(tf.nn.rnn_cell.RNNCell):
 
 		self.args = args
 		self.features = features
-		self.mac = self.MAC_Component(question_state, question_tokens, vocab_embedding)
+		self.question_state = question_state
+		self.question_tokens = question_tokens
+		self.vocab_embedding = vocab_embedding
 
-		super.__init__(self)
+		self.mac = MAC_Component()
+
+		super().__init__(self)
 
 
 	def __call__(self, inputs, in_state):
@@ -46,13 +50,15 @@ class MAC_RNNCell(tf.nn.rnn_cell.RNNCell):
 				the arity and shapes of `state`.
 		'''
 
-		output, out_state = self.mac.forward(self.args, self.features, inputs, in_state)
+		output, out_state = self.mac.forward(self.args, self.features, 
+			inputs, in_state, 
+			self.question_state, self.question_tokens, self.vocab_embedding)
 
-		taps = self.mac.recursive_taps()
+		taps = self.mac.all_taps()
 
 		out_data = [output]
 
-		for k,v in taps.items()
+		for k,v in taps.items():
 			out_data.append(v.tensor)
 
 		return out_data, out_state
@@ -73,8 +79,7 @@ class MAC_RNNCell(tf.nn.rnn_cell.RNNCell):
 	@property
 	def output_size(self):
 
-		taps = self.mac.recursive_taps()
-		tap_sizes = [v.size for k,v in taps.items()]
+		tap_sizes = self.mac.all_tap_sizes()
 
 		return [
 			self.args["output_width"], 
@@ -85,22 +90,22 @@ class MAC_RNNCell(tf.nn.rnn_cell.RNNCell):
 
 class MAC_Component(Component):
 
-	def __init__(self, question_state, question_tokens, vocab_embedding):
-		self.question_state = question_state
-		self.question_tokens = question_tokens
-		self.vocab_embedding = vocab_embedding
-
+	def __init__(self, ):
 		super().__init__("mac_cell")
 
 	"""
 	Special forward. Should return output, out_state
 	"""
-	def forward(self, args, features, inputs, in_state):
+	def forward(self, args, features, inputs, in_state, question_state, question_tokens, vocab_embedding):
 		# TODO: remove this transition scaffolding
 		self.args = args
 		self.features = features
 
-		with tf.variable_scope("mac_cell", reuse=True):
+		self.question_state = question_state
+		self.question_tokens = question_tokens
+		self.vocab_embedding = vocab_embedding
+
+		with tf.variable_scope("mac_cell", reuse=tf.AUTO_REUSE):
 
 			in_control_state, in_memory_state, in_node_state = in_state
 
@@ -111,10 +116,6 @@ class MAC_Component(Component):
 			in_iter_id = dynamic_assert_shape(in_iter_id, [self.features["d_batch_size"], self.args["max_decode_iterations"]], "in_iter_id")
 
 			in_prev_outputs = inputs[-1]
-
-
-			empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)
-			empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
 
 			if self.args["use_control_cell"]:
 				out_control_state, control_taps = control_cell(self.args, self.features, 
@@ -169,10 +170,18 @@ class MAC_Component(Component):
 				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)	
 
 			self.output_cell = OutputCell(context, out_memory_state, reads, mp_reads)
-			output = output_cell.foward(args, features)	
+			output = self.output_cell.forward(args, features)	
 	
-			finished = tf.fill([self.features["d_batch_size"], 1], 0.0)
+			# TODO: tidy away later
+			self.control_taps = control_taps
+			self.read_taps = read_taps
+			self.mp_taps = mp_taps
+			self.tap_memory_forget = tap_memory_forget
 
+			self.mp_state = out_mp_state
+			self.context = context
+
+			
 			out_state = (
 				out_control_state, 
 				out_memory_state, 
@@ -185,50 +194,63 @@ class MAC_Component(Component):
 
 	def taps(self):
 
+		# TODO: Remove all of this and let it run in the subsystem
 
-			# TODO: AST this all away
-			out_taps = {
-				"finished":					tf.cast(finished, tf.float32),
-				"question_word_attn": 		control_taps.get("attn", empty_attn),
-				"question_word_attn_raw": 	control_taps.get("attn_raw", empty_attn),
-				"mp_node_state":			out_mp_state,
-				"iter_id":					in_iter_id,
-			}
+		control_taps = self.control_taps
+		mp_taps = self.mp_taps
+		read_taps = self.read_taps		
 
-			if self.args["use_message_passing"]:
+		empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)
+		empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
 
-				suffixes = ["_attn", "_attn_raw", "_query", "_signal"]
-				for qt in self.args["query_taps"]:
-					suffixes.append("_query_"+qt)
 
-				for mp_head in ["mp_write", "mp_read0"]:
-					for suffix in suffixes:
-						i = mp_head + suffix
-						out_taps[i] = mp_taps.get(i, empty_query)
 
-			if self.args["use_read_cell"]:
-				
-				for j in range(self.args["read_heads"]):
+		# TODO: AST this all away
+		out_taps = {
+			"question_word_attn": 		control_taps.get("attn", empty_attn),
+			"question_word_attn_raw": 	control_taps.get("attn_raw", empty_attn),
+			"mp_node_state":			self.mp_state,
+			"iter_id":					self.context.in_iter_id,
+		}
 
-					for i in [f"read{j}_head_attn", f"read{j}_head_attn_focus"]:
+		if self.args["use_message_passing"]:
+
+			suffixes = ["_attn", "_attn_raw", "_query", "_signal"]
+			for qt in self.args["query_taps"]:
+				suffixes.append("_query_"+qt)
+
+			for mp_head in ["mp_write", "mp_read0"]:
+				for suffix in suffixes:
+					i = mp_head + suffix
+					out_taps[i] = mp_taps.get(i, empty_query)
+
+		if self.args["use_read_cell"]:
+			
+			for j in range(self.args["read_heads"]):
+
+				for i in [f"read{j}_head_attn", f"read{j}_head_attn_focus"]:
+					out_taps[i] = read_taps[i]
+
+				if self.args["use_read_previous_outputs"]:
+					for i in [f"read{j}_po_content_attn", f"read{j}_po_index_attn"]:
 						out_taps[i] = read_taps[i]
 
-					if self.args["use_read_previous_outputs"]:
-						for i in [f"read{j}_po_content_attn", f"read{j}_po_index_attn"]:
-							out_taps[i] = read_taps[i]
+				for i in self.args["kb_list"]:
+					for k in ["attn", *self.args["query_taps"]]:
+						out_taps[f"{i}{j}_{k}"    ] = tf.squeeze(read_taps.get(f"{i}{j}_{k}", empty_attn), 2)
+					out_taps[f"{i}{j}_switch_attn"] = read_taps.get(f"{i}{j}_switch_attn", empty_attn)
+					out_taps[f"{i}{j}_word_attn"  ] = read_taps.get(f"{i}{j}_word_attn", empty_query)
 
-					for i in self.args["kb_list"]:
-						for k in ["attn", *self.args["query_taps"]]:
-							out_taps[f"{i}{j}_{k}"    ] = tf.squeeze(read_taps.get(f"{i}{j}_{k}", empty_attn), 2)
-						out_taps[f"{i}{j}_switch_attn"] = read_taps.get(f"{i}{j}_switch_attn", empty_attn)
-						out_taps[f"{i}{j}_word_attn"  ] = read_taps.get(f"{i}{j}_word_attn", empty_query)
+		
 
-
+		return out_taps
 
 
 
 
-	def get_taps(self):
+	def tap_sizes(self):
+
+		# TODO: Merge with taps / remove all this
 
 		# we need a DSL so badly
 		def add_query_taps(t, prefix):
@@ -241,7 +263,6 @@ class MAC_Component(Component):
 
 
 		t = {
-			"finished":					1,
 			"question_word_attn": 		self.args["control_heads"] * self.features["d_src_len"],
 			"question_word_attn_raw": 	self.args["control_heads"] * self.features["d_src_len"],
 			"mp_node_state":			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
@@ -276,6 +297,9 @@ class MAC_Component(Component):
 					add_query_taps(t, f"{i}{j}")
 
 		return t
+
+	def print(self, tap_dict, path):
+		pass
 
 
 

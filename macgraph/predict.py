@@ -15,6 +15,8 @@ from .const import EPSILON
 from .args import get_git_hash
 from .global_args import global_args
 
+from .cell import MAC_Component
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -121,6 +123,10 @@ def predict(args, cmd_args):
 	vocab = Vocab.load_from_args(args)
 
 
+	# And build the component
+	mac = MAC_Component(None, None, None)
+
+
 	def print_query(i, prefix, row):
 		switch_attn = row[f"{prefix}_switch_attn"][i]
 		print(f"{i}: {prefix}_switch: ", 
@@ -162,6 +168,8 @@ def predict(args, cmd_args):
 
 		if cmd_args["hide_details"]:
 			return
+
+		mac.recursive_print(row)
 
 		for i in range(iterations):
 
