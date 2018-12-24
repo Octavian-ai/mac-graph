@@ -9,8 +9,8 @@ from .const import EPSILON
 from .component import *
 
 class Attention(Component):
-	def __init__(self, table:Component, query:Component, key_width:int=None, seq_len:int=None, keys_len:Tensor=None, name:str=None):
-		super().__init__(name)
+	def __init__(self, args, table:Component, query:Component, key_width:int=None, seq_len:int=None, keys_len:Tensor=None, name:str=None):
+		super().__init__(args, name)
 
 		self.table = table
 		self.query = query
@@ -18,10 +18,10 @@ class Attention(Component):
 		self.seq_len = seq_len
 		self.keys_len = keys_len
 
-	def forward(self, args, features):
+	def forward(self, features):
 		attn, self.focus, self._taps = attention(
-			self.table.forward(args, features),
-			self.query.forward(args, features),
+			self.table.forward(features),
+			self.query.forward(features),
 			self.key_width,
 			self.keys_len,
 			name=self.name

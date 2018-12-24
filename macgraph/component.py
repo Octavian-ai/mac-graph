@@ -13,7 +13,7 @@ class FixedSizeTensor(NamedTuple):
 
 class Component(ABC):
 
-	def __init__(self, name:str):
+	def __init__(self, args:Dict[str, Any], name:str=None):
 		'''
 		Components should instantiate their sub-components in init
 
@@ -21,10 +21,12 @@ class Component(ABC):
 		`forward` (which may be impossible outside of a session)
 		prior to being able to recursively print all sub-components.
 		'''
+		self.args = args
 		self.name = name
 
+
 	@abstractmethod
-	def forward(self, args:Dict[str, Any], features:Dict[str, RawTensor]) -> RawTensor:
+	def forward(self, features:Dict[str, RawTensor]) -> RawTensor:
 		'''
 		Wire the forward pass (e.g. take tensors and return transformed tensors)
 		to ultimately build the whole network
@@ -60,9 +62,9 @@ class Component(ABC):
 
 	def _do_recursive_map(self, fn, path:List[str]=[]):
 		new_path = [*path, self.name]
-		prefix = '_'.join(new_path)
+		new_path = [i for i in new_path if i is not None]
 		
-		r = fn(self, prefix, new_path)
+		r = fn(self, new_path)
 
 		for i in vars(self):
 			if isinstance(i,Component):
@@ -73,9 +75,10 @@ class Component(ABC):
 
 	def all_taps(self) -> Dict[str,RawTensor]:
 
-		def fn(self, prefix, path):		
+		def fn(self, path):		
 			r = self.taps()
-			r_prefixed = {prefix+"_"+k: v for k,v in r.items()}
+			r_prefixed = {'_'.join([*path, k]): v 
+				for k,v in r.items()}
 			return r_prefixed
 
 		sizes = self.all_tap_sizes()
@@ -90,9 +93,11 @@ class Component(ABC):
 
 	def all_tap_sizes(self) -> Dict[str, List[int]]:
 
-		def fn(self, prefix, path):
+		def fn(self, path):
 			r = self.tap_sizes()
-			r_prefixed = {prefix+"_"+k: v for k, v in r.items()}
+			r_prefixed = {'_'.join([*path, k]): v 
+				for k,v in r.items()}
+
 			return r_prefixed
 
 		return self._do_recursive_map(fn)
@@ -101,11 +106,11 @@ class Component(ABC):
 	# You must call recursive_taps before this
 	def print_all(self, tap_dict:Dict[str, np.array], path:List[str]=[]):
 		
-		def fn(self, prefix, path):
+		def fn(self, path):
 			t = self.tap_sizes()
 
 			r = {
-				k: tap_dict[f"{prefix}_{k}"]
+				k: tap_dict['_'.join([*path, k])]
 				for k in t.keys()
 			}
 
@@ -124,7 +129,7 @@ class Tensor(Component):
 	def bind(self, tensor:RawTensor):
 		self.tensor = tensor
 
-	def forward(self, args, features):
+	def forward(self, features):
 		return self.tensor
 
 		

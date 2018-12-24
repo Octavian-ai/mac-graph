@@ -25,7 +25,7 @@ class MAC_RNNCell(tf.nn.rnn_cell.RNNCell):
 		self.question_tokens = question_tokens
 		self.vocab_embedding = vocab_embedding
 
-		self.mac = MAC_Component()
+		self.mac = MAC_Component(args)
 
 		super().__init__(self)
 
@@ -50,8 +50,7 @@ class MAC_RNNCell(tf.nn.rnn_cell.RNNCell):
 				the arity and shapes of `state`.
 		'''
 
-		output, out_state = self.mac.forward(self.args, self.features, 
-			inputs, in_state, 
+		output, out_state = self.mac.forward(self.features, inputs, in_state, 
 			self.question_state, self.question_tokens, self.vocab_embedding)
 
 		taps = self.mac.all_taps()
@@ -94,15 +93,16 @@ class MAC_RNNCell(tf.nn.rnn_cell.RNNCell):
 
 class MAC_Component(Component):
 
-	def __init__(self, ):
-		super().__init__("mac_cell")
+	def __init__(self, args):
+		super().__init__(args, name=None) # empty to preserve legacy naming
+
+		self.output_cell = OutputCell(args)
 
 	"""
 	Special forward. Should return output, out_state
 	"""
-	def forward(self, args, features, inputs, in_state, question_state, question_tokens, vocab_embedding):
+	def forward(self, features, inputs, in_state, question_state, question_tokens, vocab_embedding):
 		# TODO: remove this transition scaffolding
-		self.args = args
 		self.features = features
 
 		self.question_state = question_state
@@ -173,8 +173,7 @@ class MAC_Component(Component):
 				out_memory_state = in_memory_state
 				tap_memory_forget = tf.fill([self.features["d_batch_size"], 1], 0.0)	
 
-			self.output_cell = OutputCell(context, out_memory_state, reads, mp_reads)
-			output = self.output_cell.forward(args, features)	
+			output = self.output_cell.forward(features, context, out_memory_state, reads, mp_reads)	
 	
 			# TODO: tidy away later
 			self.control_taps = control_taps
@@ -204,8 +203,8 @@ class MAC_Component(Component):
 		mp_taps = self.mp_taps
 		read_taps = self.read_taps		
 
-		empty_attn = tf.fill([self.features["d_batch_size"], self.features["d_src_len"], 1], 0.0)
-		empty_query = tf.fill([self.features["d_batch_size"], self.features["d_src_len"]], 0.0)
+		empty_attn = tf.fill([self.features["d_batch_size"], self.args["max_seq_len"], 1], 0.0)
+		empty_query = tf.fill([self.features["d_batch_size"], self.args["max_seq_len"]], 0.0)
 
 
 
@@ -258,8 +257,8 @@ class MAC_Component(Component):
 
 		# we need a DSL so badly
 		def add_query_taps(t, prefix):
-			t[f"{prefix}_token_content_attn"] = self.features["d_src_len"]
-			t[f"{prefix}_token_index_attn"  ] = self.features["d_src_len"]
+			t[f"{prefix}_token_content_attn"] = self.args["max_seq_len"]
+			t[f"{prefix}_token_index_attn"  ] = self.args["max_seq_len"]
 			t[f"{prefix}_step_const_signal" ] = self.args["input_width"]
 			t[f"{prefix}_memory_attn" 	    ] = self.args["memory_width"] // self.args["input_width"]
 			t[f"{prefix}_prev_output_attn"  ] = self.args["max_decode_iterations"]
@@ -267,8 +266,8 @@ class MAC_Component(Component):
 
 
 		t = {
-			"question_word_attn": 		self.args["control_heads"] * self.features["d_src_len"],
-			"question_word_attn_raw": 	self.args["control_heads"] * self.features["d_src_len"],
+			"question_word_attn": 		self.args["control_heads"] * self.args["max_seq_len"],
+			"question_word_attn_raw": 	self.args["control_heads"] * self.args["max_seq_len"],
 			"mp_node_state":			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
 			"iter_id":					self.args["max_decode_iterations"],
 		}
@@ -279,7 +278,7 @@ class MAC_Component(Component):
 				t[f"{mp_head}_attn_raw"] 		= self.args["kb_node_max_len"]
 				t[f"{mp_head}_query"]			= self.args["kb_node_width"] * self.args["embed_width"]
 				t[f"{mp_head}_signal"]			= self.args["mp_state_width"]
-				t[f"{mp_head}_query_token_index_attn"  ] = self.features["d_src_len"]
+				t[f"{mp_head}_query_token_index_attn"  ] = self.args["max_seq_len"]
 
 				# add_query_taps(t, mp_head+"_query")
 

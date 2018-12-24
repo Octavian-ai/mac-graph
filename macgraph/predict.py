@@ -124,7 +124,7 @@ def predict(args, cmd_args):
 
 
 	# And build the component
-	mac = MAC_Component(None, None, None)
+	mac = MAC_Component(args)
 
 
 	def print_query(i, prefix, row):
@@ -155,7 +155,7 @@ def predict(args, cmd_args):
 					print(f"{i}: {prefix}_{part_noun}_attn: {color_vector(np.squeeze(scores))} Σ={attn_sum}")
 
 	def print_row(row):
-		if p["actual_label"] == p["predicted_label"]:
+		if row["actual_label"] == row["predicted_label"]:
 			emoji = "✅"
 			answer_part = f"{stylize(row['predicted_label'], bg(22))}"
 		else:
@@ -169,7 +169,7 @@ def predict(args, cmd_args):
 		if cmd_args["hide_details"]:
 			return
 
-		mac.recursive_print(row)
+		mac.print_all(row)
 
 		for i in range(iterations):
 
@@ -232,7 +232,7 @@ def predict(args, cmd_args):
 				for mp_head in ["mp_write", "mp_read0"]:
 
 					# -- Print node query ---
-					print_query(i, mp_head+"_query", row)
+					# print_query(i, mp_head+"_query", row)
 
 					# --- Print node attn ---
 					db = [vocab.prediction_value_to_string(kb_row[0:1]) for kb_row in row["kb_nodes"]]
