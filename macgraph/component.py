@@ -24,7 +24,7 @@ class Component(ABC):
 		self.name = name
 
 	@abstractmethod
-	def forward(self, args:Dict[str, Any], features:Dict[str, RawTensor]) -> RawTensor, Dict[str, RawTensor]:
+	def forward(self, args:Dict[str, Any], features:Dict[str, RawTensor]) -> RawTensor:
 		'''
 		Wire the forward pass (e.g. take tensors and return transformed tensors)
 		to ultimately build the whole network
@@ -76,15 +76,24 @@ class Component(ABC):
 		def fn(self, prefix, path):		
 			r = self.taps()
 			r_prefixed = {prefix+"_"+k: v for k,v in r.items()}
-			return r
+			return r_prefixed
 
-		return self._do_recursive_map(fn)
+		sizes = self.all_tap_sizes()
+		taps = self._do_recursive_map(fn)
+
+		sk = set(sizes.keys())
+		tk = set(taps.keys())
+
+		assert sk == tk, f"Set mismatch, in sizes but not taps: {sk - tk}, in taps but not sizes: {tk - sk}"
+
+		return taps
 
 	def all_tap_sizes(self) -> Dict[str, List[int]]:
 
 		def fn(self, prefix, path):
 			r = self.tap_sizes()
 			r_prefixed = {prefix+"_"+k: v for k, v in r.items()}
+			return r_prefixed
 
 		return self._do_recursive_map(fn)
 

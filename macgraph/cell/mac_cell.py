@@ -59,9 +59,13 @@ class MAC_RNNCell(tf.nn.rnn_cell.RNNCell):
 		out_data = [output]
 
 		for k,v in taps.items():
-			out_data.append(v.tensor)
+			out_data.append(v)
 
 		return out_data, out_state
+
+
+	def tap_sizes(self):
+		return self.mac.all_tap_sizes()
 
 
 
@@ -216,7 +220,7 @@ class MAC_Component(Component):
 		if self.args["use_message_passing"]:
 
 			suffixes = ["_attn", "_attn_raw", "_query", "_signal"]
-			for qt in self.args["query_taps"]:
+			for qt in ["token_index_attn"]:
 				suffixes.append("_query_"+qt)
 
 			for mp_head in ["mp_write", "mp_read0"]:
@@ -275,8 +279,9 @@ class MAC_Component(Component):
 				t[f"{mp_head}_attn_raw"] 		= self.args["kb_node_max_len"]
 				t[f"{mp_head}_query"]			= self.args["kb_node_width"] * self.args["embed_width"]
 				t[f"{mp_head}_signal"]			= self.args["mp_state_width"]
+				t[f"{mp_head}_query_token_index_attn"  ] = self.features["d_src_len"]
 
-				add_query_taps(t, mp_head+"_query")
+				# add_query_taps(t, mp_head+"_query")
 
 
 		if self.args["use_read_cell"]:

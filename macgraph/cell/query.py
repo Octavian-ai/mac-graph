@@ -21,8 +21,6 @@ def generate_token_index_query(context:CellContext, name:str):
 			output = token_index_signal
 			taps["token_index_attn"] = tf.expand_dims(query, 2)
 
-			taps["switch_attn"] = tf.tile(tf.constant([[1.0, 0.0]]), [context.features["d_batch_size"], 1])
-
 			return output, taps
 
 

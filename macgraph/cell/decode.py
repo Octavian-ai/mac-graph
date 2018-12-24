@@ -135,7 +135,7 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 
 		out_taps = {
 			key: get_tap(idx+1, key)
-			for idx, key in enumerate(d_cell.taps().keys())
+			for idx, key in enumerate(d_cell.tap_sizes().keys())
 		}
 		
 		return final_output, out_taps
