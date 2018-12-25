@@ -157,7 +157,9 @@ def predict(args, cmd_args):
 
 			if args["use_message_passing"]:
 
-				for mp_head in ["mp_write", "mp_read0"]:
+				mp_reads = [f"mp_read{i}" for i in range(args["mp_read_heads"])]
+
+				for mp_head in ["mp_write", *mp_reads]:
 
 					# -- Print node query ---
 					# print_query(i, mp_head+"_query", row)

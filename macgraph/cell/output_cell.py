@@ -12,9 +12,9 @@ from ..component import *
 class OutputCell(Component):
 
 	def __init__(self, args):
-		self.in_prev_outputs = Tensor("in_prev_outputs")
-		self.prev_query = Tensor("prev_query")
-		self.from_prev = Attention(args, self.in_prev_outputs, self.prev_query, seq_len=args["max_decode_iterations"], name="from_prev")
+		# self.in_prev_outputs = Tensor("in_prev_outputs")
+		# self.prev_query = Tensor("prev_query")
+		# self.from_prev = Attention(args, self.in_prev_outputs, self.prev_query, seq_len=args["max_decode_iterations"], name="from_prev")
 
 		super().__init__(args, "output_cell")
 
@@ -42,10 +42,9 @@ class OutputCell(Component):
 			if self.args["use_message_passing"]:
 				in_all.extend(self.mp_reads)
 
-			self.in_prev_outputs.bind(self.context.in_prev_outputs)
-			self.prev_query.bind(layer_dense(self.context.in_iter_id, self.args["input_width"]))
-
-			in_all.append(self.from_prev.forward(features))
+			# self.in_prev_outputs.bind(self.context.in_prev_outputs)
+			# self.prev_query.bind(layer_dense(self.context.in_iter_id, self.args["input_width"]))
+			# in_all.append(self.from_prev.forward(features))
 
 			in_all = tf.concat(in_all, -1)
 

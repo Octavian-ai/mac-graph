@@ -218,11 +218,13 @@ class MAC_Component(Component):
 
 		if self.args["use_message_passing"]:
 
+			mp_reads = [f"mp_read{i}" for i in range(self.args["mp_read_heads"])]
+
 			suffixes = ["_attn", "_attn_raw", "_query", "_signal"]
 			for qt in ["token_index_attn"]:
 				suffixes.append("_query_"+qt)
 
-			for mp_head in ["mp_write", "mp_read0"]:
+			for mp_head in ["mp_write", *mp_reads]:
 				for suffix in suffixes:
 					i = mp_head + suffix
 					out_taps[i] = mp_taps.get(i, empty_query)
@@ -273,7 +275,10 @@ class MAC_Component(Component):
 		}
 
 		if self.args["use_message_passing"]:
-			for mp_head in ["mp_write", "mp_read0"]:
+
+			mp_reads = [f"mp_read{i}" for i in range(self.args["mp_read_heads"])]
+
+			for mp_head in ["mp_write", *mp_reads]:
 				t[f"{mp_head}_attn"]			= self.args["kb_node_max_len"]
 				t[f"{mp_head}_attn_raw"] 		= self.args["kb_node_max_len"]
 				t[f"{mp_head}_query"]			= self.args["kb_node_width"] * self.args["embed_width"]
