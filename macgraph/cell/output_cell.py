@@ -12,9 +12,7 @@ from ..component import *
 class OutputCell(Component):
 
 	def __init__(self, args):
-		# self.in_prev_outputs = Tensor("in_prev_outputs")
-		# self.prev_query = Tensor("prev_query")
-		# self.from_prev = Attention(args, self.in_prev_outputs, self.prev_query, seq_len=args["max_decode_iterations"], name="from_prev")
+		super().__init__(args, "output_cell")
 
 		# TODO: generate this from components
 		tr = []
@@ -24,13 +22,13 @@ class OutputCell(Component):
 		for i in range(args["max_decode_iterations"]):
 			tr.append(f"po{i}")
 
-		if self.args["use_question_state"]:
+		if args["use_question_state"]:
 			tr.append("q_state")
 			
-		if self.args["use_memory_cell"]:
+		if args["use_memory_cell"]:
 			tr.append("mem")
 		
-		if self.args["use_read_cell"]:
+		if args["use_read_cell"]:
 			for i in range(args["read_heads"]):
 				tr.append(f"read{i}")
 
@@ -43,7 +41,7 @@ class OutputCell(Component):
 			table_representation=tr,
 			name="focus")
 
-		super().__init__(args, "output_cell")
+		
 
 	def forward(self, features, context, memory_state, reads, mp_reads):
 
