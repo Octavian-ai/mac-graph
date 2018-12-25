@@ -7,12 +7,10 @@ i=1
 python -m macgraph.train \
 	--dataset StationShortestCount \
 	--max-decode-iterations 2 \
-	--train-max-steps 5 \
+	--train-max-steps 2 \
 	--tag upto_1 \
 	--tag iter_2 \
 	--tag mp_r4 \
-	--tag w_memory \
-	--tag $i \
 	--filter-output-class 1 \
 	--filter-output-class 0 \
 	--disable-control-cell \
@@ -22,7 +20,7 @@ python -m macgraph.train \
 	--eval-every 90 \
 	--mp-state-width 1 \
 	--disable-mp-gru \
-	--mp-read-heads 2 \
+	--mp-read-heads 1 \
 	--memory-width 4 \
 	--input-width 128 \
 	--embed-width 128 \

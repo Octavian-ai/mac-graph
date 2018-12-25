@@ -66,11 +66,6 @@ def model_fn(features, labels, mode, params):
 		question_tokens=question_tokens, 
 		vocab_embedding=vocab_embedding)
 
-
-	var = tf.trainable_variables()
-	for i in var:
-		print(i)
-
 	# --------------------------------------------------------------------------
 	# Calc loss
 	# --------------------------------------------------------------------------
