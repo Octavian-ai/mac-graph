@@ -14,7 +14,7 @@ class OutputCell(Component):
 	def __init__(self, args):
 		self.in_prev_outputs = Tensor("in_prev_outputs")
 		self.prev_query = Tensor("prev_query")
-		self.from_prev = Attention(args, self.in_prev_outputs, self.prev_query)
+		self.from_prev = Attention(args, self.in_prev_outputs, self.prev_query, seq_len=args["max_decode_iterations"], name="from_prev")
 
 		super().__init__(args, "output_cell")
 

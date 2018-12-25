@@ -103,6 +103,12 @@ def static_decode(args, features, inputs, question_state, question_tokens, label
 			with tf.variable_scope("decoder_cell", reuse=tf.AUTO_REUSE):
 				inputs_slice = [item[i] for item in inputs]
 				prev_outputs = [item[0][0] for item in states]
+
+				if len(prev_outputs) < args["max_decode_iterations"]:
+					for i in range(args["max_decode_iterations"] - len(prev_outputs)):
+						prev_outputs.append(d_cell_empty_output[0])
+
+				assert len(prev_outputs) == args["max_decode_iterations"]
 				prev_outputs = tf.stack(prev_outputs, axis=1)
 				
 				inputs_for_iteration = [*inputs_slice, prev_outputs]

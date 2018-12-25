@@ -53,7 +53,7 @@ class Component(ABC):
 		'''
 		return {}
 
-	def print(self, tap_dict:Dict[str, np.array], path:List[str]):
+	def print(self, tap_dict:Dict[str, np.array], path:List[str], prefix:str, all_features:Dict[str, np.array]):
 		'''
 		Print predict output nicely
 		'''
@@ -66,9 +66,9 @@ class Component(ABC):
 		
 		r = fn(self, new_path)
 
-		for i in vars(self):
-			if isinstance(i,Component):
-				r = {**r, **i._do_recursive_map(fn, new_path)}
+		for k, v in vars(self).items():
+			if issubclass(type(v), Component):
+				r = {**r, **v._do_recursive_map(fn, new_path)}
 
 		return r
 
@@ -104,17 +104,16 @@ class Component(ABC):
 
 
 	# You must call recursive_taps before this
-	def print_all(self, tap_dict:Dict[str, np.array], path:List[str]=[]):
+	def print_all(self, all_features:Dict[str, np.array]):
 		
 		def fn(self, path):
 			t = self.tap_sizes()
 
 			r = {
-				k: tap_dict['_'.join([*path, k])]
+				k: all_features['_'.join([*path, k])]
 				for k in t.keys()
 			}
-
-			self.print(r, path)
+			self.print(r, path, '_'.join(path), all_features)
 			return {}
 
 		self._do_recursive_map(fn)

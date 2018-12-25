@@ -5,11 +5,12 @@ from .util import *
 
 from .args import global_args
 from .const import EPSILON
+from .print_util import *
 
 from .component import *
 
 class Attention(Component):
-	def __init__(self, args, table:Component, query:Component, key_width:int=None, seq_len:int=None, keys_len:Tensor=None, name:str=None):
+	def __init__(self, args, table:Component, query:Component, key_width:int=None, seq_len:int=None, keys_len:Tensor=None, table_representation=None, name:str=None):
 		super().__init__(args, name)
 
 		self.table = table
@@ -17,6 +18,7 @@ class Attention(Component):
 		self.key_width = key_width
 		self.seq_len = seq_len
 		self.keys_len = keys_len
+		self.table_representation = table_representation
 
 	def forward(self, features):
 		attn, self.focus, self._taps = attention(
@@ -41,9 +43,20 @@ class Attention(Component):
 			"attn_raw": [self.seq_len],
 		}
 
-	def print(self, taps, path):
-		for k,v in taps.items():
-			print(k,v)
+	def print(self, taps, path, prefix, all_features):
+		if self.table_representation is None:
+			table_rep = list(range(len(taps["attn"])))
+		elif isinstance(self.table_representation, str):
+			table_rep = all_features[self.table_representation]
+		else:
+			table_rep = self.table_representation
+
+		l = ' '.join(color_text(table_rep, taps["attn"].flatten()))
+
+		print(prefix, l)
+
+
+
 
 
 def softmax_with_masking(logits, mask, axis, name="", internal_dtype=tf.float64):

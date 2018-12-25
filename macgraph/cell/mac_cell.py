@@ -302,10 +302,6 @@ class MAC_Component(Component):
 
 		return t
 
-	def print(self, tap_dict, path):
-		pass
-
-
 
 
 
