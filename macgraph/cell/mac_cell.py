@@ -96,6 +96,7 @@ class MAC_Component(Component):
 	def __init__(self, args):
 		super().__init__(args, name=None) # empty to preserve legacy naming
 
+		self.iter_id = PrintTensor(args["max_decode_iterations"], "iter_id")
 		self.output_cell = OutputCell(args)
 
 	"""
@@ -118,6 +119,7 @@ class MAC_Component(Component):
 			
 			in_iter_id = inputs[1]
 			in_iter_id = dynamic_assert_shape(in_iter_id, [self.features["d_batch_size"], self.args["max_decode_iterations"]], "in_iter_id")
+			self.iter_id.bind(in_iter_id)
 
 			in_prev_outputs = inputs[-1]
 

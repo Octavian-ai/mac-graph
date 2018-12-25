@@ -16,12 +16,12 @@ class OutputCell(Component):
 		# self.prev_query = Tensor("prev_query")
 		# self.from_prev = Attention(args, self.in_prev_outputs, self.prev_query, seq_len=args["max_decode_iterations"], name="from_prev")
 
-		self.output_table = Tensor("output_table")
-		self.output_query = Tensor("output_focus_query")
+		self.output_table = Tensor("table")
+		self.output_query = Tensor("focus_query")
 		self.focus = AttentionByIndex(args, 
-			self.output_table, self.output_query, seq_len=4, 
+			self.output_table, self.output_query, seq_len=6, 
 			table_representation=["mp0", "mp1", "mp2", "mp3", "po0", "po1"],
-			name="output_focus")
+			name="focus")
 
 		super().__init__(args, "output_cell")
 

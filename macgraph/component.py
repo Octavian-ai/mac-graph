@@ -4,6 +4,8 @@ from typing import *
 from abc import *
 import numpy as np
 
+from .print_util import *
+
 RawTensor = Any
 
 
@@ -13,7 +15,7 @@ class FixedSizeTensor(NamedTuple):
 
 class Component(ABC):
 
-	def __init__(self, args:Dict[str, Any], name:str=None):
+	def __init__(self, args:Dict[str, Any]={}, name:str=None):
 		'''
 		Components should instantiate their sub-components in init
 
@@ -87,7 +89,7 @@ class Component(ABC):
 		sk = set(sizes.keys())
 		tk = set(taps.keys())
 
-		assert sk == tk, f"Set mismatch, in sizes but not taps: {sk - tk}, in taps but not sizes: {tk - sk}"
+		assert sk == tk, f"Set mismatch, in sizes but not taps: {sk - tk}, in taps but not sizes: {tk - sk}.  \nFull sets taps:{tk} \ntap_sizes:{sk}"
 
 		return taps
 
@@ -123,12 +125,35 @@ class Component(ABC):
 
 class Tensor(Component):
 	def __init__(self, name=None):
-		super().__init__(name)
+		super().__init__(name=name)
 
 	def bind(self, tensor:RawTensor):
 		self.tensor = tensor
 
 	def forward(self, features):
 		return self.tensor
+
+
+
+
+class PrintTensor(Tensor):
+
+	def __init__(self, width, name):
+		super().__init__(name=name)
+		self.width = width
+
+	def taps(self):
+		return {
+			"tensor": self.tensor
+		}
+
+	def tap_sizes(self):
+		return {
+			"tensor": [self.width]
+		}
+
+	def print(self, taps, path, prefix, all):
+		print(prefix, color_vector(taps["tensor"]))
+
 
 		
