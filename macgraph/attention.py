@@ -58,6 +58,47 @@ class Attention(Component):
 
 
 
+class AttentionByIndex(Component):
+	def __init__(self, args, table:Component, control:Component,  seq_len:int=None, table_representation=None, name:str=None):
+		super().__init__(args, name)
+
+		self.table = table
+		self.control = control
+		self.seq_len = seq_len
+		self.table_representation = table_representation
+
+	def forward(self, features):
+		output, self.tap_attn = attention_by_index(
+			self.table.forward(features),
+			self.control.forward(features),
+			name=self.name
+			)
+
+		return output
+
+	def taps(self):
+		return {
+			"attn": 	self.tap_attn, 
+		}
+
+	def tap_sizes(self):
+		return {
+			"attn": 	[self.seq_len],
+		}
+
+	def print(self, taps, path, prefix, all_features):
+		if self.table_representation is None:
+			table_rep = list(range(len(taps["attn"])))
+		elif isinstance(self.table_representation, str):
+			table_rep = all_features[self.table_representation]
+		else:
+			table_rep = self.table_representation
+
+		l = ' '.join(color_text(table_rep, taps["attn"].flatten()))
+
+		print(prefix, l)
+
+
 
 def softmax_with_masking(logits, mask, axis, name="", internal_dtype=tf.float64):
 	with tf.name_scope(name+"_softmax_with_masking"):

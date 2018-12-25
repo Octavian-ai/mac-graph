@@ -78,6 +78,30 @@ def minimize_clipped(optimizer, value, max_gradient_norm, var=None):
 	return op, grad_dict
 
 
+
+"""
+	Where length is the second dimension
+"""
+def pad_to_table_len(tensor, table_to_mimic, name=None):
+	delta = tf.shape(table_to_mimic)[1] - tf.shape(tensor)[1]
+	tensor = tf.pad(tensor, [ [0,0], [0,delta], [0,0] ], name=name) # zero pad out
+	# tensor = dynamic_assert_shape(tensor, tf.shape(table_to_mimic)[0:1]+[tf.shape(tensor)[2]], name)
+	return tensor
+
+
+"""
+	Where length is the second dimension
+"""
+def pad_to_len(tensor, len:int, name=None):
+	delta = len - tf.shape(tensor)[1]
+	tensor = tf.pad(tensor, [ [0,0], [0,delta], [0,0] ], name=name) # zero pad out
+	# tensor = dynamic_assert_shape(tensor, tf.shape(table_to_mimic)[0:1]+[tf.shape(tensor)[2]], name)
+	return tensor
+
+
+
+
+
 def vector_to_barcode(tensor):
 	width = tf.shape(tensor)[-1]
 	barcode_height = tf.cast(tf.round(tf.div(tf.cast(width, tf.float32), 3.0)), tf.int32)

@@ -46,14 +46,6 @@ def mp_matmul(state, mat, name):
 	return tf.nn.conv1d(state, mat, 1, 'VALID', name=name)
 
 
-"""
-	Where length is the second dimension
-"""
-def pad_to_table_len(tensor, table_to_mimic, name=None):
-	delta = tf.shape(table_to_mimic)[1] - tf.shape(tensor)[1]
-	tensor = tf.pad(tensor, [ [0,0], [0,delta], [0,0] ]) # zero pad out
-	# tensor = dynamic_assert_shape(tensor, tf.shape(table_to_mimic)[0:1]+[tf.shape(tensor)[2]], name)
-	return tensor
 
 
 

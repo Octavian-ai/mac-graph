@@ -7,7 +7,7 @@ def get_estimator(args):
 
 	run_config = tf.estimator.RunConfig(
 		model_dir=args["model_dir"],
-		tf_random_seed=3,
+		tf_random_seed=args["random_seed"],
 		save_checkpoints_steps=None,
 		save_checkpoints_secs=args["eval_every"],
 	)
