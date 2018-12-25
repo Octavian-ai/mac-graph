@@ -18,7 +18,10 @@ class OutputCell(Component):
 
 		self.output_table = Tensor("output_table")
 		self.output_query = Tensor("output_focus_query")
-		self.focus = AttentionByIndex(args, self.output_table, self.output_query, seq_len=4, name="output_focus")
+		self.focus = AttentionByIndex(args, 
+			self.output_table, self.output_query, seq_len=4, 
+			table_representation=["mp0", "mp1", "mp2", "mp3", "po0", "po1"],
+			name="output_focus")
 
 		super().__init__(args, "output_cell")
 
@@ -52,7 +55,6 @@ class OutputCell(Component):
 
 			if self.args["use_message_passing"]:
 				add_all(self.mp_reads)
-
 
 
 			prev_outputs = tf.unstack(self.context.in_prev_outputs, axis=1)

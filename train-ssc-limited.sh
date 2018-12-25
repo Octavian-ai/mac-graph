@@ -6,10 +6,10 @@
 i=1
 python -m macgraph.train \
 	--dataset StationShortestCount \
-	--max-decode-iterations 1 \
+	--max-decode-iterations 2 \
 	--train-max-steps 2 \
 	--tag upto_1 \
-	--tag iter_1 \
+	--tag iter_2 \
 	--tag mp_r4 \
 	--tag $i \
 	--filter-output-class 1 \
