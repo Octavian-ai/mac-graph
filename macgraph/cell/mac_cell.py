@@ -155,7 +155,7 @@ class MAC_Component(Component):
 					reads.append(read)
 					read_taps = {**read_taps, **read_taps_}
 			else:
-				reads = [tf.fill([self.features["d_batch_size"], 1], 0.0)]
+				reads = [tf.fill([self.features["d_batch_size"], self.args["read_width"]], 0.0, name="fake_read")]
 				read_taps = {}
 
 
@@ -163,7 +163,7 @@ class MAC_Component(Component):
 				mp_reads, out_mp_state, mp_taps = messaging_cell(context)
 			else:
 				out_mp_state = in_node_state
-				mp_reads = [tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0)]
+				mp_reads = [tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0, name="fake_mp_read")]
 				mp_taps = {}
 			
 			if self.args["use_memory_cell"]:

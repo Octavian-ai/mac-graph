@@ -50,7 +50,7 @@ class OutputCell(Component):
 			if self.args["use_memory_cell"]:
 				add(self.memory_state)
 			
-			if self.args["use_output_read"]:
+			if self.args["use_read_cell"]:
 				add_all(self.reads)
 
 			if self.args["use_message_passing"]:
@@ -61,7 +61,6 @@ class OutputCell(Component):
 			add_all(prev_outputs)
 			# add(tf.reshape(self.context.in_prev_outputs, [features["d_batch_size"], self.args["max_decode_iterations"] * self.args["output_width"]]))
 
-			
 			in_stack = tf.stack(in_all, axis=1)
 			in_stack = dynamic_assert_shape(in_stack, [features["d_batch_size"], None, self.args["input_width"]])
 
