@@ -237,8 +237,6 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--enable-mp-right-shift', 		action='store_false', dest='use_mp_right_shift')
 	parser.add_argument('--mp-read-heads',				type=int, default=1)
 
-
-
 	parser.add_argument('--output-activation',			type=str, default="selu", choices=ACTIVATION_FNS.keys())
 	parser.add_argument('--output-layers',				type=int, default=1)
 	parser.add_argument('--output-width',	       		type=int, default=128,    help="The number of different possible answers (e.g. answer classes). Currently tied to vocab size since we attempt to tokenise the output.")
