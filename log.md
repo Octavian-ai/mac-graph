@@ -238,6 +238,10 @@ The successful station property model does no better than random guessing. I'm e
  	- sometimes works for 0 to 1 paths - it gets stuck on read + write of same node at times
  	- --fast causes it to fail, otherwise it succeeds
 
+ - `4bef897`
+ 	- works for iter two after shrinking LR to 0.1
+ 	- single mp head, output cell has attention_by_index of both mp reads and previous outputs
+
 
 ## Notes on training infrastructure
 

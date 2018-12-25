@@ -16,11 +16,31 @@ class OutputCell(Component):
 		# self.prev_query = Tensor("prev_query")
 		# self.from_prev = Attention(args, self.in_prev_outputs, self.prev_query, seq_len=args["max_decode_iterations"], name="from_prev")
 
+		# TODO: generate this from components
+		tr = []
+		for i in range(args["mp_read_heads"]):
+			tr.append(f"mp{i}")
+
+		for i in range(args["max_decode_iterations"]):
+			tr.append(f"po{i}")
+
+		if self.args["use_question_state"]:
+			tr.append("q_state")
+			
+		if self.args["use_memory_cell"]:
+			tr.append("mem")
+		
+		if self.args["use_read_cell"]:
+			for i in range(args["read_heads"]):
+				tr.append(f"read{i}")
+
+
+
 		self.output_table = Tensor("table")
 		self.output_query = Tensor("focus_query")
 		self.focus = AttentionByIndex(args, 
 			self.output_table, self.output_query, seq_len=6, 
-			table_representation=["mp0", "mp1", "mp2", "mp3", "po0", "po1"],
+			table_representation=tr,
 			name="focus")
 
 		super().__init__(args, "output_cell")
@@ -43,6 +63,12 @@ class OutputCell(Component):
 			def add_all(t):
 				for i in t:
 					add(i)
+
+			if self.args["use_message_passing"]:
+				add_all(self.mp_reads)
+
+			prev_outputs = tf.unstack(self.context.in_prev_outputs, axis=1)
+			add_all(prev_outputs)
 			
 			if self.args["use_question_state"]:
 				add(self.context.in_question_state)
@@ -53,14 +79,7 @@ class OutputCell(Component):
 			if self.args["use_read_cell"]:
 				add_all(self.reads)
 
-			if self.args["use_message_passing"]:
-				add_all(self.mp_reads)
-
-
-			prev_outputs = tf.unstack(self.context.in_prev_outputs, axis=1)
-			add_all(prev_outputs)
-			# add(tf.reshape(self.context.in_prev_outputs, [features["d_batch_size"], self.args["max_decode_iterations"] * self.args["output_width"]]))
-
+			
 			in_stack = tf.stack(in_all, axis=1)
 			in_stack = dynamic_assert_shape(in_stack, [features["d_batch_size"], None, self.args["input_width"]])
 
