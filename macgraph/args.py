@@ -234,6 +234,7 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--disable-mp-gru', 			action='store_false', dest='use_mp_gru')
 	parser.add_argument('--enable-mp-node-id', 			action='store_false', dest='use_mp_node_id')
 	parser.add_argument('--enable-mp-right-shift', 		action='store_false', dest='use_mp_right_shift')
+	parser.add_argument('--mp-read-heads',				type=int, default=1)
 
 
 

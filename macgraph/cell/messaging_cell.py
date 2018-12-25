@@ -46,11 +46,15 @@ def messaging_cell(context:CellContext):
 	# in_read0_query			= context.in_question_tokens[:,14,:] 
 	# in_read0_query 			= control_parts[:,0,:]
 	# in_read0_query			= tf.layers.dense(generate_query(context, "mp_read_query")[0], node_table_width)
-	in_read0_query			= add_taps(generate_token_index_query(context, "mp_read0_query"), "mp_read0_query")
+	
+
+	read_queries = []
+	for i in range(context.args["mp_read_heads"]):
+		read_queries.append(add_taps(generate_token_index_query(context, f"mp_read{i}_query"), f"mp_read{i}_query"))
 	
 	out_read_signals, node_state, taps2 = do_messaging_cell(context,
 		node_table, node_table_width, node_table_len,
-		in_write_query, in_write_signal, [in_read0_query])
+		in_write_query, in_write_signal, read_queries)
 
 
 	return out_read_signals, node_state, {**taps, **taps2}
