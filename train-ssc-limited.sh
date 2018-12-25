@@ -27,7 +27,7 @@ python -m macgraph.train \
 	--input-width 128 \
 	--embed-width 128 \
 	--learning-rate 1.0 \
-	--random-seed $i \
+	--random-seed None \
 	--fast
 # done    
 

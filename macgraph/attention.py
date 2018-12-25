@@ -347,7 +347,7 @@ def attention_by_index(table, control, name:str="attention_by_index"):
 			if control is not None:
 				query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
 			else:
-				query = tf.get_variable("query", [1, seq_len], trainable=True)
+				query = tf.get_variable("query", [1, seq_len], trainable=True, initializer=tf.initializers.glorot_uniform)
 				query = tf.tile(query, [batch_size, 1])
 				query = tf.nn.softmax(query)
 
