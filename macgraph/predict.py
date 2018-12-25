@@ -171,7 +171,7 @@ def predict(args, cmd_args):
 					print(f"{i}: {mp_head}_attn: ",', '.join(color_text(db, row[mp_head+"_attn"][i])))
 					# print(f"{i}: {tap}: ", list(zip(db, np.squeeze(row[tap][i]))), f"Σ={attn_sum}")
 
-					for tap in ["query", "signal"]:
+					for tap in ["signal"]:
 						t_v = row[f'{mp_head}_{tap}'][i]
 						print(f"{i}: {mp_head}_{tap}:  {color_vector(t_v)}")
 
@@ -182,9 +182,10 @@ def predict(args, cmd_args):
 				print(f"{i}: mp_node_state:")
 				print(mp_state_str)
 
-				hr()
+				
 
 		if args["use_message_passing"]:
+			hr()
 			print("Adjacency:\n",
 				adj_pretty(row["kb_adjacency"], row["kb_nodes_len"], row["kb_nodes"], vocab))
 
