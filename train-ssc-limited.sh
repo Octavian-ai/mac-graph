@@ -7,7 +7,7 @@ i=1
 python -m macgraph.train \
 	--dataset StationShortestCount \
 	--max-decode-iterations 2 \
-	--train-max-steps 2 \
+	--train-max-steps 5 \
 	--tag upto_1 \
 	--tag iter_2 \
 	--tag mp_r4 \
