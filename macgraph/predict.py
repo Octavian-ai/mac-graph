@@ -22,7 +22,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
+# Make TF be quiet
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"]="2"
 
 
 

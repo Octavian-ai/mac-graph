@@ -67,6 +67,10 @@ def model_fn(features, labels, mode, params):
 		vocab_embedding=vocab_embedding)
 
 
+	var = tf.trainable_variables()
+	for i in var:
+		print(i)
+
 	# --------------------------------------------------------------------------
 	# Calc loss
 	# --------------------------------------------------------------------------
@@ -110,6 +114,8 @@ def model_fn(features, labels, mode, params):
 			var = tf.trainable_variables()
 			gradients = tf.gradients(loss, var)
 			norms = [tf.norm(i, 2) for i in gradients if i is not None]
+
+			print(var)
 
 			for i in gradients:
 				if i is not None:
