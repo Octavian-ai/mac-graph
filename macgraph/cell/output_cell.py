@@ -79,7 +79,7 @@ class OutputCell(Component):
 
 			
 			in_stack = tf.stack(in_all, axis=1)
-			in_stack = dynamic_assert_shape(in_stack, [features["d_batch_size"], None, self.args["input_width"]])
+			in_stack = dynamic_assert_shape(in_stack, [features["d_batch_size"], len(in_all), self.args["input_width"]])
 
 			self.output_table.bind(in_stack)
 			self.output_query.bind(context.in_iter_id)

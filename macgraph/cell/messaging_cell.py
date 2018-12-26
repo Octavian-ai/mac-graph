@@ -88,12 +88,12 @@ def node_investiage_gru(context, node_state, node_incoming, padded_node_table):
 
 	input_width = old_and_new.shape[-1]
 
-	forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]], 	initalizer=tf.initalizers.random_uniform)
-	forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]],				initalizer=tf.initalizers.random_uniform)
-	reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]], 	initalizer=tf.initalizers.random_uniform)
+	forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]], 	initializer=tf.initializers.random_uniform)
+	forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]],				initializer=tf.initializers.random_uniform)
+	reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]], 	initializer=tf.initializers.random_uniform)
 
-	transform_w  = tf.get_variable("mp_transform_w", [1, 2 * context.args["mp_state_width"], context.args["mp_state_width"]], initalizer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
-	transform_b  = tf.get_variable("mp_transform_b", [1, context.args["mp_state_width"]], 				initalizer=tf.initalizers.random_uniform)
+	transform_w  = tf.get_variable("mp_transform_w", [1, 2 * context.args["mp_state_width"], context.args["mp_state_width"]], initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
+	transform_b  = tf.get_variable("mp_transform_b", [1, context.args["mp_state_width"]], 				initializer=tf.initializers.random_uniform)
 
 
 	# Initially likely to be zero

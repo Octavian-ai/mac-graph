@@ -35,6 +35,7 @@ do
 			--input-width 128 \
 			--embed-width 128 \
 			--learning-rate 0.1 \
+			--fast \
 			--enable-comet &> nohup-$task-$iteration.out&
 	done
 done
