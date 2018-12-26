@@ -242,6 +242,8 @@ The successful station property model does no better than random guessing. I'm e
  	- works for iter two after shrinking LR to 0.1
  	- single mp head, output cell has attention_by_index of both mp reads and previous outputs
 
+ - `ee22e45`: full dataset, 40 iter, up to 99% accuracy
+
 
 ## Notes on training infrastructure
 

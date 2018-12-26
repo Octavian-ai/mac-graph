@@ -10,6 +10,9 @@ python -m macgraph.train \
 	--train-max-steps 2 \
 	--tag upto_2 \
 	--tag iter_2 \
+	--tag gru_exp \
+	--filter-output-class 0 \
+	--filter-output-class 1 \
 	--disable-control-cell \
 	--disable-read-cell \
 	--disable-memory-cell \
@@ -17,7 +20,6 @@ python -m macgraph.train \
 	--enable-embed-const-eye \
 	--eval-every 500 \
 	--mp-state-width 1 \
-	--disable-mp-gru \
 	--input-width 128 \
 	--embed-width 128 \
 	--learning-rate 0.1 \

@@ -34,8 +34,8 @@ def messaging_cell(context:CellContext):
 		return ret
 
 
-	# in_write_signal 		= layer_dense(in_signal, context.args["mp_state_width"], "sigmoid")
-	in_write_signal			= tf.ones([context.features["d_batch_size"], context.args["mp_state_width"]])
+	in_write_signal 		= layer_dense(in_signal, context.args["mp_state_width"], "sigmoid")
+	# in_write_signal			= tf.ones([context.features["d_batch_size"], context.args["mp_state_width"]])
 
 
 	# Read/Write queries
@@ -79,6 +79,31 @@ def calc_normalized_adjacency(context, node_state):
 
 	return node_incoming
 
+
+def node_investiage_gru(context, node_state, node_incoming, padded_node_table):
+
+	all_inputs = [node_state, node_incoming]
+
+	old_and_new = tf.concat(all_inputs, axis=-1)
+
+	input_width = old_and_new.shape[-1]
+
+	forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]])
+	forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]])
+
+	reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]])
+	transform_w  = tf.get_variable("mp_transform_w", [1, 2 * context.args["mp_state_width"], context.args["mp_state_width"]])
+
+	# Initially likely to be zero
+	forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)
+	# reuse_signal  = tf.nn.sigmoid(mp_matmul(old_and_new , reuse_w,  'reuse_signal'))
+
+	# reuse_and_new = tf.concat([reuse_signal * node_state, node_incoming], axis=-1)
+	# proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](mp_matmul(reuse_and_new, transform_w, 'proposed_new_state'))
+
+	node_state = (1-forget_signal) * node_state + (forget_signal) * node_incoming
+
+	return node_state
 
 
 def node_gru(context, node_state, node_incoming, padded_node_table):
@@ -173,7 +198,7 @@ def do_messaging_cell(context:CellContext,
 		# --------------------------------------------------------------------------
 		
 		if context.args["use_mp_gru"]:
-			node_state = node_gru(context, node_state, node_incoming, padded_node_table)
+			node_state = node_investiage_gru(context, node_state, node_incoming, padded_node_table)
 
 		else:
 			node_state = node_incoming
