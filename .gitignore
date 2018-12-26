@@ -1,4 +1,4 @@
-nohup.out
+nohup*.out
 /input*/
 /output*/
 

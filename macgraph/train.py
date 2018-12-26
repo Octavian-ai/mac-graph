@@ -38,7 +38,7 @@ def train(args):
 	if args["use_comet"]:
 		# Add the following code anywhere in your machine learning file
 		experiment = Experiment(api_key="bRptcjkrwOuba29GcyiNaGDbj", project_name="macgraph", workspace="davidhughhenrymack")
-		experiment.log_multiple_params(args)
+		experiment.log_parameters(args)
 
 		if len(args["tag"]) > 0:
 			experiment.add_tags(args["tag"])

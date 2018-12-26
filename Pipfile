@@ -18,6 +18,7 @@ tqdm = "*"
 tableprint = "*"
 colored = "*"
 coloredlogs = "*"
+comet-ml = "*"
 
 
 [requires]

@@ -19,8 +19,8 @@ do
 	for iteration in "${iterations[@]}"
 	do
 
-		nohup python -m macgraph.regression_test \
-			--name $task \
+		nohup python -m macgraph.train \
+			--dataset $task \
 			--tag basic_gru \
 			--train-max-steps 20 \
 			--max-decode-iterations $iteration \
