@@ -88,11 +88,13 @@ def node_investiage_gru(context, node_state, node_incoming, padded_node_table):
 
 	input_width = old_and_new.shape[-1]
 
-	forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]])
-	forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]])
-	reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]])
+	forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]], 	initalizer=tf.initalizers.random_uniform)
+	forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]],				initalizer=tf.initalizers.random_uniform)
+	reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]], 	initalizer=tf.initalizers.random_uniform)
 
-	transform_w  = tf.get_variable("mp_transform_w", [1, 2 * context.args["mp_state_width"], context.args["mp_state_width"]])
+	transform_w  = tf.get_variable("mp_transform_w", [1, 2 * context.args["mp_state_width"], context.args["mp_state_width"]], initalizer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
+	transform_b  = tf.get_variable("mp_transform_b", [1, context.args["mp_state_width"]], 				initalizer=tf.initalizers.random_uniform)
+
 
 	# Initially likely to be zero
 	forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)
@@ -100,6 +102,8 @@ def node_investiage_gru(context, node_state, node_incoming, padded_node_table):
 
 	# reuse_and_new = tf.concat([reuse_signal * node_state, node_incoming], axis=-1)
 	# proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](mp_matmul(reuse_and_new, transform_w, 'proposed_new_state'))
+
+	transformed = mp_matmul(old_and_new, transform_w, 'proposed_new_state') + transform_b
 
 	proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](node_incoming)
 
