@@ -90,8 +90,8 @@ def node_investiage_gru(context, node_state, node_incoming, padded_node_table):
 
 	forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]])
 	forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]])
-
 	reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]])
+
 	transform_w  = tf.get_variable("mp_transform_w", [1, 2 * context.args["mp_state_width"], context.args["mp_state_width"]])
 
 	# Initially likely to be zero
@@ -101,7 +101,9 @@ def node_investiage_gru(context, node_state, node_incoming, padded_node_table):
 	# reuse_and_new = tf.concat([reuse_signal * node_state, node_incoming], axis=-1)
 	# proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](mp_matmul(reuse_and_new, transform_w, 'proposed_new_state'))
 
-	node_state = (1-forget_signal) * node_state + (forget_signal) * node_incoming
+	proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](node_incoming)
+
+	node_state = (1-forget_signal) * node_state + (forget_signal) * proposed_new_state
 
 	return node_state
 
