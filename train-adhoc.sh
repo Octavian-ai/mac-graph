@@ -5,14 +5,10 @@
 
 i=1
 python -m macgraph.train \
-	--dataset StationShortestCount \
-	--max-decode-iterations 2 \
+	--dataset StationShortestAvoidingCount \
+	--max-decode-iterations 15 \
 	--train-max-steps 2 \
-	--tag upto_2 \
-	--tag iter_2 \
-	--tag gru_exp \
-	--filter-output-class 0 \
-	--filter-output-class 1 \
+	--tag iter_15 \
 	--disable-control-cell \
 	--disable-read-cell \
 	--disable-memory-cell \

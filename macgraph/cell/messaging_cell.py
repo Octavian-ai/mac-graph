@@ -80,7 +80,7 @@ def calc_normalized_adjacency(context, node_state):
 	return node_incoming
 
 
-def node_investiage_gru(context, node_state, node_incoming, padded_node_table):
+def node_stripped_gru(context, node_state, node_incoming, padded_node_table):
 
 	all_inputs = [node_state, node_incoming]
 
@@ -95,17 +95,10 @@ def node_investiage_gru(context, node_state, node_incoming, padded_node_table):
 	transform_w  = tf.get_variable("mp_transform_w", [1, 2 * context.args["mp_state_width"], context.args["mp_state_width"]], initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
 	transform_b  = tf.get_variable("mp_transform_b", [1, context.args["mp_state_width"]], 				initializer=tf.initializers.random_uniform)
 
-
-	# Initially likely to be zero
 	forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)
-	# reuse_signal  = tf.nn.sigmoid(mp_matmul(old_and_new , reuse_w,  'reuse_signal'))
-
-	# reuse_and_new = tf.concat([reuse_signal * node_state, node_incoming], axis=-1)
-	# proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](mp_matmul(reuse_and_new, transform_w, 'proposed_new_state'))
-
+	
 	transformed = mp_matmul(old_and_new, transform_w, 'proposed_new_state') + transform_b
-
-	proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](node_incoming)
+	proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](transformed)
 
 	node_state = (1-forget_signal) * node_state + (forget_signal) * proposed_new_state
 
@@ -204,7 +197,7 @@ def do_messaging_cell(context:CellContext,
 		# --------------------------------------------------------------------------
 		
 		if context.args["use_mp_gru"]:
-			node_state = node_investiage_gru(context, node_state, node_incoming, padded_node_table)
+			node_state = node_stripped_gru(context, node_state, node_incoming, padded_node_table)
 
 		else:
 			node_state = node_incoming
