@@ -11,7 +11,7 @@ tasks=(
 )
 
 iterations=(
-	"20"
+	"40"
 )
 
 for task in "${tasks[@]}"
@@ -22,6 +22,7 @@ do
 		nohup python -m macgraph.train \
 			--dataset $task \
 			--tag basic_gru \
+			--tag iter_$iteration \
 			--train-max-steps 20 \
 			--max-decode-iterations $iteration \
 			--disable-control-cell \
