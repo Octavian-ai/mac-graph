@@ -42,6 +42,23 @@ def layer_normalize(tensor):
 	return tensor
 	
 
+
+def calc_normalized_adjacency(context, node_state):
+	# Aggregate via adjacency matrix with normalisation (that does not include self-edges)
+	adj = tf.cast(context.features["kb_adjacency"], tf.float32)
+	degree = tf.reduce_sum(adj, -1, keepdims=True)
+	inv_degree = tf.reciprocal(degree)
+	node_mask = tf.expand_dims(tf.sequence_mask(context.features["kb_nodes_len"], context.args["kb_node_max_len"]), -1)
+	inv_degree = tf.where(node_mask, inv_degree, tf.zeros(tf.shape(inv_degree)))
+	inv_degree = tf.where(tf.greater(degree, 0), inv_degree, tf.zeros(tf.shape(inv_degree)))
+	inv_degree = tf.check_numerics(inv_degree, "inv_degree")
+	adj_norm = inv_degree * adj
+	adj_norm = tf.cast(adj_norm, node_state.dtype)
+	adj_norm = tf.check_numerics(adj_norm, "adj_norm")
+	node_incoming = tf.einsum('bnw,bnm->bmw', node_state, adj_norm)
+
+	return node_incoming
+
 def mp_matmul(state, mat, name):
 	return tf.nn.conv1d(state, mat, 1, 'VALID', name=name)
 

@@ -99,6 +99,9 @@ class MAC_Component(Component):
 		self.iter_id = PrintTensor(args["max_decode_iterations"], "iter_id")
 		self.output_cell = OutputCell(args)
 
+		if args["use_message_passing"]:
+			self.messaging_cell = MessagingCell(args)
+
 	"""
 	Special forward. Should return output, out_state
 	"""
@@ -162,11 +165,10 @@ class MAC_Component(Component):
 
 
 			if self.args["use_message_passing"]:
-				mp_reads, out_mp_state, mp_taps = messaging_cell(context)
+				mp_reads, out_mp_state = self.messaging_cell.forward(features, context)
 			else:
 				out_mp_state = in_node_state
 				mp_reads = [tf.fill([self.features["d_batch_size"], self.args["mp_state_width"]], 0.0, name="fake_mp_read")]
-				mp_taps = {}
 			
 			if self.args["use_memory_cell"]:
 				out_memory_state, tap_memory_forget = memory_cell(self.args, self.features,
@@ -180,7 +182,6 @@ class MAC_Component(Component):
 			# TODO: tidy away later
 			self.control_taps = control_taps
 			self.read_taps = read_taps
-			self.mp_taps = mp_taps
 			self.tap_memory_forget = tap_memory_forget
 
 			self.mp_state = out_mp_state
@@ -202,7 +203,6 @@ class MAC_Component(Component):
 		# TODO: Remove all of this and let it run in the subsystem
 
 		control_taps = self.control_taps
-		mp_taps = self.mp_taps
 		read_taps = self.read_taps		
 
 		empty_attn = tf.fill([self.features["d_batch_size"], self.args["max_seq_len"], 1], 0.0)
@@ -217,19 +217,6 @@ class MAC_Component(Component):
 			"mp_node_state":			self.mp_state,
 			"iter_id":					self.context.in_iter_id,
 		}
-
-		if self.args["use_message_passing"]:
-
-			mp_reads = [f"mp_read{i}" for i in range(self.args["mp_read_heads"])]
-
-			suffixes = ["_attn", "_attn_raw", "_query", "_signal"]
-			for qt in ["token_index_attn"]:
-				suffixes.append("_query_"+qt)
-
-			for mp_head in ["mp_write", *mp_reads]:
-				for suffix in suffixes:
-					i = mp_head + suffix
-					out_taps[i] = mp_taps.get(i, empty_query)
 
 		if self.args["use_read_cell"]:
 			
@@ -275,19 +262,6 @@ class MAC_Component(Component):
 			"mp_node_state":			tf.TensorShape([self.args["kb_node_max_len"], self.args["mp_state_width"]]),
 			"iter_id":					self.args["max_decode_iterations"],
 		}
-
-		if self.args["use_message_passing"]:
-
-			mp_reads = [f"mp_read{i}" for i in range(self.args["mp_read_heads"])]
-
-			for mp_head in ["mp_write", *mp_reads]:
-				t[f"{mp_head}_attn"]			= self.args["kb_node_max_len"]
-				t[f"{mp_head}_attn_raw"] 		= self.args["kb_node_max_len"]
-				t[f"{mp_head}_query"]			= self.args["kb_node_width"] * self.args["embed_width"]
-				t[f"{mp_head}_signal"]			= self.args["mp_state_width"]
-				t[f"{mp_head}_query_token_index_attn"  ] = self.args["max_seq_len"]
-
-				# add_query_taps(t, mp_head+"_query")
 
 
 		if self.args["use_read_cell"]:

@@ -244,6 +244,9 @@ The successful station property model does no better than random guessing. I'm e
 
  - `ee22e45`: full dataset, 40 iter, up to 99% accuracy
 
+ - `9a881d7`: full dataset up to 9, 10 iteration 99.6% - breakthrough was using state width of 32 so
+ 		the network can send different elements at different times for timing
+
 
 ## Notes on training infrastructure
 
