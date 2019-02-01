@@ -157,13 +157,16 @@ def get_args(extend=lambda parser:None, argv=None):
 	parser.add_argument('--train-max-steps',            type=float, default=None, help="In thousands")
 	parser.add_argument('--results-path', 				type=str, default="./results.yaml")
 
-		
-	parser.add_argument('--max-gradient-norm',     		type=float, default=0.4)
 	parser.add_argument('--learning-rate',         		type=float, default=1e-3)
 	parser.add_argument('--enable-regularization',		action='store_true', dest='use_regularization')
 	parser.add_argument('--regularization-factor',		type=float, default=0.0001)
 	parser.add_argument('--random-seed',				type=int, default=3)
 	parser.add_argument('--enable-gradient-clipping',	action='store_true', dest='use_gradient_clipping')
+	parser.add_argument('--max-gradient-norm',     		type=float, default=0.4)
+
+	parser.add_argument('--enable-gradient-norm-loss',	action='store_true', dest='use_gradient_norm_loss')
+	parser.add_argument('--gradient-norm-loss-factor',  type=float, default=1e-3)
+
 	parser.add_argument('--eval-every',					type=int,	default=7*60, help="Evaluate every X seconds")
 
 	parser.add_argument('--fast',						action='store_true', dest='use_fast')

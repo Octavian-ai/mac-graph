@@ -66,6 +66,8 @@ def model_fn(features, labels, mode, params):
 		question_tokens=question_tokens, 
 		vocab_embedding=vocab_embedding)
 
+	trainable_variables = tf.trainable_variables()
+
 	# --------------------------------------------------------------------------
 	# Calc loss
 	# --------------------------------------------------------------------------
@@ -79,6 +81,11 @@ def model_fn(features, labels, mode, params):
 			l1_regularizer = tf.contrib.layers.l1_regularizer(scale=0.005, scope=None)
 			regularisation_penality = tf.contrib.layers.apply_regularization(l1_regularizer, [vocab_embedding])
 			loss += args["regularization_factor"] * regularisation_penality
+
+		if args["use_gradient_norm_loss"]:
+			gradients = tf.gradients(loss, trainable_variables)
+			norms = [tf.norm(i, 2) for i in gradients if i is not None]
+			loss += args["gradient_norm_loss_factor"] * tf.reduce_mean(norms)
 
 	# --------------------------------------------------------------------------
 	# Optimize
@@ -106,11 +113,8 @@ def model_fn(features, labels, mode, params):
 				decay_rate=0.9)
 
 		if args["use_summary_scalar"]:
-			var = tf.trainable_variables()
-			gradients = tf.gradients(loss, var)
+			gradients = tf.gradients(loss, trainable_variables)
 			norms = [tf.norm(i, 2) for i in gradients if i is not None]
-
-			print(var)
 
 			for i in gradients:
 				if i is not None:

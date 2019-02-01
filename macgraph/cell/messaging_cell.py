@@ -14,6 +14,10 @@ from ..util import *
 from ..layers import *
 from ..activations import *
 
+
+def lerp (a, b, f):
+	return (1-f)*a + f*b
+
 class MessagingCell(Component):
 
 	def __init__(self, args):
@@ -220,6 +224,9 @@ class MessagingCell(Component):
 		node_cleanliness_tgt = tf.expand_dims(global_signal, 1)
 		node_cleanliness_score = tf.reduce_sum(node_cleanliness * node_cleanliness_tgt, axis=2, keepdims=True)
 
+		node_cleanliness_score = dynamic_assert_shape(node_cleanliness_score, 
+			[context.features["d_batch_size"], seq_len, 1])
+
 		# all_inputs.append(node_cleanliness_score)
 
 		# a = Attn by index on the properties conditioned on static var to get property value
@@ -232,21 +239,26 @@ class MessagingCell(Component):
 
 		input_width = old_and_new.shape[-1]
 
-		forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]], 	initializer=tf.initializers.random_uniform)
-		forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]],				initializer=tf.initializers.random_uniform)
 		reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]], 	initializer=tf.initializers.random_uniform)
 
 		transform_w  = tf.get_variable("mp_transform_w", [1, old_and_new.shape[-1], context.args["mp_state_width"]], initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
 		transform_b  = tf.get_variable("mp_transform_b", [1, context.args["mp_state_width"]], 				initializer=tf.initializers.random_uniform)
 
-		forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)
-		
+		signals = {}
+
+		for s in ["forget", "pass_thru"]:
+			w          = tf.get_variable(f"mp_{s}_w",    [1, input_width, context.args["mp_state_width"]], initializer=tf.initializers.random_uniform)
+			b          = tf.get_variable(f"mp_{s}_b",    [1, context.args["mp_state_width"]],				 initializer=tf.initializers.random_uniform)
+			signals[s] = tf.nn.sigmoid(mp_matmul(old_and_new , w, f'{s}_signal') + b)
+			
 		transformed = mp_matmul(old_and_new, transform_w, 'proposed_new_state') + transform_b
 		proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](transformed)
 
-		node_state = (1-forget_signal) * node_state + (forget_signal) * proposed_new_state
+		out_node_state = node_state
+		# out_node_state = lerp(node_state, proposed_new_state, signals["forget"])
+		# out_node_state = lerp(out_node_state, node_incoming, signals["pass_thru"])
 
-		return node_state
+		return out_node_state
 
 
 
