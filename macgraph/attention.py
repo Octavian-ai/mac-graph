@@ -10,7 +10,10 @@ from .print_util import *
 from .component import *
 
 class Attention(Component):
-	def __init__(self, args, table:Component, query:Component, key_width:int=None, seq_len:int=None, keys_len:Tensor=None, table_representation=None, name:str=None):
+	def __init__(self, args, table:Component, query:Component, 
+			key_width:int=None, seq_len:int=None, keys_len:Tensor=None, 
+			table_representation=None, name:str=None):
+
 		super().__init__(args, name)
 
 		self.table = table
@@ -59,13 +62,16 @@ class Attention(Component):
 
 
 class AttentionByIndex(Component):
-	def __init__(self, args, table:Component, control:Component,  seq_len:int=None, table_representation=None, name:str=None):
+	def __init__(self, args, table:Component, control:Component=None,  seq_len:int=None, table_representation=None, name:str=None):
 		super().__init__(args, name)
 
 		self.table = table
 		self.control = control
 		self.seq_len = seq_len
 		self.table_representation = table_representation
+
+		if self.control is None:
+			self.control = NoneComponent()
 
 	def forward(self, features):
 		output, self.tap_attn = attention_by_index(
@@ -342,8 +348,8 @@ def attention_by_index(table, control, name:str="attention_by_index"):
 			query_shape  = [batch_size, seq_len]
 			output_shape = [batch_size, word_size]
 
-			assert seq_len is not None, "Seq len must be defined"
-
+			assert seq_len.value is not None, "Seq len must be defined"
+			
 			if control is not None:
 				query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
 			else:

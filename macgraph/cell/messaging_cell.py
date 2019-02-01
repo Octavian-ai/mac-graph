@@ -19,12 +19,15 @@ class MessagingCell(Component):
 	def __init__(self, args):
 		super().__init__(args, name="mp")
 
+		self.question_tokens = Tensor("question_tokens")
+		self.read_gs_attn = AttentionByIndex(args, 
+			table=self.question_tokens,
+			seq_len=args["max_seq_len"],
+			table_representation="src", name="read_gs_attn")
+
 	def forward(self, features, context):
 	
 		node_table, node_table_width, node_table_len = get_table_with_embedding(context.args, context.features, context.vocab_embedding, "kb_node")
-
-		node_table_width = context.args["input_width"]
-		node_table = node_table[:,:,0:node_table_width]
 
 		in_signal = tf.concat([context.control_state, context.in_iter_id], -1)
 
@@ -56,9 +59,13 @@ class MessagingCell(Component):
 		for i in range(context.args["mp_read_heads"]):
 			read_queries.append(add_taps(generate_token_index_query(context, f"read{i}_query"), f"read{i}_query"))
 		
-		out_read_signals, node_state, taps2 = do_messaging_cell(context,
+		self.question_tokens.bind(context.in_question_tokens_padded)
+
+		global_signal = self.read_gs_attn.forward(features)
+
+		out_read_signals, node_state, taps2 = self.do_messaging_cell(context,
 			node_table, node_table_width, node_table_len,
-			in_write_query, in_write_signal, read_queries)
+			in_write_query, in_write_signal, read_queries, global_signal)
 
 		self._taps = {**taps, **taps2}
 
@@ -92,158 +99,156 @@ class MessagingCell(Component):
 
 
 
-def do_messaging_cell(context:CellContext, 
-	node_table, node_table_width, node_table_len,
-	in_write_query, in_write_signal, in_read_queries):
+	def do_messaging_cell(self, context:CellContext, 
+		node_table, node_table_width, node_table_len,
+		in_write_query, in_write_signal, in_read_queries, global_signal):
 
-	'''
-	Operate a message passing cell
-	Each iteration it'll do one round of message passing
+		'''
+		Operate a message passing cell
+		Each iteration it'll do one round of message passing
 
-	Returns: read_signal, node_state
+		Returns: read_signal, node_state
 
-	for to_node in nodes:
-		to_node.state = combine_incoming_signals([
-			message_pass(from_node, to_node) for from_node in to_node.neighbors
-		] + [node_self_update(to_node)])  
+		for to_node in nodes:
+			to_node.state = combine_incoming_signals([
+				message_pass(from_node, to_node) for from_node in to_node.neighbors
+			] + [node_self_update(to_node)])  
+				
+
+		'''
+
+		with tf.name_scope("messaging_cell"):
+
+			taps = {}
+			taps["write_query"] = in_write_query
+			taps["write_signal"] = in_write_signal
+
+			node_state_shape = tf.shape(context.in_node_state)
+			node_state = context.in_node_state
+			padded_node_table = pad_to_table_len(node_table, node_state, "padded_node_table")
+
+			node_ids_width = self.args["embed_width"]
+			node_ids = node_table[:,:,0:node_ids_width]
+			padded_node_ids  =padded_node_table[:,:,0:node_ids_width]
+			node_ids_len = node_table_len
+
+			# --------------------------------------------------------------------------
+			# Write to graph
+			# --------------------------------------------------------------------------
 			
-
-	'''
-
-	with tf.name_scope("messaging_cell"):
-
-		taps = {}
-		taps["write_query"] = in_write_query
-		taps["write_signal"] = in_write_signal
-
-		node_state_shape = tf.shape(context.in_node_state)
-		node_state = context.in_node_state
-		padded_node_table = pad_to_table_len(node_table, node_state, "padded_node_table")
-		
-		# --------------------------------------------------------------------------
-		# Write to graph
-		# --------------------------------------------------------------------------
-		
-		write_signal, _, a_taps = attention_write_by_key(
-			keys=node_table,
-			key_width=node_table_width,
-			keys_len=node_table_len,
-			query=in_write_query,
-			value=in_write_signal,
-			name="write_signal"
-		)
-		for k,v in a_taps.items():
-			taps["write_"+k] = v
-
-		write_signal = pad_to_table_len(write_signal, node_state, "write_signal")
-		node_state += write_signal
-		node_state = dynamic_assert_shape(node_state, node_state_shape, "node_state")
-		
-		# --------------------------------------------------------------------------
-		# Calculate adjacency 
-		# --------------------------------------------------------------------------
-
-		node_incoming = calc_normalized_adjacency(context, node_state)
-
-		if context.args["use_mp_right_shift"]:
-			node_incoming = calc_right_shift(node_incoming)
-
-
-		# --------------------------------------------------------------------------
-		# Perform propagation
-		# --------------------------------------------------------------------------
-		
-		if context.args["use_mp_gru"]:
-			node_state = node_stripped_gru(context, node_state, node_incoming, padded_node_table)
-
-		else:
-			node_state = node_incoming
-
-		# --------------------------------------------------------------------------
-		# Read from graph
-		# --------------------------------------------------------------------------
-
-		out_read_signals = []
-
-		for idx, qry in enumerate(in_read_queries):
-			out_read_signal, _, a_taps = attention_key_value(
-				keys=padded_node_table,
-				keys_len=node_table_len,
-				key_width=node_table_width,
-				query=qry,
-				table=node_state,
-				name=f"read{idx}"
-				)
-			out_read_signals.append(out_read_signal)
-
+			write_signal, _, a_taps = attention_write_by_key(
+				keys     =node_ids,
+				key_width=node_ids_width,
+				keys_len =node_ids_len,
+				query=in_write_query,
+				value=in_write_signal,
+				name="write_signal"
+			)
 			for k,v in a_taps.items():
-				taps[f"read{idx}_{k}"] = v
-			taps[f"read{idx}_signal"] = out_read_signal
-			taps[f"read{idx}_query"] = qry
+				taps["write_"+k] = v
+
+			write_signal = pad_to_table_len(write_signal, node_state, "write_signal")
+			node_state += write_signal
+			node_state = dynamic_assert_shape(node_state, node_state_shape, "node_state")
+			
+			# --------------------------------------------------------------------------
+			# Calculate adjacency 
+			# --------------------------------------------------------------------------
+
+			node_incoming = calc_normalized_adjacency(context, node_state)
+
+			if context.args["use_mp_right_shift"]:
+				node_incoming = calc_right_shift(node_incoming)
 
 
-		taps["node_state"] = node_state
-		node_state = dynamic_assert_shape(node_state, node_state_shape, "node_state")
-		assert node_state.shape[-1] == context.in_node_state.shape[-1], "Node state should not lose dimension"
+			# --------------------------------------------------------------------------
+			# Perform propagation
+			# --------------------------------------------------------------------------
+			
+			if context.args["use_mp_gru"]:
+				node_state = self.node_stripped_gru(context, node_state, node_incoming, padded_node_table, global_signal)
 
-		return out_read_signals, node_state, taps
+			else:
+				node_state = node_incoming
 
+			# --------------------------------------------------------------------------
+			# Read from graph
+			# --------------------------------------------------------------------------
 
+			out_read_signals = []
 
+			for idx, qry in enumerate(in_read_queries):
+				out_read_signal, _, a_taps = attention_key_value(
+					keys     =padded_node_ids,
+					keys_len =node_ids_len,
+					key_width=node_ids_width,
+					query=qry,
+					table=node_state,
+					name=f"read{idx}"
+					)
+				out_read_signals.append(out_read_signal)
 
-
-
-def node_stripped_gru(context, node_state, node_incoming, padded_node_table):
-
-	all_inputs = [node_state, node_incoming]
-
-	old_and_new = tf.concat(all_inputs, axis=-1)
-
-	input_width = old_and_new.shape[-1]
-
-	forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]], 	initializer=tf.initializers.random_uniform)
-	forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]],				initializer=tf.initializers.random_uniform)
-	reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]], 	initializer=tf.initializers.random_uniform)
-
-	transform_w  = tf.get_variable("mp_transform_w", [1, 2 * context.args["mp_state_width"], context.args["mp_state_width"]], initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
-	transform_b  = tf.get_variable("mp_transform_b", [1, context.args["mp_state_width"]], 				initializer=tf.initializers.random_uniform)
-
-	forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)
-	
-	transformed = mp_matmul(old_and_new, transform_w, 'proposed_new_state') + transform_b
-	proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](transformed)
-
-	node_state = (1-forget_signal) * node_state + (forget_signal) * proposed_new_state
-
-	return node_state
+				for k,v in a_taps.items():
+					taps[f"read{idx}_{k}"] = v
+				taps[f"read{idx}_signal"] = out_read_signal
+				taps[f"read{idx}_query"] = qry
 
 
-def node_gru(context, node_state, node_incoming, padded_node_table):
+			taps["node_state"] = node_state
+			node_state = dynamic_assert_shape(node_state, node_state_shape, "node_state")
+			assert node_state.shape[-1] == context.in_node_state.shape[-1], "Node state should not lose dimension"
 
-	all_inputs = [node_state, node_incoming]
+			return out_read_signals, node_state, taps
 
-	if context.args["use_mp_node_id"]:
-		all_inputs.append(padded_node_table[:,:,:context.args["embed_width"]])
 
-	old_and_new = tf.concat(all_inputs, axis=-1)
 
-	input_width = old_and_new.shape[-1]
 
-	forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]])
-	forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]])
+	def node_stripped_gru(self, context, node_state, node_incoming, padded_node_table, global_signal):
 
-	reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]])
-	transform_w  = tf.get_variable("mp_transform_w", [1, 2 * context.args["mp_state_width"], context.args["mp_state_width"]])
+		all_inputs = [node_state, node_incoming]
+		# all_inputs.append(padded_node_table)
+		# all_inputs.append(tf.tile(tf.expand_dims(global_signal,1), [1, node_state.shape[1], 1]))
 
-	# Initially likely to be zero
-	forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)
-	reuse_signal  = tf.nn.sigmoid(mp_matmul(old_and_new , reuse_w,  'reuse_signal'))
+		seq_len = padded_node_table.shape[1]
+		n_features = self.args["kb_node_width"]
+		feature_width = self.args["embed_width"]
 
-	reuse_and_new = tf.concat([reuse_signal * node_state, node_incoming], axis=-1)
-	proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](mp_matmul(reuse_and_new, transform_w, 'proposed_new_state'))
+		node_properties = tf.reshape(padded_node_table, 
+			[context.features["d_batch_size"], seq_len, n_features, feature_width])
 
-	node_state = (1-forget_signal) * node_state + (forget_signal) * proposed_new_state
+		node_cleanliness = node_properties[:,:,1,:]
+		node_cleanliness_tgt = tf.expand_dims(global_signal, 1)
+		node_cleanliness_score = tf.reduce_sum(node_cleanliness * node_cleanliness_tgt, axis=2, keepdims=True)
 
-	return node_state
+		# all_inputs.append(node_cleanliness_score)
+
+		# a = Attn by index on the properties conditioned on static var to get property value
+		# global_signal = Attn by index on question tokens, conditioned on static var, to get property filter
+		# c = a.b is property the same?
+
+		# node_state = activation(dense(node_state, node_incoming, c))
+
+		old_and_new = tf.concat(all_inputs, axis=-1)
+
+		input_width = old_and_new.shape[-1]
+
+		forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]], 	initializer=tf.initializers.random_uniform)
+		forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]],				initializer=tf.initializers.random_uniform)
+		reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]], 	initializer=tf.initializers.random_uniform)
+
+		transform_w  = tf.get_variable("mp_transform_w", [1, old_and_new.shape[-1], context.args["mp_state_width"]], initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
+		transform_b  = tf.get_variable("mp_transform_b", [1, context.args["mp_state_width"]], 				initializer=tf.initializers.random_uniform)
+
+		forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)
+		
+		transformed = mp_matmul(old_and_new, transform_w, 'proposed_new_state') + transform_b
+		proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](transformed)
+
+		node_state = (1-forget_signal) * node_state + (forget_signal) * proposed_new_state
+
+		return node_state
+
+
+
 
 

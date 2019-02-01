@@ -126,6 +126,10 @@ class MAC_Component(Component):
 
 			in_prev_outputs = inputs[-1]
 
+			p = [[0,0], [0, tf.maximum(0,self.args["max_seq_len"] - tf.shape(self.question_tokens)[1])], [0,0]] # batch, seq_len, token
+			in_question_tokens_padded = tf.pad(self.question_tokens, p)
+			in_question_tokens_padded.set_shape([None, self.args["max_seq_len"], None])
+
 			if self.args["use_control_cell"]:
 				out_control_state, control_taps = control_cell(self.args, self.features, 
 					in_iter_question_state, in_control_state, self.question_state, self.question_tokens)
@@ -142,6 +146,7 @@ class MAC_Component(Component):
 				in_iter_question_state=in_iter_question_state,
 				in_memory_state=in_memory_state,
 				in_question_tokens=self.question_tokens,
+				in_question_tokens_padded=in_question_tokens_padded,
 				in_question_state=self.question_state,
 				in_node_state=in_node_state,
 				control_state=out_control_state,

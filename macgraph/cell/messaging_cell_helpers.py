@@ -16,13 +16,16 @@ from ..activations import *
 
 MP_State = tf.Tensor
 
+
 class MP_Node(NamedTuple):
 	id: str
 	properties: tf.Tensor
 	state: MP_State
 
+
 use_message_passing_fn = False
 use_self_reference = False
+
 
 def layer_normalize(tensor):
 	'''Apologies if I've abused this term'''
@@ -42,7 +45,6 @@ def layer_normalize(tensor):
 	return tensor
 	
 
-
 def calc_normalized_adjacency(context, node_state):
 	# Aggregate via adjacency matrix with normalisation (that does not include self-edges)
 	adj = tf.cast(context.features["kb_adjacency"], tf.float32)
@@ -59,11 +61,9 @@ def calc_normalized_adjacency(context, node_state):
 
 	return node_incoming
 
+
 def mp_matmul(state, mat, name):
 	return tf.nn.conv1d(state, mat, 1, 'VALID', name=name)
-
-
-
 
 
 def calc_right_shift(node_incoming):
@@ -71,3 +71,32 @@ def calc_right_shift(node_incoming):
 	node_incoming = tf.concat([node_incoming[:,:,1:],node_incoming[:,:,0:1]], axis=-1) 
 	node_incoming = dynamic_assert_shape(node_incoming, shape, "node_incoming")
 	return node_incoming
+
+def node_gru(context, node_state, node_incoming, padded_node_table):
+
+	all_inputs = [node_state, node_incoming]
+
+	if context.args["use_mp_node_id"]:
+		all_inputs.append(padded_node_table[:,:,:context.args["embed_width"]])
+
+	old_and_new = tf.concat(all_inputs, axis=-1)
+
+	input_width = old_and_new.shape[-1]
+
+	forget_w     = tf.get_variable("mp_forget_w",    [1, input_width, context.args["mp_state_width"]])
+	forget_b     = tf.get_variable("mp_forget_b",    [1, context.args["mp_state_width"]])
+
+	reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]])
+	transform_w  = tf.get_variable("mp_transform_w", [1, 2 * context.args["mp_state_width"], context.args["mp_state_width"]])
+
+	# Initially likely to be zero
+	forget_signal = tf.nn.sigmoid(mp_matmul(old_and_new , forget_w, 'forget_signal') + forget_b)
+	reuse_signal  = tf.nn.sigmoid(mp_matmul(old_and_new , reuse_w,  'reuse_signal'))
+
+	reuse_and_new = tf.concat([reuse_signal * node_state, node_incoming], axis=-1)
+	proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](mp_matmul(reuse_and_new, transform_w, 'proposed_new_state'))
+
+	node_state = (1-forget_signal) * node_state + (forget_signal) * proposed_new_state
+
+	return node_state
+

@@ -14,6 +14,7 @@ class CellContext(NamedTuple):
 	in_iter_question_state: Tensor
 	in_memory_state: Tensor
 	in_question_tokens: Tensor
+	in_question_tokens_padded: Tensor
 	in_question_state: Tensor
 	in_node_state: Tensor
 	control_state: Tensor

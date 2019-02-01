@@ -134,6 +134,12 @@ class Tensor(Component):
 		return self.tensor
 
 
+class NoneComponent(Component):
+	def __init__(self):
+		super().__init__(name="None")
+
+	def forward(self, features=None, placeholder=None):
+		return None
 
 
 class PrintTensor(Tensor):

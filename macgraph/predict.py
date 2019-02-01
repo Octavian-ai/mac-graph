@@ -91,14 +91,18 @@ def predict(args, cmd_args):
 
 			hr_text(f"Iteration {i}")
 
-			def get_slice_if_poss(v,i):
+			def get_slice_if_poss(k,v,i):
+				# TODO: Better way to split out the iteration taps
+				if k in ["src"]:
+					return v
+					
 				try:
 					return v[i]
 				except:
 					return v
 
 			row_iter_slice = {
-				k: get_slice_if_poss(v,i) for k, v in row.items()
+				k: get_slice_if_poss(k, v,i) for k, v in row.items()
 			}
 
 			mac.print_all(row_iter_slice)
