@@ -254,7 +254,7 @@ class MessagingCell(Component):
 		transformed = mp_matmul(old_and_new, transform_w, 'proposed_new_state') + transform_b
 		proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](transformed)
 
-		out_node_state = node_state
+		out_node_state = node_incoming
 		# out_node_state = lerp(node_state, proposed_new_state, signals["forget"])
 		# out_node_state = lerp(out_node_state, node_incoming, signals["pass_thru"])
 
