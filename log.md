@@ -248,6 +248,12 @@ The successful station property model does no better than random guessing. I'm e
  		the network can send different elements at different times for timing
 
 
+### Station shortest avoiding count
+
+- No gru gets 72% accuracy on paths up to length 6
+- Gru with forget gate (out = node_incoming * signal['forget']) gets 92%
+
+
 ## Notes on training infrastructure
 
 - FloydHub seems to fail with static decoding, need to do dynamic

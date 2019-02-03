@@ -25,7 +25,7 @@ do
 		--filter-output-class 5 \
 		--filter-output-class 6 \
 		\
-		--tag real_forget_with_property_gru \
+		--tag exp_mp_cell \
 		\
 		--tag grad_clip \
 		--enable-gradient-clipping \

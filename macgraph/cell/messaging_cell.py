@@ -247,7 +247,7 @@ class MessagingCell(Component):
 
 		signals = {}
 
-		for s in ["forget", "pass_thru"]:
+		for s in ["forget", "pass_thru", "stay_same"]:
 			w          = tf.get_variable(f"mp_{s}_w",    [1, input_width, context.args["mp_state_width"]], initializer=tf.initializers.random_uniform)
 			b          = tf.get_variable(f"mp_{s}_b",    [1, context.args["mp_state_width"]],				 initializer=tf.initializers.random_uniform)
 			signals[s] = tf.nn.sigmoid(mp_matmul(all_inputs , w, f'{s}_signal') + b)
@@ -256,15 +256,12 @@ class MessagingCell(Component):
 				tf.summary.histogram("mp_"+s, signals[s])
 			
 		transformed = mp_matmul(all_inputs, transform_w, 'proposed_new_state') + transform_b
-		proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](transformed)
+		transformed = ACTIVATION_FNS[context.args["mp_activation"]](transformed)
 
 		zero_state = tf.zeros(tf.shape(node_state))
 
-		# out_node_state = node_incoming gives 100% perf on ShortestCount
-		# out_node_state = node_incoming
-		# out_node_state = lerp(node_state, proposed_new_state, signals["forget"])
-		out_node_state = lerp(zero_state, node_incoming, signals["forget"])
-		
+		proposed_new_state = lerp(zero_state, transformed, signals["forget"])
+		out_node_state = lerp(proposed_new_state, node_incoming, signals["pass_thru"])
 
 		return out_node_state
 
