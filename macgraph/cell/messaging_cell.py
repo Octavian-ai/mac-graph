@@ -227,7 +227,7 @@ class MessagingCell(Component):
 		node_cleanliness_score = dynamic_assert_shape(node_cleanliness_score, 
 			[context.features["d_batch_size"], seq_len, 1])
 
-		# all_inputs.append(node_cleanliness_score)
+		all_inputs.append(node_cleanliness_score)
 
 		# a = Attn by index on the properties conditioned on static var to get property value
 		# global_signal = Attn by index on question tokens, conditioned on static var, to get property filter
@@ -235,13 +235,14 @@ class MessagingCell(Component):
 
 		# node_state = activation(dense(node_state, node_incoming, c))
 
-		old_and_new = tf.concat(all_inputs, axis=-1)
+		# Convert to pure tensor [batch, kb_node, width]
+		all_inputs = tf.concat(all_inputs, axis=-1)
 
-		input_width = old_and_new.shape[-1]
+		input_width = all_inputs.shape[-1]
 
 		reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]], 	initializer=tf.initializers.random_uniform)
 
-		transform_w  = tf.get_variable("mp_transform_w", [1, old_and_new.shape[-1], context.args["mp_state_width"]], initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
+		transform_w  = tf.get_variable("mp_transform_w", [1, all_inputs.shape[-1], context.args["mp_state_width"]], initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
 		transform_b  = tf.get_variable("mp_transform_b", [1, context.args["mp_state_width"]], 				initializer=tf.initializers.random_uniform)
 
 		signals = {}
@@ -249,14 +250,21 @@ class MessagingCell(Component):
 		for s in ["forget", "pass_thru"]:
 			w          = tf.get_variable(f"mp_{s}_w",    [1, input_width, context.args["mp_state_width"]], initializer=tf.initializers.random_uniform)
 			b          = tf.get_variable(f"mp_{s}_b",    [1, context.args["mp_state_width"]],				 initializer=tf.initializers.random_uniform)
-			signals[s] = tf.nn.sigmoid(mp_matmul(old_and_new , w, f'{s}_signal') + b)
+			signals[s] = tf.nn.sigmoid(mp_matmul(all_inputs , w, f'{s}_signal') + b)
 			
-		transformed = mp_matmul(old_and_new, transform_w, 'proposed_new_state') + transform_b
+			if self.args["use_summary_scalar"]:
+				tf.summary.histogram("mp_"+s, signals[s])
+			
+		transformed = mp_matmul(all_inputs, transform_w, 'proposed_new_state') + transform_b
 		proposed_new_state = ACTIVATION_FNS[context.args["mp_activation"]](transformed)
 
-		out_node_state = node_incoming
+		zero_state = tf.zeros(tf.shape(node_state))
+
+		# out_node_state = node_incoming gives 100% perf on ShortestCount
+		# out_node_state = node_incoming
 		# out_node_state = lerp(node_state, proposed_new_state, signals["forget"])
-		# out_node_state = lerp(out_node_state, node_incoming, signals["pass_thru"])
+		out_node_state = lerp(zero_state, node_incoming, signals["forget"])
+		
 
 		return out_node_state
 

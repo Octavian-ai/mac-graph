@@ -4,8 +4,8 @@
 iteration=7
 
 tasks=(
-	# "StationShortestAvoidingCount" 
-	"StationShortestCount" 
+	"StationShortestAvoidingCount" 
+	# "StationShortestCount" 
 )
 
 for task in "${tasks[@]}"
@@ -25,7 +25,7 @@ do
 		--filter-output-class 5 \
 		--filter-output-class 6 \
 		\
-		--tag minimal_gru \
+		--tag real_forget_with_property_gru \
 		\
 		--tag grad_clip \
 		--enable-gradient-clipping \
@@ -43,6 +43,5 @@ do
 		--input-width 128 \
 		--embed-width 128 \
 		--learning-rate 0.1 \
-		--fast \
 
 done
