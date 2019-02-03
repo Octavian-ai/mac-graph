@@ -14,9 +14,6 @@ do
 		python -m macgraph.train \
 			--dataset $task \
 			\
-			--tag iter_$iteration \
-			--max-decode-iterations $iteration \
-			\
 			--tag upto_6 \
 			--filter-output-class 0 \
 			--filter-output-class 1 \
@@ -26,10 +23,10 @@ do
 			--filter-output-class 5 \
 			--filter-output-class 6 \
 			\
-			--tag forget_mp_cell \
+			--tag iter_$iteration \
+			--max-decode-iterations $iteration \
 			\
-			--tag grad_clip \
-			--enable-gradient-clipping \
+			--tag forget_mp_cell \
 			\
 			--random-seed $RANDOM \
 			\

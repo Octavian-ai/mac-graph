@@ -251,7 +251,7 @@ The successful station property model does no better than random guessing. I'm e
 ### Station shortest avoiding count
 
 - No gru gets 72% accuracy on paths up to length 6
-- Gru with forget gate (out = node_incoming * signal['forget']) gets 92%
+- Gru with forget gate (out = node_incoming * signal['forget']) gets up to 95% via random seed search
 
 
 ## Notes on training infrastructure
