@@ -247,7 +247,7 @@ class MessagingCell(Component):
 
 		signals = {}
 
-		for s in ["forget", "pass_thru", "stay_same"]:
+		for s in ["forget"]:
 			w          = tf.get_variable(f"mp_{s}_w",    [1, input_width, context.args["mp_state_width"]], initializer=tf.initializers.random_uniform)
 			b          = tf.get_variable(f"mp_{s}_b",    [1, context.args["mp_state_width"]],				 initializer=tf.initializers.random_uniform)
 			signals[s] = tf.nn.sigmoid(mp_matmul(all_inputs , w, f'{s}_signal') + b)
@@ -258,10 +258,7 @@ class MessagingCell(Component):
 		transformed = mp_matmul(all_inputs, transform_w, 'proposed_new_state') + transform_b
 		transformed = ACTIVATION_FNS[context.args["mp_activation"]](transformed)
 
-		zero_state = tf.zeros(tf.shape(node_state))
-
-		proposed_new_state = lerp(zero_state, transformed, signals["forget"])
-		out_node_state = lerp(proposed_new_state, node_incoming, signals["pass_thru"])
+		out_node_state = node_incoming * signals["forget"]
 
 		return out_node_state
 
