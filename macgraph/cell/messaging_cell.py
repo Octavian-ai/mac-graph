@@ -206,58 +206,69 @@ class MessagingCell(Component):
 
 
 
+	def node_dense(nodes, units, activation="linear", scope=None):
+		with tf.variable_scope(scope):
+
+			assert nodes.shape[-1].value is not None, "Nodes must have fixed last dimension"
+
+			w  = tf.get_variable("w", [1, nodes.shape[-1], units], initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
+			b  = tf.get_variable("b", [1, 				   units], initializer=tf.initializers.random_uniform)
+
+			r = mp_matmul(nodes, w, 'matmul') + b
+			r = ACTIVATION_FNS[activation](r)
+
+			return r
+
+
 
 	def node_stripped_gru(self, context, node_state, node_incoming, padded_node_table, global_signal):
 
-		all_inputs = [node_state, node_incoming]
-		# all_inputs.append(padded_node_table)
-		# all_inputs.append(tf.tile(tf.expand_dims(global_signal,1), [1, node_state.shape[1], 1]))
-
+		# --------------------------------------------------------------------------
+		# Sizes
+		# --------------------------------------------------------------------------
+		
 		seq_len = padded_node_table.shape[1]
 		n_features = self.args["kb_node_width"]
 		feature_width = self.args["embed_width"]
 
+		# --------------------------------------------------------------------------
+		# Global signal comparison
+		# --------------------------------------------------------------------------
+		
 		node_properties = tf.reshape(padded_node_table, 
 			[context.features["d_batch_size"], seq_len, n_features, feature_width])
 
 		node_cleanliness = node_properties[:,:,1,:]
-		node_cleanliness_tgt = tf.expand_dims(global_signal, 1)
+
+		t_global_signal = layer_dense(global_signal, feature_width, "selu")
+		node_cleanliness_tgt = tf.expand_dims(t_global_signal, 1)
+		print("node_cleanliness", node_cleanliness.shape)
+		print("node_cleanliness_tgt", node_cleanliness_tgt.shape)
+
 		node_cleanliness_score = tf.reduce_sum(node_cleanliness * node_cleanliness_tgt, axis=2, keepdims=True)
 
 		node_cleanliness_score = dynamic_assert_shape(node_cleanliness_score, 
 			[context.features["d_batch_size"], seq_len, 1])
 
+
+		# --------------------------------------------------------------------------
+		# RNN Cell
+		# --------------------------------------------------------------------------
+		
+		all_inputs = [node_state, node_incoming]
+		# all_inputs.append(padded_node_table)
+		# all_inputs.append(tf.tile(tf.expand_dims(global_signal,1), [1, node_state.shape[1], 1]))
 		all_inputs.append(node_cleanliness_score)
-
-		# a = Attn by index on the properties conditioned on static var to get property value
-		# global_signal = Attn by index on question tokens, conditioned on static var, to get property filter
-		# c = a.b is property the same?
-
-		# node_state = activation(dense(node_state, node_incoming, c))
-
-		# Convert to pure tensor [batch, kb_node, width]
 		all_inputs = tf.concat(all_inputs, axis=-1)
 
-		input_width = all_inputs.shape[-1]
-
-		reuse_w      = tf.get_variable("mp_reuse_w",     [1, input_width, context.args["mp_state_width"]], 	initializer=tf.initializers.random_uniform)
-
-		transform_w  = tf.get_variable("mp_transform_w", [1, all_inputs.shape[-1], context.args["mp_state_width"]], initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
-		transform_b  = tf.get_variable("mp_transform_b", [1, context.args["mp_state_width"]], 				initializer=tf.initializers.random_uniform)
 
 		signals = {}
-
 		for s in ["forget"]:
-			w          = tf.get_variable(f"mp_{s}_w",    [1, input_width, context.args["mp_state_width"]], initializer=tf.initializers.random_uniform)
-			b          = tf.get_variable(f"mp_{s}_b",    [1, context.args["mp_state_width"]],				 initializer=tf.initializers.random_uniform)
-			signals[s] = tf.nn.sigmoid(mp_matmul(all_inputs , w, f'{s}_signal') + b)
+			signals[s] = self.node_dense(all_inputs, context.args["mp_state_width"], "sigmoid")
 			
 			if self.args["use_summary_scalar"]:
 				tf.summary.histogram("mp_"+s, signals[s])
 			
-		transformed = mp_matmul(all_inputs, transform_w, 'proposed_new_state') + transform_b
-		transformed = ACTIVATION_FNS[context.args["mp_activation"]](transformed)
-
 		out_node_state = node_incoming * signals["forget"]
 
 		return out_node_state

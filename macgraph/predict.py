@@ -175,8 +175,9 @@ def predict(args, cmd_args):
 					db = db[0:row["kb_nodes_len"]]
 					
 					tap = mp_head+"_attn"
-					attn_sum = sum(row[mp_head+"_attn"][i])
-					print(f"{i}: {mp_head}_attn: ",', '.join(color_text(db, row[mp_head+"_attn"][i])))
+					attn = row[tap][i]
+					attn_sum = sum(attn)
+					print(f"{i}: {tap}: ",', '.join(color_text(db, attn)))
 					# print(f"{i}: {tap}: ", list(zip(db, np.squeeze(row[tap][i]))), f"Σ={attn_sum}")
 
 					for tap in ["signal"]:
