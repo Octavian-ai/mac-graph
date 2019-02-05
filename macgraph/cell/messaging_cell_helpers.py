@@ -72,6 +72,21 @@ def calc_right_shift(node_incoming):
 	node_incoming = dynamic_assert_shape(node_incoming, shape, "node_incoming")
 	return node_incoming
 
+
+def node_dense(nodes, units, name, activation="linear"):
+	with tf.variable_scope(name):
+
+		assert nodes.shape[-1].value is not None, "Nodes must have fixed last dimension"
+
+		w  = tf.get_variable("w", [1, nodes.shape[-1], units], initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
+		b  = tf.get_variable("b", [1, 				   units], initializer=tf.initializers.random_uniform)
+
+		r = mp_matmul(nodes, w, 'matmul') + b
+		r = ACTIVATION_FNS[activation](r)
+
+		return r
+
+
 def node_gru(context, node_state, node_incoming, padded_node_table):
 
 	all_inputs = [node_state, node_incoming]

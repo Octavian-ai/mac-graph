@@ -63,9 +63,9 @@ class MessagingCell(Component):
 		for i in range(context.args["mp_read_heads"]):
 			read_queries.append(add_taps(generate_token_index_query(context, f"read{i}_query"), f"read{i}_query"))
 		
-		self.question_tokens.bind(context.in_question_tokens_padded)
-
-		global_signal = self.read_gs_attn.forward(features)
+		# self.question_tokens.bind(context.in_question_tokens_padded)
+		# global_signal = self.read_gs_attn.forward(features)
+		global_signal = context.in_question_tokens[:,26,:] # just the cleanliness signal
 
 		out_read_signals, node_state, taps2 = self.do_messaging_cell(context,
 			node_table, node_table_width, node_table_len,
@@ -170,7 +170,7 @@ class MessagingCell(Component):
 			# --------------------------------------------------------------------------
 			
 			if context.args["use_mp_gru"]:
-				node_state = self.node_stripped_gru(context, node_state, node_incoming, padded_node_table, global_signal)
+				node_state = self.node_cell(context, node_state, node_incoming, padded_node_table, global_signal)
 
 			else:
 				node_state = node_incoming
@@ -206,22 +206,7 @@ class MessagingCell(Component):
 
 
 
-	def node_dense(nodes, units, activation="linear", scope=None):
-		with tf.variable_scope(scope):
-
-			assert nodes.shape[-1].value is not None, "Nodes must have fixed last dimension"
-
-			w  = tf.get_variable("w", [1, nodes.shape[-1], units], initializer=tf.contrib.layers.variance_scaling_initializer(factor=1.0))
-			b  = tf.get_variable("b", [1, 				   units], initializer=tf.initializers.random_uniform)
-
-			r = mp_matmul(nodes, w, 'matmul') + b
-			r = ACTIVATION_FNS[activation](r)
-
-			return r
-
-
-
-	def node_stripped_gru(self, context, node_state, node_incoming, padded_node_table, global_signal):
+	def node_cell(self, context, node_state, node_incoming, padded_node_table, global_signal):
 
 		# --------------------------------------------------------------------------
 		# Sizes
@@ -239,12 +224,11 @@ class MessagingCell(Component):
 			[context.features["d_batch_size"], seq_len, n_features, feature_width])
 
 		node_cleanliness = node_properties[:,:,1,:]
+		# node_cleanliness = node_dense(node_cleanliness, feature_width, activation="selu", name="node_cleanliness")
 
 		t_global_signal = layer_dense(global_signal, feature_width, "selu")
 		node_cleanliness_tgt = tf.expand_dims(t_global_signal, 1)
-		print("node_cleanliness", node_cleanliness.shape)
-		print("node_cleanliness_tgt", node_cleanliness_tgt.shape)
-
+		
 		node_cleanliness_score = tf.reduce_sum(node_cleanliness * node_cleanliness_tgt, axis=2, keepdims=True)
 
 		node_cleanliness_score = dynamic_assert_shape(node_cleanliness_score, 
@@ -258,13 +242,13 @@ class MessagingCell(Component):
 		all_inputs = [node_state, node_incoming]
 		# all_inputs.append(padded_node_table)
 		# all_inputs.append(tf.tile(tf.expand_dims(global_signal,1), [1, node_state.shape[1], 1]))
-		all_inputs.append(node_cleanliness_score)
+		# all_inputs.append(node_cleanliness_score)
 		all_inputs = tf.concat(all_inputs, axis=-1)
 
 
 		signals = {}
 		for s in ["forget"]:
-			signals[s] = self.node_dense(all_inputs, context.args["mp_state_width"], "sigmoid")
+			signals[s] = node_dense(all_inputs, context.args["mp_state_width"], activation="sigmoid", name=s+"_signal")
 			
 			if self.args["use_summary_scalar"]:
 				tf.summary.histogram("mp_"+s, signals[s])
