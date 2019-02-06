@@ -226,13 +226,14 @@ class MessagingCell(Component):
 		node_cleanliness = node_properties[:,:,1,:]
 		# node_cleanliness = node_dense(node_cleanliness, feature_width, activation="selu", name="node_cleanliness")
 
-		t_global_signal = layer_dense(global_signal, feature_width, "linear")
-		node_cleanliness_tgt = tf.expand_dims(t_global_signal, 1)
+		node_cleanliness_tgt = tf.expand_dims(global_signal, 1)
 		
 		node_cleanliness_score = tf.reduce_sum(node_cleanliness * node_cleanliness_tgt, axis=2, keepdims=True)
 
 		node_cleanliness_score = dynamic_assert_shape(node_cleanliness_score, 
 			[context.features["d_batch_size"], seq_len, 1])
+
+		# node_cleanliness_score = node_dense(node_cleanliness_score, 1, activation="selu", name="node_cleanliness_score")
 
 
 		# --------------------------------------------------------------------------
@@ -248,7 +249,7 @@ class MessagingCell(Component):
 
 		signals = {}
 		for s in ["forget"]:
-			signals[s] = node_dense(all_inputs, context.args["mp_state_width"], activation="sigmoid", name=s+"_signal")
+			signals[s] = node_dense(node_cleanliness_score, context.args["mp_state_width"], activation="sigmoid", name=s+"_signal")
 			
 			if self.args["use_summary_scalar"]:
 				tf.summary.histogram("mp_"+s, signals[s])
