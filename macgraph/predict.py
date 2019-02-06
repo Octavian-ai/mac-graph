@@ -73,7 +73,8 @@ def predict(args, cmd_args):
 					print(f"{i}: {prefix}_{part_noun}_attn: {color_vector(np.squeeze(scores))} Σ={attn_sum}")
 
 	def print_row(row):
-		if row["actual_label"] == row["predicted_label"]:
+		prediction_was_correct = row["actual_label"] == row["predicted_label"]
+		if prediction_was_correct:
 			emoji = "✅"
 			answer_part = f"{stylize(row['predicted_label'], bg(22))}"
 		else:
@@ -82,10 +83,17 @@ def predict(args, cmd_args):
 
 		iterations = len(row["question_word_attn"])
 
-		print(emoji, " ", answer_part, " - ", ''.join(row['src']).replace('<space>', ' ').replace('<eos>', ''))
+		print(emoji, answer_part, '-', ''.join(row['src']).replace('<space>', ' ').replace('<eos>', ''))
+
+		if row["type_string"] == "StationShortestAvoidingCount":
+			stats = measure_paths(row, vocab, row["src"][18], row["src"][22], row["src"][26])
+			if stats["shortest_path"] != stats["shortest_path_avoiding"] or not prediction_was_correct:
+				print("⭐ stats:", stats)
+
 
 		if cmd_args["hide_details"]:
 			return
+
 
 		for i in range(iterations):
 
@@ -197,6 +205,9 @@ def predict(args, cmd_args):
 			hr()
 			print("Adjacency:\n",
 				adj_pretty(row["kb_adjacency"], row["kb_nodes_len"], row["kb_nodes"], vocab))
+
+
+
 
 		
 

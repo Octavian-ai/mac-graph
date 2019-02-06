@@ -5,6 +5,7 @@ import numpy as np
 from colored import fg, bg, stylize
 from .const import EPSILON
 import math
+import networkx as nx
 
 
 TARGET_CHAR_WIDTH = 80
@@ -81,6 +82,46 @@ def pad_str(s, target=3):
 			s += " "
 	return s
 
+def measure_paths(row, vocab, node_from, node_to, avoiding, avoiding_property=1):
+
+	graph = nx.Graph()
+
+	def l(j):
+		return vocab.inverse_lookup(j)
+
+	only_using_nodes = [l(i[0]) for i in row["kb_nodes"] if l(i[avoiding_property]) != avoiding] + [node_from, node_to]
+		
+	for i in row["kb_nodes"]:
+		graph.add_node( l(i[0]), attr_dict={"body": [l(j) for j in i]} )
+
+	for id_a, connections in enumerate(row["kb_adjacency"][:row["kb_nodes_len"]]):
+		for id_b, connected in enumerate(connections[:row["kb_nodes_len"]]):
+			if connected:
+				node_a = row["kb_nodes"][id_a]
+				node_b = row["kb_nodes"][id_b]
+				edge = (l(node_a[0]), l(node_b[0]))
+				graph.add_edge(*edge)
+
+	induced_subgraph = nx.induced_subgraph(graph, only_using_nodes)
+
+	try:
+		shortest_path_avoiding = len(nx.shortest_path(induced_subgraph, node_from, node_to))-2
+	except:
+		shortest_path_avoiding = None
+		pass
+
+	try:
+		shortest_path = len(nx.shortest_path(graph, node_from, node_to)) -2
+	except:
+		shortest_path = None
+		pass
+
+	return {
+		"shortest_path": shortest_path,
+		"shortest_path_avoiding": shortest_path_avoiding,
+	}
+
+
 def adj_pretty(mtx, kb_nodes_len, kb_nodes, vocab):
 	output = ""
 
@@ -88,8 +129,9 @@ def adj_pretty(mtx, kb_nodes_len, kb_nodes, vocab):
 		if r_idx < kb_nodes_len:
 			
 			r_id = kb_nodes[r_idx][0]
+			r_clean = vocab.inverse_lookup(kb_nodes[r_idx][1])
 			r_name = vocab.inverse_lookup(r_id)
-			output += pad_str(f"{r_name}: ",target=4)
+			output += pad_str(f"{r_name} - {r_clean}: ",target=20)
 			
 			for c_idx, item in enumerate(row):
 				if c_idx < kb_nodes_len:

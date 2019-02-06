@@ -19,6 +19,7 @@ tableprint = "*"
 colored = "*"
 coloredlogs = "*"
 comet-ml = "*"
+networkx = "*"
 
 
 [requires]
