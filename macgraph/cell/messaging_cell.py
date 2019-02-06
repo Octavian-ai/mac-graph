@@ -23,11 +23,11 @@ class MessagingCell(Component):
 	def __init__(self, args):
 		super().__init__(args, name="mp")
 
-		self.question_tokens = Tensor("question_tokens")
-		self.read_gs_attn = AttentionByIndex(args, 
-			table=self.question_tokens,
-			seq_len=args["max_seq_len"],
-			table_representation="src", name="read_gs_attn")
+		# self.question_tokens = Tensor("question_tokens")
+		# self.read_gs_attn = AttentionByIndex(args, 
+		# 	table=self.question_tokens,
+		# 	seq_len=args["max_seq_len"],
+		# 	table_representation="src", name="read_gs_attn")
 
 	def forward(self, features, context):
 	
@@ -226,7 +226,7 @@ class MessagingCell(Component):
 		node_cleanliness = node_properties[:,:,1,:]
 		# node_cleanliness = node_dense(node_cleanliness, feature_width, activation="selu", name="node_cleanliness")
 
-		t_global_signal = layer_dense(global_signal, feature_width, "selu")
+		t_global_signal = layer_dense(global_signal, feature_width, "linear")
 		node_cleanliness_tgt = tf.expand_dims(t_global_signal, 1)
 		
 		node_cleanliness_score = tf.reduce_sum(node_cleanliness * node_cleanliness_tgt, axis=2, keepdims=True)
