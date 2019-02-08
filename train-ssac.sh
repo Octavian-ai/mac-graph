@@ -26,11 +26,11 @@ do
 			--tag iter_$iteration \
 			--max-decode-iterations $iteration \
 			\
-			--tag gs_stripeed_cell \
+			--tag gs_all_i_cell \
 			\
 			--random-seed $RANDOM \
 			\
-			--train-max-steps 5 \
+			--train-max-steps 10 \
 			--disable-control-cell \
 			--disable-read-cell \
 			--disable-memory-cell \

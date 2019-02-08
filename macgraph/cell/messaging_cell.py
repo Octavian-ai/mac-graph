@@ -249,7 +249,7 @@ class MessagingCell(Component):
 
 		signals = {}
 		for s in ["forget"]:
-			signals[s] = node_dense(node_cleanliness_score, context.args["mp_state_width"], activation="sigmoid", name=s+"_signal")
+			signals[s] = node_dense(all_inputs, context.args["mp_state_width"], activation="sigmoid", name=s+"_signal")
 			
 			if self.args["use_summary_scalar"]:
 				tf.summary.histogram("mp_"+s, signals[s])
