@@ -227,6 +227,14 @@ class MessagingCell(Component):
 		# node_cleanliness = node_dense(node_cleanliness, feature_width, activation="selu", name="node_cleanliness")
 
 		node_cleanliness_tgt = tf.expand_dims(global_signal, 1)
+
+		w1 = tf.get_variable("w1", [1])
+		w2 = tf.get_variable("w2", [1])
+		b1 = tf.get_variable("b1", [1])
+		b2 = tf.get_variable("b2", [1])
+
+		node_cleanliness = node_cleanliness * w1 + b1
+		node_cleanliness_tgt = node_cleanliness_tgt * w2 + b2
 		
 		node_cleanliness_score = tf.reduce_sum(node_cleanliness * node_cleanliness_tgt, axis=2, keepdims=True)
 
@@ -243,7 +251,7 @@ class MessagingCell(Component):
 		all_inputs = [node_state, node_incoming]
 		# all_inputs.append(padded_node_table)
 		# all_inputs.append(tf.tile(tf.expand_dims(global_signal,1), [1, node_state.shape[1], 1]))
-		# all_inputs.append(node_cleanliness_score)
+		all_inputs.append(node_cleanliness_score)
 		all_inputs = tf.concat(all_inputs, axis=-1)
 
 

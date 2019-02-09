@@ -7,7 +7,7 @@ tasks=(
 	# "StationShortestCount" 
 )
 
-for repeat in {1..2}
+for repeat in {1..5}
 do
 	for task in "${tasks[@]}"
 	do
@@ -26,7 +26,7 @@ do
 			--tag iter_$iteration \
 			--max-decode-iterations $iteration \
 			\
-			--tag gs_all_i_cell \
+			--tag gs_w_b_fixed_cell \
 			\
 			--random-seed $RANDOM \
 			\
