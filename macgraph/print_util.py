@@ -37,21 +37,29 @@ ATTN_THRESHOLD = 0.25
 np.set_printoptions(precision=3)
 
 
+def normalize_levels(text_array, l):
+	l_max = np.amax(l)
+	l_min = np.amin(l)
+	l_max = max(l_max, 1.0)
+
+	print(f"min:{l_min}  max:{l_max}")
+
+	l = (l - l_min) / (l_max + EPSILON)
+	l = np.maximum(0.0, np.minimum(1.0, l))
+
+	return l
+
+
 def color_text(text_array, levels, color_fg=True):
 	out = []
 
-	l_max = np.amax(levels)
-	l_min = np.amin(levels)
-
-	l_max = max(l_max, 1.0)
+	levels = normalize_levels(text_array, levels)
 
 	for l, s in zip(levels, text_array):
-		l_n = (l - l_min) / (l_max + EPSILON)
-		l_n = max(0.0, min(1.0, l_n))
 		if color_fg:
-			color = fg(int(math.floor(DARK_GREY + l_n * (WHITE-DARK_GREY))))
+			color = fg(int(math.floor(DARK_GREY + l * (WHITE-DARK_GREY))))
 		else:
-			color = bg(int(math.floor(BG_BLACK + l_n * (BG_DARK_GREY-BG_BLACK))))
+			color = bg(int(math.floor(BG_BLACK + l * (BG_DARK_GREY-BG_BLACK))))
 		out.append(stylize(s, color))
 	return out
 

@@ -322,7 +322,7 @@ def attention_write_by_key(keys, query, value, key_width=None, keys_len=None, na
 
 
 
-def attention_by_index(table, control, name:str="attention_by_index"):
+def attention_by_index(table, control=None, keys_len=None, name:str="attention_by_index"):
 	'''
 	Essentially a weighted sum over the second-last dimension of table, 
 	using a dense softmax of control for the weights
@@ -345,23 +345,37 @@ def attention_by_index(table, control, name:str="attention_by_index"):
 			seq_len = table.shape[-2]
 			batch_size = tf.shape(table)[0]
 
-			query_shape  = [batch_size, seq_len]
+			scores_shape  = [batch_size, seq_len]
 			output_shape = [batch_size, word_size]
+
 
 			assert seq_len.value is not None, "Seq len must be defined"
 			
 			if control is not None:
-				query = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
+				scores = tf.layers.dense(control, seq_len, activation=tf.nn.softmax)
 			else:
-				query = tf.get_variable("query", [1, seq_len], trainable=True, initializer=tf.initializers.random_normal)
-				query = tf.tile(query, [batch_size, 1])
-				query = tf.nn.softmax(query)
+				scores = tf.get_variable("query", [1, seq_len], trainable=True, initializer=tf.initializers.random_normal)
+				scores = tf.tile(scores, [batch_size, 1])
+				
 
-			weighted_stack = table * tf.expand_dims(query, -1)
+			if keys_len is not None:
+				keys_len = dynamic_assert_shape(keys_len, [batch_size], "keys_len")
+
+				scores_mask = tf.sequence_mask(keys_len, seq_len)
+				scores_mask = tf.expand_dims(scores_mask, -1)
+				scores_mask = dynamic_assert_shape(scores_mask, scores_shape, "scores_mask")
+
+				scores = tf.where(scores_mask, scores, tf.fill(scores_shape, -1e9))
+				scores_sm = tf.nn.softmax(scores + EPSILON, axis=1)
+			else:
+				scores_sm = tf.nn.softmax(scores)
+
+
+			weighted_stack = table * tf.expand_dims(scores_sm, -1)
 			weighted_sum = tf.reduce_sum(weighted_stack, -2)
 
 			output = weighted_sum
 			output = dynamic_assert_shape(output, output_shape)
-			return output, query
+			return output, scores_sm
 			
 

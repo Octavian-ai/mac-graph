@@ -7,19 +7,13 @@ from .types import *
 def generate_token_index_query(context:CellContext, name:str):
 	with tf.name_scope(name):
 		with tf.variable_scope(name):
-
 			taps = {}
-
 			master_signal = context.in_iter_id
 
-			
+			token_index_signal, attn = attention_by_index(context.in_question_tokens_padded, keys_len=context.features["src_len"])
+			taps["token_index_attn"] = tf.expand_dims(attn, 2)
 
-			token_index_signal, query = attention_by_index(context.in_question_tokens_padded, None)
-			
-			output = token_index_signal
-			taps["token_index_attn"] = tf.expand_dims(query, 2)
-
-			return output, taps
+			return token_index_signal, taps
 
 
 

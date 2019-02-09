@@ -7,11 +7,11 @@ tasks=(
 	# "StationShortestCount" 
 )
 
-for repeat in {1..5}
+for repeat in {1..1}
 do
 	for task in "${tasks[@]}"
 	do
-		python -m macgraph.train \
+		pipenv run python -m macgraph.train \
 			--dataset $task \
 			\
 			--tag upto_6 \
@@ -26,10 +26,11 @@ do
 			--tag iter_$iteration \
 			--max-decode-iterations $iteration \
 			\
-			--tag gs_w_b_fixed_cell \
+			--tag gs_wb_fattn_cell \
 			\
 			--random-seed $RANDOM \
 			\
+			--enable-comet \
 			--train-max-steps 10 \
 			--disable-control-cell \
 			--disable-read-cell \

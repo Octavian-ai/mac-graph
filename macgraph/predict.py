@@ -183,10 +183,10 @@ def predict(args, cmd_args):
 					db = db[0:row["kb_nodes_len"]]
 					
 					tap = mp_head+"_attn"
-					attn = row[tap][i]
+					attn = row[tap][i][0:row["kb_nodes_len"]]
 					attn_sum = sum(attn)
 					print(f"{i}: {tap}: ",', '.join(color_text(db, attn)))
-					# print(f"{i}: {tap}: ", list(zip(db, np.squeeze(row[tap][i]))), f"Σ={attn_sum}")
+					print(f"{i}: {tap}: ", list(zip(db, normalize_levels(db, attn.flatten()))), f"Σ={attn_sum}")
 
 					for tap in ["signal"]:
 						t_v = row[f'{mp_head}_{tap}'][i]
