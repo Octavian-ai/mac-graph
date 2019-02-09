@@ -362,7 +362,6 @@ def attention_by_index(table, control=None, keys_len=None, name:str="attention_b
 				keys_len = dynamic_assert_shape(keys_len, [batch_size], "keys_len")
 
 				scores_mask = tf.sequence_mask(keys_len, seq_len)
-				scores_mask = tf.expand_dims(scores_mask, -1)
 				scores_mask = dynamic_assert_shape(scores_mask, scores_shape, "scores_mask")
 
 				scores = tf.where(scores_mask, scores, tf.fill(scores_shape, -1e9))
@@ -371,7 +370,8 @@ def attention_by_index(table, control=None, keys_len=None, name:str="attention_b
 				scores_sm = tf.nn.softmax(scores)
 
 
-			weighted_stack = table * tf.expand_dims(scores_sm, -1)
+			scores_sm = tf.expand_dims(scores_sm, -1)
+			weighted_stack = table * scores_sm
 			weighted_sum = tf.reduce_sum(weighted_stack, -2)
 
 			output = weighted_sum
